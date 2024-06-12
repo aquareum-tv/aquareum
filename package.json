@@ -1,0 +1,13 @@
+{
+  "name": "aquareum-monorepo",
+  "private": true,
+  "version": "0.0.1",
+  "description": "The video layer for everything.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Aquareum",
+  "license": "MIT"
+}
