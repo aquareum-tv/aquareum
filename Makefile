@@ -7,8 +7,8 @@ default: app node
 
 .PHONY: app
 app:
-	pnpm install
-	pnpm run -r build
+	yarn install --frozen-lockfile
+	yarn workspaces run build
 
 .PHONY: node
 node:

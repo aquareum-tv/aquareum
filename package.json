@@ -9,5 +9,8 @@
   },
   "keywords": [],
   "author": "Aquareum",
-  "license": "MIT"
+  "license": "MIT",
+  "workspaces": [
+    "packages/app"
+  ]
 }
