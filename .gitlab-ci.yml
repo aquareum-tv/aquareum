@@ -9,7 +9,7 @@ builder:
     # Newer versions of docker can handle the OCI format, but older versions, like
     # the one shipped with Fedora 30, cannot handle the format.
     # BUILDAH_FORMAT: docker
-    FQ_IMAGE_NAME: "$CI_REGISTRY_IMAGE:builder"
+    FQ_IMAGE_NAME: "$CI_REGISTRY_IMAGE:builder-$CI_COMMIT_SHA"
   before_script:
     # GitLab container registry credentials taken from the
     # [predefined CI/CD variables](../variables/index.md#predefined-cicd-variables)
@@ -23,11 +23,7 @@ build:
   stage: build
   needs:
     - builder
-  image: "$CI_REGISTRY_IMAGE:builder"
+  image: "$CI_REGISTRY_IMAGE:builder-$CI_COMMIT_SHA"
   script:
     - make all
-  artifacts:
-    name: "$CI_COMMIT_REF_NAME"
-    paths:
-      - bin/aquareum-linux-amd64.tar.gz
-      - bin/aquareum-linux-arm64.tar.gz
+    - make ci-upload
