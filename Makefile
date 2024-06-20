@@ -18,7 +18,15 @@ node:
 	go build -ldflags="-X 'main.Version=$(VERSION)'" -o $(OUT_DIR)/aquareum ./cmd/aquareum
 
 .PHONY: all
-all: install check app node-all-platforms
+all: install check app node-all-platforms android
+
+.PHONY: android
+android: app
+	cd ./packages/app/android \
+	&& ./gradlew build \
+	&& cd - \
+	&& mv ./packages/app/android/app/build/outputs/apk/release/app-release.apk ./bin/aquareum-$(VERSION)-android-release.apk \
+	&& mv ./packages/app/android/app/build/outputs/apk/debug/app-debug.apk ./bin/aquareum-$(VERSION)-android-debug.apk
 
 .PHONY: node-all-platforms
 node-all-platforms:
@@ -48,9 +56,20 @@ ci-upload:
 	for GOOS in linux; do \
 		for GOARCH in amd64 arm64; do \
 			export file=aquareum-$(VERSION)-$$GOOS-$$GOARCH.tar.gz \
-			&& curl --fail-with-body --header "JOB-TOKEN: $$CI_JOB_TOKEN" --upload-file bin/$$file "$$CI_API_V4_URL/projects/$$CI_PROJECT_ID/packages/generic/aquareum/$(VERSION)/$$file"; \
+			&& $(MAKE) ci-upload-file upload_file=$$file; \
 		done \
-	done
+	done; \
+	$(MAKE) ci-upload-file upload_file=aquareum-$(VERSION)-android-release.apk \
+	&& $(MAKE) ci-upload-file upload_file=aquareum-$(VERSION)-android-debug.apk
+
+upload_file?=""
+.PHONY: ci-upload-file
+ci-upload-file:
+	curl \
+		--fail-with-body \
+		--header "JOB-TOKEN: $$CI_JOB_TOKEN" \
+		--upload-file bin/$(upload_file) \
+		"$$CI_API_V4_URL/projects/$$CI_PROJECT_ID/packages/generic/aquareum/$(VERSION)/$(upload_file)";
 
 .PHONY: version
 version:

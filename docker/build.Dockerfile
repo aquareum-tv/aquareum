@@ -6,7 +6,7 @@ ENV TARGETARCH $TARGETARCH
 ENV GO_VERSION 1.22.4
 ENV NODE_VERSION 22.3.0
 
-RUN apt update && apt install -y build-essential curl git
+RUN apt update && apt install -y build-essential curl git openjdk-17-jdk unzip
 RUN curl -L --fail https://go.dev/dl/go$GO_VERSION.linux-$TARGETARCH.tar.gz -o go.tar.gz \
   && tar -C /usr/local -xf go.tar.gz \
   && rm go.tar.gz
@@ -20,3 +20,12 @@ RUN export NODEARCH="$TARGETARCH" \
   && rm -rf node.tar.gz node-v$NODE_VERSION-linux-$NODEARCH
   
 RUN npm install -g yarn
+
+ARG ANDROID_SDK_VERSION=11076708
+ENV ANDROID_HOME /opt/android-sdk
+RUN mkdir -p ${ANDROID_HOME}/cmdline-tools && \
+    curl -L -O https://dl.google.com/android/repository/commandlinetools-linux-${ANDROID_SDK_VERSION}_latest.zip && \
+    unzip *tools*linux*.zip -d ${ANDROID_HOME}/cmdline-tools && \
+    mv ${ANDROID_HOME}/cmdline-tools/cmdline-tools ${ANDROID_HOME}/cmdline-tools/tools && \
+    rm *tools*linux*.zip && \
+    curl -L https://raw.githubusercontent.com/thyrlian/AndroidSDK/bfcbf0cdfd6bb1ef45579e6ddc4d3876264cbdd1/android-sdk/license_accepter.sh | bash
