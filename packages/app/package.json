@@ -10,7 +10,7 @@
     "ios": "expo run:ios",
     "web": "npx expo start --web",
     "test": "jest --watchAll",
-    "build": "expo export -p web",
+    "build": "expo export -p web || expo export -p web",
     "prepare": "rm -rf android/app/src/main/assets/fonts && mkdir -p ./android/app/src/main/assets/fonts && cp -R ./assets/fonts ./android/app/src/main/assets"
   },
   "jest": {
