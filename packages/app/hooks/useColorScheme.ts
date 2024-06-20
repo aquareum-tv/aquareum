@@ -1,1 +1,4 @@
-export { useColorScheme } from 'react-native';
+// export { useColorScheme } from "react-native";
+export const useColorScheme = () => {
+  return "dark";
+};

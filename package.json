@@ -5,12 +5,21 @@
   "description": "The video layer for everything.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "check": "git ls-files | xargs prettier --check --ignore-unknown",
+    "fix": "git ls-files | xargs prettier --write --ignore-unknown",
+    "prepare": "husky",
+    "build": "yarn workspaces foreach --all run build"
   },
   "keywords": [],
   "author": "Aquareum",
   "license": "MIT",
+  "devDependencies": {
+    "husky": "^9.0.11",
+    "lint-staged": "^15.2.7",
+    "prettier": "^3.3.2"
+  },
   "workspaces": [
-    "packages/app"
-  ]
+    "packages/*"
+  ],
+  "packageManager": "yarn@4.3.0"
 }

@@ -7,15 +7,15 @@ default: app node
 
 .PHONY: app
 app:
-	yarn install --frozen-lockfile
-	yarn workspaces run build
+	yarn install
+	yarn run build
 
 .PHONY: node
 node:
 	go build -ldflags="-X 'main.Version=$(VERSION)'" -o $(OUT_DIR)/aquareum ./cmd/aquareum
 
 .PHONY: all
-all: app node-all-platforms
+all: check app node-all-platforms
 
 .PHONY: node-all-platforms
 node-all-platforms:
@@ -52,3 +52,11 @@ ci-upload:
 .PHONY: version
 version:
 	@echo $(VERSION)
+
+.PHONY: check
+check:
+	yarn run check
+
+.PHONY: fix
+fix:
+	yarn run fix
