@@ -5,9 +5,12 @@ VERSION=$(shell git describe --long --tags --dirty | sed 's/-[0-9]*-g/-/')
 .PHONY: default
 default: app node
 
-.PHONY: app
-app:
+.PHONY: install
+install:
 	yarn install
+
+.PHONY: app
+app: install
 	yarn run build
 
 .PHONY: node
@@ -15,7 +18,7 @@ node:
 	go build -ldflags="-X 'main.Version=$(VERSION)'" -o $(OUT_DIR)/aquareum ./cmd/aquareum
 
 .PHONY: all
-all: check app node-all-platforms
+all: install check app node-all-platforms
 
 .PHONY: node-all-platforms
 node-all-platforms:
