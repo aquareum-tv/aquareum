@@ -19,4 +19,4 @@ RUN export NODEARCH="$TARGETARCH" \
   && cp -r node-v$NODE_VERSION-linux-$NODEARCH/* /usr/local \
   && rm -rf node.tar.gz node-v$NODE_VERSION-linux-$NODEARCH
   
-RUN npm install -g pnpm
+RUN npm install -g yarn
