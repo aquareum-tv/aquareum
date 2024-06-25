@@ -1,28 +1,64 @@
 import { config as configBase } from "@tamagui/config/v3";
 import { createTamagui, createFont } from "tamagui";
 
+const sizes = {
+  "1": 11,
+  "2": 12,
+  "3": 13,
+  "4": 14,
+  "5": 13,
+  "6": 15,
+  "7": 20,
+  "8": 23,
+  "9": 32,
+  "10": 44,
+  "11": 55,
+  "12": 62,
+  "13": 72,
+  "14": 92,
+  "15": 114,
+  "16": 134,
+};
+
+const lineHeights = {
+  "1": 22,
+  "2": 23,
+  "3": 24,
+  "4": 25,
+  "5": 24,
+  "6": 27,
+  "7": 32,
+  "8": 35,
+  "9": 40,
+  "10": 53,
+  "11": 66,
+  "12": 73,
+  "13": 84,
+  "14": 106,
+  "15": 130,
+  "16": 152,
+};
+
 const bodyFont = createFont({
   ...configBase.fonts.body,
   family: `FiraSans-Medium`,
+  lineHeight: lineHeights,
+  size: sizes,
 });
 
 const headingFont = createFont({
   ...configBase.fonts.heading,
   family: `FiraSans-Medium`,
+  lineHeight: lineHeights,
+  size: sizes,
 });
+
+console.log(headingFont);
 
 const codeFont = createFont({
   family: `FiraCode-Medium`,
-  size: {
-    1: 12,
-    2: 14,
-    3: 15,
-    4: 16,
-  },
-  lineHeight: {
-    // 1 will be 22
-    2: 22,
-  },
+  size: sizes,
+  lineHeight: lineHeights,
   weight: {
     1: "300",
     // 2 will be 300
@@ -42,6 +78,20 @@ const aquareumConfig = {
     heading: headingFont,
     body: bodyFont,
     mono: codeFont,
+  },
+  media: {
+    xs: { maxWidth: 660 },
+    gtXs: { minWidth: 660 + 1 },
+    sm: { maxWidth: 860 },
+    gtSm: { minWidth: 860 + 1 },
+    md: { maxWidth: 980 },
+    gtMd: { minWidth: 980 + 1 },
+    lg: { maxWidth: 1120 },
+    gtLg: { minWidth: 1120 + 1 },
+    short: { maxHeight: 820 },
+    tall: { minHeight: 820 },
+    hoverNone: { hover: "none" },
+    pointerCoarse: { pointer: "coarse" },
   },
 };
 

@@ -5,7 +5,7 @@
   "description": "The video layer for everything.",
   "main": "index.js",
   "scripts": {
-    "check": "git ls-files | xargs prettier --check --ignore-unknown",
+    "check": "yarn workspaces foreach --all run check && git ls-files | xargs prettier --check --ignore-unknown",
     "fix": "git ls-files | xargs prettier --write --ignore-unknown",
     "prepare": "husky",
     "build": "yarn workspaces foreach --all run build"
