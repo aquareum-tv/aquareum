@@ -28,6 +28,13 @@ all: version install check app node-all-platforms android
 .PHONY: ci
 ci: all
 
+.PHONY: ci
+ci: ci-pull all
+
+.PHONY: ci-pull
+ci-pull:
+	git pull --tags
+
 .PHONY: android
 android: app
 	cd ./packages/app/android \
