@@ -33,7 +33,7 @@ ci: ci-pull all
 
 .PHONY: ci-pull
 ci-pull:
-	git pull --tags
+	git fetch --tags
 
 .PHONY: android
 android: app
