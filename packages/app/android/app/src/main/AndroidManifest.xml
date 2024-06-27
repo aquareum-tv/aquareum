@@ -12,9 +12,13 @@
     </intent>
   </queries>
   <application android:name=".MainApplication" android:label="@string/app_name" android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher_round" android:allowBackup="true" android:theme="@style/AppTheme">
-    <meta-data android:name="expo.modules.updates.ENABLED" android:value="false"/>
+    <meta-data android:name="expo.modules.updates.CODE_SIGNING_CERTIFICATE" android:value="-----BEGIN CERTIFICATE-----&#xD;&#xA;MIIC1TCCAb2gAwIBAgIJfEotCdSnUUCLMA0GCSqGSIb3DQEBCwUAMBMxETAPBgNV&#xD;&#xA;BAMTCEFxdWFyZXVtMCAXDTI0MDYyNjAwMTI0MFoYDzIxMjQwNjI2MDAxMjQwWjAT&#xD;&#xA;MREwDwYDVQQDEwhBcXVhcmV1bTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoC&#xD;&#xA;ggEBANUPqJPf9Jwk/tQLuQq7bFviwIHCWNWQe4d6uMr3fPWDKp6hlg7iH1qT87K8&#xD;&#xA;YssnZR66LfjJZcO8ua3Y+uv/5i4CabM5XXaCZLao6VYDqNOqrB6w3KfJGDLOWHeu&#xD;&#xA;hgh5gps2a8TXgwQ9U3176RhQQDiIImiQLfgjLlqrlbqO/IAdT2YHL+WhqtCe55PJ&#xD;&#xA;cNUkjIemjsege/652xOT0dwMU1hja4dygUkVJlyFodZXFMbq4ssWNmTv+zFVwr1e&#xD;&#xA;fRxts/Pa1aQocifHUbHDArVx0DUfVCgYcY6/Agis0RYzO/2LJBzXIpqL4kTXLB+R&#xD;&#xA;8fd5CgpUkl74CunPFVM0sx1q4r0CAwEAAaMqMCgwDgYDVR0PAQH/BAQDAgeAMBYG&#xD;&#xA;A1UdJQEB/wQMMAoGCCsGAQUFBwMDMA0GCSqGSIb3DQEBCwUAA4IBAQDQo/Mc/bpA&#xD;&#xA;2EnfJdNVu44qmz9hZ7wdNeB5zjN8a847ol5PaEKEjU3TjqB2BDlOWwPaNaoSsP6x&#xD;&#xA;FdB4Kjp4ee5DOWaO8goQy5JPVm6+pZ00oPHxZbZl7J75l5Rfq3onQxiLs2hWM3kh&#xD;&#xA;cb1GXdBYT7246snrUyMVRubJpZZI6gRApBdXBzNFvib8LsaPcCFLINFzH9OlYbyQ&#xD;&#xA;y19F+sYN9VgLFGDKogdtJ4b8n/XpzqCG8iyXVsxnaCBcjrsEHXvtJXykggLCpAzK&#xD;&#xA;dpMWBnYHvuDz+Ggbf0HrnUeEqD1Dh87O6dXacbtO0bclClmsg9xWlZ8Tl+H0U7Yj&#xD;&#xA;gfgSR/G5d+YX&#xD;&#xA;-----END CERTIFICATE-----&#xD;&#xA;"/>
+    <meta-data android:name="expo.modules.updates.CODE_SIGNING_METADATA" android:value="{&quot;keyid&quot;:&quot;main&quot;,&quot;alg&quot;:&quot;rsa-v1_5-sha256&quot;}"/>
+    <meta-data android:name="expo.modules.updates.ENABLED" android:value="true"/>
+    <meta-data android:name="expo.modules.updates.EXPO_RUNTIME_VERSION" android:value="@string/expo_runtime_version"/>
     <meta-data android:name="expo.modules.updates.EXPO_UPDATES_CHECK_ON_LAUNCH" android:value="ALWAYS"/>
     <meta-data android:name="expo.modules.updates.EXPO_UPDATES_LAUNCH_WAIT_MS" android:value="0"/>
+    <meta-data android:name="expo.modules.updates.EXPO_UPDATE_URL" android:value="https://aquareum.tv/app-updates"/>
     <activity android:name=".MainActivity" android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|uiMode" android:launchMode="singleTask" android:windowSoftInputMode="adjustResize" android:theme="@style/Theme.App.SplashScreen" android:exported="true" android:screenOrientation="portrait">
       <intent-filter>
         <action android:name="android.intent.action.MAIN"/>

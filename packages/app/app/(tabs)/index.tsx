@@ -24,7 +24,7 @@ export default function TabOneScreen() {
         <CenteredH3>World Premiere</CenteredH3>
         <CodeH3>Tuesday Jul 16 2024 10:00 PDT</CodeH3>
       </YStack>
-      <Countdown />
+      <Countdown to="2024-07-16T17:00:00.000Z" />
     </YStack>
   );
 }

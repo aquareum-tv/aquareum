@@ -12,6 +12,7 @@ import {
 import { useFonts } from "expo-font";
 import { SplashScreen, Stack } from "expo-router";
 import { Provider } from "./Provider";
+import "./updates";
 
 export {
   // Catch any errors thrown by the Layout component.

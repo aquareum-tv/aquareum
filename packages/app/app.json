@@ -2,7 +2,8 @@
   "expo": {
     "name": "Aquareum",
     "slug": "Aquareum",
-    "version": "1.0.0",
+    "version": "0.0.1",
+    "runtimeVersion": "0.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
@@ -65,6 +66,17 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "updates": {
+      "url": "https://aquareum.tv/app-updates",
+      "enabled": true,
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 0,
+      "codeSigningCertificate": "./code-signing/certificate.pem",
+      "codeSigningMetadata": {
+        "keyid": "main",
+        "alg": "rsa-v1_5-sha256"
+      }
     }
   }
 }

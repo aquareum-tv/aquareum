@@ -53,8 +53,6 @@ const headingFont = createFont({
   size: sizes,
 });
 
-console.log(headingFont);
-
 const codeFont = createFont({
   family: `FiraCode-Medium`,
   size: sizes,

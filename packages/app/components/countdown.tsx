@@ -1,5 +1,15 @@
 import { useEffect, useState } from "react";
-import { Text, View, YStack, styled, XStack, useMedia } from "tamagui";
+import {
+  Text,
+  View,
+  YStack,
+  styled,
+  XStack,
+  useMedia,
+  useWindowDimensions,
+  H1,
+} from "tamagui";
+import * as chrono from "chrono-node";
 
 const CountdownBox = styled(View, {
   alignSelf: "center",
@@ -57,9 +67,28 @@ const LabelBox = ({ children }) => {
   );
 };
 
-export function Countdown() {
+export function Countdown({ from, to }: { from?: string; to?: string } = {}) {
   const media = useMedia();
   const [now, setNow] = useState(Date.now());
+  const [dest, setDest] = useState<number | null>(null);
+  const { width, height } = useWindowDimensions();
+  useEffect(() => {
+    if (from) {
+      const fromDate = chrono.parseDate(from);
+      if (fromDate === null) {
+        throw new Error("could not parse from");
+      }
+      setDest(fromDate.getTime());
+    } else if (to) {
+      const toDate = chrono.parseDate(to);
+      if (toDate === null) {
+        throw new Error("could not parse to");
+      }
+      setDest(toDate.getTime());
+    } else {
+      throw new Error("must provide either from or to");
+    }
+  }, [from, to]);
   useEffect(() => {
     const tick = () => {
       if (!running) {
@@ -75,8 +104,17 @@ export function Countdown() {
     };
   }, []);
 
-  const small = !!media.sm;
-  const [years, days, hrs, min, sec, ms] = toLabels(now);
+  if (dest === null) {
+    return <View />;
+  }
+  let diff = Math.abs(dest - now);
+  if (to && now > dest) {
+    diff = 0;
+  } else if (from && now < dest) {
+    diff = 0;
+  }
+  const small = width <= 600;
+  const [years, days, hrs, min, sec, ms] = toLabels(diff);
 
   return (
     <CountdownBox small={small}>

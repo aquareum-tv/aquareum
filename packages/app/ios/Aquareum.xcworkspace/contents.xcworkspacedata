@@ -2,12 +2,9 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "group:/Users/iameli/code/aquareum/packages/app/ios/Aquareum.xcodeproj">
+      location = "group:Aquareum.xcodeproj">
    </FileRef>
    <FileRef
       location = "group:Pods/Pods.xcodeproj">
-   </FileRef>
-   <FileRef
-      location = "group:Aquareum.xcodeproj">
    </FileRef>
 </Workspace>

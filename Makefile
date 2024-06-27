@@ -1,9 +1,14 @@
 OUT_DIR?="bin"
 $(shell mkdir -p $(OUT_DIR))
-VERSION=$(shell git describe --long --tags --dirty | sed 's/-[0-9]*-g/-/')
 
 .PHONY: default
 default: app node
+
+VERSION?=$(shell ./util/version.sh)
+
+.PHONY: version
+version:
+	@./util/version.sh
 
 .PHONY: install
 install:
@@ -18,7 +23,10 @@ node:
 	go build -ldflags="-X 'main.Version=$(VERSION)'" -o $(OUT_DIR)/aquareum ./cmd/aquareum
 
 .PHONY: all
-all: install check app node-all-platforms android
+all: version install check app node-all-platforms android
+
+.PHONY: ci
+ci: all
 
 .PHONY: android
 android: app
@@ -70,10 +78,6 @@ ci-upload-file:
 		--header "JOB-TOKEN: $$CI_JOB_TOKEN" \
 		--upload-file bin/$(upload_file) \
 		"$$CI_API_V4_URL/projects/$$CI_PROJECT_ID/packages/generic/aquareum/$(VERSION)/$(upload_file)";
-
-.PHONY: version
-version:
-	@echo $(VERSION)
 
 .PHONY: check
 check:

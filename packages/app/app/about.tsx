@@ -11,7 +11,7 @@ import {
 import { Asset } from "expo-asset";
 import { useEffect, useState } from "react";
 import Markdown from "react-native-markdown-display";
-import info from "./aquareum-description.json";
+import { description } from "./aquareum-description";
 import { H1, H2, H3, H4, H5, H6, YStack } from "tamagui";
 import { Dimensions } from "react-native";
 
@@ -96,7 +96,7 @@ export default function ModalScreen() {
           height={Dimensions.get("window").height}
         >
           <View>
-            <Markdown rules={rules}>{info.description}</Markdown>
+            <Markdown rules={rules}>{description}</Markdown>
           </View>
         </ScrollView>
       </XStack>
