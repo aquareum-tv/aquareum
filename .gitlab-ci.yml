@@ -25,6 +25,6 @@ build:
     - builder
   image: "$CI_REGISTRY_IMAGE:builder-$CI_COMMIT_SHA"
   script:
-    - git fetch --unshallow
+    - git fetch --unshallow || echo 'already unshallow'
     - make ci
     - make ci-upload
