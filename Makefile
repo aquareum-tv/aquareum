@@ -26,11 +26,11 @@ node:
 all: version install check app node-all-platforms android
 
 .PHONY: ci
-ci: ci-pull all
+ci: podman ci-upload-in-container
 
-.PHONY: ci-pull
-ci-pull:
-	git fetch --tags
+.PHONY: ci-upload-in-container
+ci-upload-in-container:
+	@$(MAKE) podman-in-container command="make ci-upload" podman_args="-e CI_JOB_TOKEN=$$CI_JOB_TOKEN -e CI_API_V4_URL=$$CI_API_V4_URL -e CI_PROJECT_ID=$$CI_PROJECT_ID"
 
 .PHONY: android
 android: app
@@ -51,12 +51,13 @@ node-all-platforms:
 		done \
 	done
 
-.PHONY: podman-build
-podman-build: podman-build-builder podman-build-in-container
-
 podman_build_dockerfile_hash?=$(shell git hash-object docker/build.Dockerfile)
 podman_build_repo?=aqrm.io/aquareum-tv/aquareum
-podman_build_ref?=$(podman_build_repo)
+podman_build_ref?=$(podman_build_repo):builder-$(podman_build_dockerfile_hash)
+.PHONY: podman
+podman: podman-build-builder
+	$(MAKE) podman-in-container command="make all"
+
 .PHONY: podman-build-builder
 podman-build-builder:
 	cd docker \
@@ -64,13 +65,15 @@ podman-build-builder:
 		--os=linux \
 		-f build.Dockerfile \
 		--layers \
-		--cache-to $(podman_build_ref) \
-		--cache-from $(podman_build_ref) \
-		-t aqrm.io/aquareum-tv/aquareum:builder .
+		--cache-to $(podman_build_repo) \
+		--cache-from $(podman_build_repo) \
+		-t $(podman_build_ref) .
 
+command=echo 'no command specified' && exit 1
+podman_args?=
 .PHONY: podman-build-builder
-podman-build-in-container:
-	echo podman run -v $$(pwd):$$(pwd) -w $$(pwd) --rm -it aqrm.io/aquareum-tv/aquareum:builder make
+podman-in-container:
+	@podman run $(podman_args) -v $$(pwd):$$(pwd) -w $$(pwd) --rm -it $(podman_build_ref) bash -euo pipefail -c "$(command)"
 
 .PHONY: ci-upload
 ci-upload:
