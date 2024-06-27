@@ -58,6 +58,7 @@ podman_build_ref?=$(podman_build_repo):builder-$(podman_build_dockerfile_hash)
 podman: podman-build-builder
 	$(MAKE) podman-in-container command="make all"
 
+podman_cache_flags ?= --cache-to $(podman_build_repo) --cache-from $(podman_build_repo)
 .PHONY: podman-build-builder
 podman-build-builder:
 	cd docker \
@@ -65,8 +66,7 @@ podman-build-builder:
 		--os=linux \
 		-f build.Dockerfile \
 		--layers \
-		--cache-to $(podman_build_repo) \
-		--cache-from $(podman_build_repo) \
+		$(podman_cache_flags) \
 		-t $(podman_build_ref) . \
 	&& podman push $(podman_build_ref)
 
