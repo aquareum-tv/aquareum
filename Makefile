@@ -67,7 +67,12 @@ podman-build-builder:
 		--layers \
 		--cache-to $(podman_build_repo) \
 		--cache-from $(podman_build_repo) \
-		-t $(podman_build_ref) .
+		-t $(podman_build_ref) . \
+	&& podman push $(podman_build_ref)
+
+.PHONY: podman-build-builder-if-necessary
+podman-build-builder-if-necessary:
+	podman pull $(podman_build_ref) || $(MAKE) podman-build-builder
 
 command=echo 'no command specified' && exit 1
 podman_args?=
