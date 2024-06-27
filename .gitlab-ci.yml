@@ -1,8 +1,19 @@
 build:
   stage: build
-  needs:
-    - builder
-  image: "$CI_REGISTRY_IMAGE:builder-$CI_COMMIT_SHA"
+  image: aqrm.io/aquareum-tv/podman-rootless:latest
+  variables:
+    # Use vfs with buildah. Docker offers overlayfs as a default, but Buildah
+    # cannot stack overlayfs on top of another overlayfs filesystem.
+    STORAGE_DRIVER: vfs
+    # Write all image metadata in the docker format, not the standard OCI format.
+    # Newer versions of docker can handle the OCI format, but older versions, like
+    # the one shipped with Fedora 30, cannot handle the format.
+    # BUILDAH_FORMAT: docker
+    FQ_IMAGE_NAME: "$CI_REGISTRY_IMAGE:builder-$CI_COMMIT_SHA"
+  before_script:
+    # GitLab container registry credentials taken from the
+    # [predefined CI/CD variables](../variables/index.md#predefined-cicd-variables)
+    # to authenticate to the registry.
+    - echo "$CI_REGISTRY_PASSWORD" | podman login -u "$CI_REGISTRY_USER" --password-stdin $CI_REGISTRY
   script:
-    - git fetch --unshallow || echo 'already unshallow'
     - make ci
