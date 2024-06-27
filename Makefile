@@ -26,7 +26,10 @@ node:
 all: version install check app node-all-platforms android
 
 .PHONY: ci
-ci: podman ci-upload-in-container
+ci:
+	$(MAKE) podman-build-builder-if-necessary
+	$(MAKE) podman-in-container command="make all"
+	$(MAKE) ci-upload-in-container
 
 .PHONY: ci-upload-in-container
 ci-upload-in-container:
