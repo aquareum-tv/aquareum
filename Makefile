@@ -26,9 +26,6 @@ node:
 all: version install check app node-all-platforms android
 
 .PHONY: ci
-ci: all
-
-.PHONY: ci
 ci: ci-pull all
 
 .PHONY: ci-pull
@@ -54,17 +51,26 @@ node-all-platforms:
 		done \
 	done
 
-.PHONY: docker-build
-docker-build: docker-build-builder docker-build-in-container
+.PHONY: podman-build
+podman-build: podman-build-builder podman-build-in-container
 
-.PHONY: docker-build-builder
-docker-build-builder:
+podman_build_dockerfile_hash?=$(shell git hash-object docker/build.Dockerfile)
+podman_build_repo?=aqrm.io/aquareum-tv/aquareum
+podman_build_ref?=$(podman_build_repo)
+.PHONY: podman-build-builder
+podman-build-builder:
 	cd docker \
-	&& docker build --os=linux --arch=amd64 -f build.Dockerfile -t aqrm.io/aquareum-tv/aquareum:builder .
+	&& podman build \
+		--os=linux \
+		-f build.Dockerfile \
+		--layers \
+		--cache-to $(podman_build_ref) \
+		--cache-from $(podman_build_ref) \
+		-t aqrm.io/aquareum-tv/aquareum:builder .
 
-.PHONY: docker-build-builder
-docker-build-in-container:
-	docker run -v $$(pwd):$$(pwd) -w $$(pwd) --rm -it aqrm.io/aquareum-tv/aquareum:builder make
+.PHONY: podman-build-builder
+podman-build-in-container:
+	echo podman run -v $$(pwd):$$(pwd) -w $$(pwd) --rm -it aqrm.io/aquareum-tv/aquareum:builder make
 
 .PHONY: ci-upload
 ci-upload:
