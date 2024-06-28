@@ -41,11 +41,14 @@ const responsiveBackground = `
 body {
   background-color: #fff;
 }
+a {
+  text-decoration: none !important;
+}
 @media (prefers-color-scheme: dark) {
   body {
     background-color: #000;
   }
-  a {
-    text-decoration: none;
+  * {
+    -webkit-font-smoothing: antialiased;
   }
 }`;

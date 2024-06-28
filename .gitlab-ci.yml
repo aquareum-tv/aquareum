@@ -27,4 +27,3 @@ build:
   script:
     - git fetch --unshallow || echo 'already unshallow'
     - make ci
-    - make ci-upload

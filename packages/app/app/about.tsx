@@ -1,18 +1,22 @@
 import {
-  Anchor,
   Paragraph,
   ScrollView,
   View,
-  XStack,
   Text,
-  ListItem,
   styled,
+  H1,
+  H2,
+  H3,
+  H4,
+  H5,
+  H6,
+  isWeb,
 } from "tamagui";
 import { Asset } from "expo-asset";
 import { useEffect, useState } from "react";
 import Markdown from "react-native-markdown-display";
 import { description } from "./aquareum-description";
-import { H1, H2, H3, H4, H5, H6, YStack } from "tamagui";
+import { SafeAreaView } from "react-native";
 import { Dimensions } from "react-native";
 
 const Code = styled(Text, { fontFamily: "$mono" });
@@ -20,7 +24,12 @@ const Code = styled(Text, { fontFamily: "$mono" });
 const rules = {
   // Headings
   heading1: (node, children, parent, styles) => (
-    <H1 key={node.key} style={styles._VIEW_SAFE_heading1} paddingVertical="$4">
+    <H1
+      key={node.key}
+      style={styles._VIEW_SAFE_heading1}
+      paddingVertical="$4"
+      lineHeight="$9"
+    >
       {children}
     </H1>
   ),
@@ -50,7 +59,12 @@ const rules = {
     </H6>
   ),
   text: (node, children, parent, styles, inheritedStyles = {}) => (
-    <Text key={node.key} style={[inheritedStyles, styles.text]}>
+    <Text
+      lineHeight="$6"
+      fontSize="$7"
+      key={node.key}
+      style={[inheritedStyles, styles.text]}
+    >
       {node.content}
     </Text>
   ),
@@ -70,7 +84,9 @@ const rules = {
     </View>
   ),
   code_inline: (node, children, parent, styles, inheritedStyles = {}) => (
-    <Code key={node.key}>{node.content}</Code>
+    <Code lineHeight="$6" fontSize="$7" key={node.key}>
+      {node.content}
+    </Code>
   ),
   pre: (node, children, parent, styles) => (
     <View key={node.key} style={styles._VIEW_SAFE_pre}>
@@ -85,21 +101,37 @@ const rules = {
 };
 
 export default function ModalScreen() {
-  return (
-    <View flex={1} alignItems="center" justifyContent="center">
-      <XStack gap="$2">
-        <ScrollView
-          width="75%"
-          backgroundColor="$background"
-          padding="$4"
-          borderRadius="$4"
-          height={Dimensions.get("window").height}
+  if (isWeb) {
+    return (
+      <ScrollView
+        backgroundColor="$background"
+        padding="$4"
+        borderRadius="$4"
+        height="100%"
+      >
+        <View
+          paddingBottom={30}
+          flex={1}
+          maxWidth="800px"
+          alignSelf={isWeb ? "center" : "stretch"}
         >
-          <View>
-            <Markdown rules={rules}>{description}</Markdown>
-          </View>
-        </ScrollView>
-      </XStack>
-    </View>
+          <Markdown rules={rules}>{description}</Markdown>
+        </View>
+      </ScrollView>
+    );
+  }
+  return (
+    <SafeAreaView>
+      <ScrollView
+        backgroundColor="$background"
+        padding="$4"
+        borderRadius="$4"
+        height="100%"
+      >
+        <View paddingBottom={30} flex={1}>
+          <Markdown rules={rules}>{description}</Markdown>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }

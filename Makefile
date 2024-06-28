@@ -26,7 +26,7 @@ node:
 all: version install check app node-all-platforms android
 
 .PHONY: ci
-ci: all
+ci: version install check app node-all-platforms ci-upload-node android ci-upload-android
 
 .PHONY: android
 android: app
@@ -59,14 +59,20 @@ docker-build-builder:
 docker-build-in-container:
 	docker run -v $$(pwd):$$(pwd) -w $$(pwd) --rm -it aqrm.io/aquareum-tv/aquareum:builder make
 
-.PHONY: ci-upload
-ci-upload:
+.PHONY: ci-upload 
+ci-upload: ci-upload-node ci-upload-android
+
+.PHONY: ci-upload-node
+ci-upload-node:
 	for GOOS in linux; do \
 		for GOARCH in amd64 arm64; do \
 			export file=aquareum-$(VERSION)-$$GOOS-$$GOARCH.tar.gz \
 			&& $(MAKE) ci-upload-file upload_file=$$file; \
 		done \
-	done; \
+	done;
+
+.PHONY: ci-upload-android
+ci-upload-android:
 	$(MAKE) ci-upload-file upload_file=aquareum-$(VERSION)-android-release.apk \
 	&& $(MAKE) ci-upload-file upload_file=aquareum-$(VERSION)-android-debug.apk
 
@@ -77,7 +83,7 @@ ci-upload-file:
 		--fail-with-body \
 		--header "JOB-TOKEN: $$CI_JOB_TOKEN" \
 		--upload-file bin/$(upload_file) \
-		"$$CI_API_V4_URL/projects/$$CI_PROJECT_ID/packages/generic/aquareum/$(VERSION)/$(upload_file)";
+		"$$CI_API_V4_URL/projects/$$CI_PROJECT_ID/packages/generic/$(shell echo $$CI_COMMIT_BRANCH | sed 's/\//-/')/$(VERSION)/$(upload_file)";
 
 .PHONY: check
 check:

@@ -1,6 +1,6 @@
 import "../tamagui-web.css";
 import { Link } from "expo-router";
-import { Anchor, Button, useTheme, Text, styled } from "tamagui";
+import { Anchor, Button, useTheme, Text, styled, isWeb } from "tamagui";
 
 import { useEffect } from "react";
 import { useColorScheme } from "hooks/useColorScheme";
@@ -13,6 +13,7 @@ import { useFonts } from "expo-font";
 import { SplashScreen, Stack } from "expo-router";
 import { Provider } from "./Provider";
 import "./updates";
+import { Helmet } from "react-native-helmet-async";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -57,6 +58,11 @@ function RootLayoutNav() {
   return (
     <Provider>
       <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+        {isWeb && (
+          <Helmet>
+            <title>Aquareum</title>
+          </Helmet>
+        )}
         <Stack>
           <Stack.Screen
             name="(tabs)"
@@ -64,16 +70,21 @@ function RootLayoutNav() {
               title: "",
               headerShown: true,
               headerRight: () => (
-                <Link href="/about" asChild>
-                  <Button mr="$4" bg="$purple8" color="$purple12">
+                <Anchor href="https://explorer.livepeer.org/treasury/74518185892381909671177921640414850443801430499809418110611019961553289709442">
+                  <Button
+                    mr="$4"
+                    bg="rgb(189 110 134)"
+                    color="white"
+                    fontSize="$6"
+                  >
                     What's Aquareum?
                   </Button>
-                </Link>
+                </Anchor>
               ),
             }}
           />
 
-          <Stack.Screen
+          {/* <Stack.Screen
             name="about"
             options={{
               title: "What's Aquareum?",
@@ -83,7 +94,7 @@ function RootLayoutNav() {
               gestureDirection: "horizontal",
               headerShown: true,
             }}
-          />
+          /> */}
         </Stack>
       </ThemeProvider>
     </Provider>
