@@ -4880,7 +4880,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ajv@npm:^8.0.0, ajv@npm:^8.0.1, ajv@npm:^8.9.0":
+"ajv@npm:^8.0.0, ajv@npm:^8.0.1, ajv@npm:^8.11.0, ajv@npm:^8.9.0":
   version: 8.16.0
   resolution: "ajv@npm:8.16.0"
   dependencies:
@@ -5041,6 +5041,7 @@ __metadata:
     burnt: "npm:^0.12.2"
     chrono-node: "npm:^2.7.6"
     expo: "npm:~51.0.9"
+    expo-build-properties: "npm:^0.12.3"
     expo-font: "npm:~12.0.6"
     expo-linking: "npm:~6.3.1"
     expo-router: "npm:~3.5.15"
@@ -6966,6 +6967,18 @@ __metadata:
   peerDependencies:
     expo: "*"
   checksum: 10/c2a0ebdbd0029c73bcbfbce18a809802ebe8f6c9aaece24d9165a1a10222e6c482de4ba8dc4b0a06272743ab8414f55b435bf98adde71319efdc1fd499c4b888
+  languageName: node
+  linkType: hard
+
+"expo-build-properties@npm:^0.12.3":
+  version: 0.12.3
+  resolution: "expo-build-properties@npm:0.12.3"
+  dependencies:
+    ajv: "npm:^8.11.0"
+    semver: "npm:^7.6.0"
+  peerDependencies:
+    expo: "*"
+  checksum: 10/c59a3f7d65f7542f4e44e0468efb156d667a984e218afc8f70df093a22e8f5f8dd13dd7afae1d7a6e3a44646f867a179be03cd1996c8dd41fd97b327e3c7bb90
   languageName: node
   linkType: hard
 
