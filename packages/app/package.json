@@ -18,6 +18,8 @@
     "preset": "jest-expo"
   },
   "dependencies": {
+    "@react-native-firebase/app": "^20.1.0",
+    "@react-native-firebase/messaging": "^20.1.0",
     "@react-navigation/native": "^6.1.17",
     "@tamagui/config": "^1.100.6",
     "@tamagui/lucide-icons": "^1.100.6",
