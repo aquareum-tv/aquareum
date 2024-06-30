@@ -77,6 +77,15 @@
             "useFrameworks": "static"
           }
         }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/icon.png",
+          "color": "#ffffff",
+          "sounds": ["./assets/sound/bubble.wav"],
+          "mode": "production"
+        }
       ]
     ],
     "experiments": {

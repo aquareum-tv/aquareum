@@ -1,3 +1,4 @@
+import background from "./background";
 import "../tamagui-web.css";
 import { Link } from "expo-router";
 import { Anchor, Button, useTheme, Text, styled, isWeb } from "tamagui";
@@ -14,6 +15,8 @@ import { SplashScreen, Stack } from "expo-router";
 import { Provider } from "./Provider";
 import "./updates";
 import { Helmet } from "react-native-helmet-async";
+
+background();
 
 export {
   // Catch any errors thrown by the Layout component.
