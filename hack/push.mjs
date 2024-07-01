@@ -11,9 +11,7 @@ admin.initializeApp({
 
 (async () => {
   const res = await admin.messaging().sendMulticast({
-    tokens: [
-      "dGCfL2MtzkeQpYqrTCiYPG:APA91bEZBZwkZER7s6nF8FifUfm3I57NwCiOAKPtfuJdyEypaGnDFgIJMWYUo4w15-ODQoy0U3u8XOgM5kxxVrf21BPsq_SPsvPzmw3pljPK4oCed3SDHEtGqH2qA86FR8OIbK61dnlj",
-    ],
+    tokens: process.argv.slice(2),
     notification: {
       title: "Basic Notification",
       body: "This is a basic notification sent from the server!",

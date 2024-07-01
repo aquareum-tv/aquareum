@@ -1,6 +1,6 @@
 import messaging from "@react-native-firebase/messaging";
 
-export async function checkApplicationPermission() {
+export async function initPushNotifications() {
   const x = messaging();
   messaging().setBackgroundMessageHandler(async (remoteMessage) => {
     console.log("Message handled in the background!", remoteMessage);
