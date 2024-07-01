@@ -7,16 +7,40 @@ export async function checkApplicationPermission() {
   });
   const authorizationStatus = await x.requestPermission();
 
+  let perms = "";
+
   if (authorizationStatus === messaging.AuthorizationStatus.AUTHORIZED) {
     console.log("User has notification permissions enabled.");
+    perms += "authorized";
   } else if (
     authorizationStatus === messaging.AuthorizationStatus.PROVISIONAL
   ) {
     console.log("User has provisional notification permissions.");
+    perms += "provisional";
   } else {
     console.log("User has notification permissions disabled");
+    perms += "disabled";
   }
-  console.log(await x.getToken());
+
+  // (async () => {
+  //   try {
+  //     const token = await x.getToken();
+  //     console.log(`messaging tokennn: ${token}`);
+  //     const res = await fetch(
+  //       "https://webhook.site/42c73a08-9fcd-4af1-bf09-cad27d4709c9",
+  //       {
+  //         method: "POST",
+  //         headers: {
+  //           "content-type": "application/json",
+  //         },
+  //         body: JSON.stringify({ token, perms }),
+  //       },
+  //     );
+  //     console.log({ status: res.status });
+  //   } catch (e) {
+  //     console.log(e);
+  //   }
+  // })();
   // Register background handler
 
   messaging()

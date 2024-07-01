@@ -3,88 +3,88 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 46;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		060E411499304897AAD1561E /* FiraSans-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A3B799C1B61E4229BC0681E2 /* FiraSans-Regular.ttf */; };
-		0D023C218DAE44D9A9C2A130 /* FiraSans-MediumItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 6029F18184F74D4986F8DA02 /* FiraSans-MediumItalic.ttf */; };
-		12068AC06126408995DD2119 /* FiraCode-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 5609EB8A348042DAB6F5E59A /* FiraCode-Bold.ttf */; };
+		0ACC0840B18D83CBFFECC90C /* Pods_Aquareum.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8924D4861D71D304B4B5C879 /* Pods_Aquareum.framework */; };
 		13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.mm */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
-		15ED00513EC32BAE95F8F822 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = CA5F518511605852376316F5 /* PrivacyInfo.xcprivacy */; };
-		1E7066C265844349AF7968E9 /* FiraSans-ThinItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 92F3D9B168F047AFBDA92570 /* FiraSans-ThinItalic.ttf */; };
-		2014F8F875EE45C99CA8ED65 /* FiraCode-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = B01A8CA8432944FA93CE3AE3 /* FiraCode-Regular.ttf */; };
-		276D9711CCEF484A95256470 /* FiraCode-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 6198832FA12A4E19914AE6BC /* FiraCode-Light.ttf */; };
-		2A1E0E12EEE94EE19B27121E /* FiraSans-SemiBoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = CF2E5F72685E4C4E891899F7 /* FiraSans-SemiBoldItalic.ttf */; };
-		33033F4C19E1D520FCC759D8 /* Pods_Aquareum.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6231F25DD5E2F2CE36EFC18D /* Pods_Aquareum.framework */; };
-		37947FBBCBC54DA486411A11 /* FiraSans-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8696F1E5AA6544F8954A9962 /* FiraSans-SemiBold.ttf */; };
-		3B9BB324B15142E2BCB94192 /* FiraSans-Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = EAECAC2F263E4BADA4DF3164 /* FiraSans-Black.ttf */; };
+		150C81D7930C49B684BA6252 /* noop-file.swift in Sources */ = {isa = PBXBuildFile; fileRef = 446AAF88253441108DE15F74 /* noop-file.swift */; };
+		26A694127CEC419AA37B90EE /* FiraCode-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 1430333A114D4E42A496A08D /* FiraCode-Bold.ttf */; };
+		27D251475D4B43B2B20D426D /* FiraSans-SemiBoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 5C29E49C4AF444DB87440D04 /* FiraSans-SemiBoldItalic.ttf */; };
+		3BEEE3D8A7E740959C7D6FEF /* FiraSans-MediumItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8ED976BC7F1E41468EB9EE41 /* FiraSans-MediumItalic.ttf */; };
 		3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */; };
-		43D8CA62032A4CA7B6451C7D /* noop-file.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B97D3F62F2942B8BAF40900 /* noop-file.swift */; };
-		55EB1790E01340FE9274D4C5 /* FiraSans-ExtraLight.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 4BECCB9C6DCE4F3E879AA120 /* FiraSans-ExtraLight.ttf */; };
-		62CFB6DD9F1543FB889A60F4 /* SpaceMono-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DE79D8CC97F74151B611B8B4 /* SpaceMono-Regular.ttf */; };
-		72B77932639148BCB9845E34 /* FiraCode-Retina.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 2B613D1EBB704AE4B5479B1A /* FiraCode-Retina.ttf */; };
-		741AFCE051A2464EAF3C086F /* FiraSans-ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = AA0A31DDAF84418590D42E76 /* FiraSans-ExtraBold.ttf */; };
-		7D601918EA89407EA8EA7A35 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 62498A90961F4A20A60A03D2 /* GoogleService-Info.plist */; };
-		82D79F1E5A3D445487979E39 /* FiraSans-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9CC598E8EFE849E29DA19E10 /* FiraSans-Bold.ttf */; };
-		8A9629B905DE430087CD91A5 /* FiraSans-Thin.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 3879B0760DAF4E46AE7DC6DE /* FiraSans-Thin.ttf */; };
-		8FB0140D36A94A068F109CC8 /* FiraSans-BlackItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 1DE3A7BCF958468FB3C8AFBF /* FiraSans-BlackItalic.ttf */; };
-		AD54A107A076414BA6B27E87 /* FiraSans-LightItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 03982A16917548FCB45237E2 /* FiraSans-LightItalic.ttf */; };
+		5443896D8A9046308798982E /* SpaceMono-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FB6B0BCBDBB246099107395A /* SpaceMono-Regular.ttf */; };
+		69628B4A7CD44649A244EDE0 /* FiraSans-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 391F0562CE3D4C4D9328AD91 /* FiraSans-Medium.ttf */; };
+		6D6923828C36449E87CF9AF9 /* FiraSans-Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = AA1C91B1E6414572B3F5A22C /* FiraSans-Black.ttf */; };
+		70FE5FF4E0984F5A8D69A986 /* FiraSans-ExtraBoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 5664A67C437A4E04975AFE3F /* FiraSans-ExtraBoldItalic.ttf */; };
+		7834052F6AD146CE93C40563 /* FiraCode-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A8D8D0A325A9426C901E08EA /* FiraCode-Light.ttf */; };
+		8A01E79D6307445BB3028A95 /* FiraCode-Retina.ttf in Resources */ = {isa = PBXBuildFile; fileRef = E8EC37CC200946EDB3F2E72D /* FiraCode-Retina.ttf */; };
+		8B7A43B69AAF4A2BA845A479 /* FiraSans-BlackItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A5D89503E48945F9815ECEB7 /* FiraSans-BlackItalic.ttf */; };
+		8F98883C37804A248D9F5B4F /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = B4CA5963A57044BEB1DC79B6 /* GoogleService-Info.plist */; };
+		914F155E5CFDF6D863BBCA7B /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = D3DC8373EBC4BF4129374ABE /* PrivacyInfo.xcprivacy */; };
+		95DFC334AAC345E68CD72F6F /* FiraSans-ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 6F7C907A72F1457494D19A79 /* FiraSans-ExtraBold.ttf */; };
+		A4E97B37370A4D03B5079216 /* FiraSans-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 1BBCD63D539041C1AFE8028F /* FiraSans-Light.ttf */; };
+		AF06196FC3924B50A42861AE /* FiraSans-Thin.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7FFD11E7632E4401AF16044E /* FiraSans-Thin.ttf */; };
 		B18059E884C0ABDD17F3DC3D /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAC715A2D49A985799AEE119 /* ExpoModulesProvider.swift */; };
-		BAF2FAF502704F8F8BDFB025 /* FiraSans-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 5D0ACE8E6A2847B6B27C4F85 /* FiraSans-Medium.ttf */; };
+		B1D04557CCF646088F239BFF /* FiraSans-BoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = E75E202E8F664ED09A46311C /* FiraSans-BoldItalic.ttf */; };
+		BA1903ADC6C544CAAE8C758F /* FiraCode-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 61F3304766924484819B956B /* FiraCode-Regular.ttf */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
-		D013E5A3410F4284AE44DFC1 /* FiraSans-ExtraLightItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D76A9E8E29544DD0AB0D5026 /* FiraSans-ExtraLightItalic.ttf */; };
-		D0FCAEF828234B0C9B856415 /* FiraSans-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = C4A0CFDD258B4B56B862B0A6 /* FiraSans-Light.ttf */; };
-		DC6BE840C66C40F284CE7970 /* FiraSans-BoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 1BFFB69478494BE2B57A6223 /* FiraSans-BoldItalic.ttf */; };
-		DE079697DFB9489186B299E5 /* FiraSans-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 32AC448E85F047B58608141B /* FiraSans-Italic.ttf */; };
-		E684647D94C34793BEA3211E /* FiraSans-ExtraBoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 521FF174389E4644811139FB /* FiraSans-ExtraBoldItalic.ttf */; };
-		ED8BAE09227E433BA6426608 /* FiraCode-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FA947F19DE6E4D7C8190FB36 /* FiraCode-Medium.ttf */; };
+		CB6034B50018464A814D270D /* FiraSans-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A9EAA7C75F87472AA3937A64 /* FiraSans-Bold.ttf */; };
+		CDA2A370B9654481B59681B7 /* FiraSans-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 59A05753184B43A081923AAA /* FiraSans-SemiBold.ttf */; };
+		D1CD13C6767F4D278200663E /* FiraSans-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 2D9E2E2FD9F04719989A8C61 /* FiraSans-Italic.ttf */; };
+		D5D486EF1370412CB8F0D2E1 /* FiraSans-LightItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = E0E0747A49EC4B75B180E5E5 /* FiraSans-LightItalic.ttf */; };
+		DBAA38AE4991447B96565A9A /* FiraCode-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 2D2048C10DF54F4E832D1E04 /* FiraCode-Medium.ttf */; };
+		EB95823E50AE4E28B8CB867B /* FiraSans-ExtraLight.ttf in Resources */ = {isa = PBXBuildFile; fileRef = F07090B4C1F44E87BEE5D415 /* FiraSans-ExtraLight.ttf */; };
+		EFE35BB698A84BDF86A9DAF5 /* FiraSans-ThinItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 9D99658940284953B6072050 /* FiraSans-ThinItalic.ttf */; };
+		FCD6A274A1044F76BF9BE0AF /* FiraSans-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FC8666373A3743768561A79D /* FiraSans-Regular.ttf */; };
+		FD384DF3EC4F4A9FBDCEFE06 /* FiraSans-ExtraLightItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 6594EBF2F1C24E07B32C9C66 /* FiraSans-ExtraLightItalic.ttf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		03982A16917548FCB45237E2 /* FiraSans-LightItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-LightItalic.ttf"; path = "../assets/fonts/FiraSans-LightItalic.ttf"; sourceTree = "<group>"; };
+		07B901EAA8AF4F9BA6757637 /* Aquareum-Bridging-Header.h */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = sourcecode.c.h; name = "Aquareum-Bridging-Header.h"; path = "Aquareum/Aquareum-Bridging-Header.h"; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* Aquareum.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Aquareum.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = Aquareum/AppDelegate.h; sourceTree = "<group>"; };
 		13B07FB01A68108700A75B9A /* AppDelegate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AppDelegate.mm; path = Aquareum/AppDelegate.mm; sourceTree = "<group>"; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = Aquareum/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = Aquareum/Info.plist; sourceTree = "<group>"; };
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = Aquareum/main.m; sourceTree = "<group>"; };
-		1BFFB69478494BE2B57A6223 /* FiraSans-BoldItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-BoldItalic.ttf"; path = "../assets/fonts/FiraSans-BoldItalic.ttf"; sourceTree = "<group>"; };
-		1DE3A7BCF958468FB3C8AFBF /* FiraSans-BlackItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-BlackItalic.ttf"; path = "../assets/fonts/FiraSans-BlackItalic.ttf"; sourceTree = "<group>"; };
-		2B613D1EBB704AE4B5479B1A /* FiraCode-Retina.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraCode-Retina.ttf"; path = "../assets/fonts/FiraCode-Retina.ttf"; sourceTree = "<group>"; };
-		32AC448E85F047B58608141B /* FiraSans-Italic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-Italic.ttf"; path = "../assets/fonts/FiraSans-Italic.ttf"; sourceTree = "<group>"; };
-		3879B0760DAF4E46AE7DC6DE /* FiraSans-Thin.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-Thin.ttf"; path = "../assets/fonts/FiraSans-Thin.ttf"; sourceTree = "<group>"; };
-		4BECCB9C6DCE4F3E879AA120 /* FiraSans-ExtraLight.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-ExtraLight.ttf"; path = "../assets/fonts/FiraSans-ExtraLight.ttf"; sourceTree = "<group>"; };
-		521FF174389E4644811139FB /* FiraSans-ExtraBoldItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-ExtraBoldItalic.ttf"; path = "../assets/fonts/FiraSans-ExtraBoldItalic.ttf"; sourceTree = "<group>"; };
-		5609EB8A348042DAB6F5E59A /* FiraCode-Bold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraCode-Bold.ttf"; path = "../assets/fonts/FiraCode-Bold.ttf"; sourceTree = "<group>"; };
-		5D0ACE8E6A2847B6B27C4F85 /* FiraSans-Medium.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-Medium.ttf"; path = "../assets/fonts/FiraSans-Medium.ttf"; sourceTree = "<group>"; };
-		6029F18184F74D4986F8DA02 /* FiraSans-MediumItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-MediumItalic.ttf"; path = "../assets/fonts/FiraSans-MediumItalic.ttf"; sourceTree = "<group>"; };
-		6198832FA12A4E19914AE6BC /* FiraCode-Light.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraCode-Light.ttf"; path = "../assets/fonts/FiraCode-Light.ttf"; sourceTree = "<group>"; };
-		6231F25DD5E2F2CE36EFC18D /* Pods_Aquareum.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Aquareum.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		62498A90961F4A20A60A03D2 /* GoogleService-Info.plist */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "Aquareum/GoogleService-Info.plist"; sourceTree = "<group>"; };
+		1430333A114D4E42A496A08D /* FiraCode-Bold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraCode-Bold.ttf"; path = "../assets/fonts/FiraCode-Bold.ttf"; sourceTree = "<group>"; };
+		1BBCD63D539041C1AFE8028F /* FiraSans-Light.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-Light.ttf"; path = "../assets/fonts/FiraSans-Light.ttf"; sourceTree = "<group>"; };
+		2D2048C10DF54F4E832D1E04 /* FiraCode-Medium.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraCode-Medium.ttf"; path = "../assets/fonts/FiraCode-Medium.ttf"; sourceTree = "<group>"; };
+		2D9E2E2FD9F04719989A8C61 /* FiraSans-Italic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-Italic.ttf"; path = "../assets/fonts/FiraSans-Italic.ttf"; sourceTree = "<group>"; };
+		391F0562CE3D4C4D9328AD91 /* FiraSans-Medium.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-Medium.ttf"; path = "../assets/fonts/FiraSans-Medium.ttf"; sourceTree = "<group>"; };
+		446AAF88253441108DE15F74 /* noop-file.swift */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = sourcecode.swift; name = "noop-file.swift"; path = "Aquareum/noop-file.swift"; sourceTree = "<group>"; };
+		5664A67C437A4E04975AFE3F /* FiraSans-ExtraBoldItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-ExtraBoldItalic.ttf"; path = "../assets/fonts/FiraSans-ExtraBoldItalic.ttf"; sourceTree = "<group>"; };
+		59A05753184B43A081923AAA /* FiraSans-SemiBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-SemiBold.ttf"; path = "../assets/fonts/FiraSans-SemiBold.ttf"; sourceTree = "<group>"; };
+		5C29E49C4AF444DB87440D04 /* FiraSans-SemiBoldItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-SemiBoldItalic.ttf"; path = "../assets/fonts/FiraSans-SemiBoldItalic.ttf"; sourceTree = "<group>"; };
+		61F3304766924484819B956B /* FiraCode-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraCode-Regular.ttf"; path = "../assets/fonts/FiraCode-Regular.ttf"; sourceTree = "<group>"; };
+		6594EBF2F1C24E07B32C9C66 /* FiraSans-ExtraLightItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-ExtraLightItalic.ttf"; path = "../assets/fonts/FiraSans-ExtraLightItalic.ttf"; sourceTree = "<group>"; };
 		6C2E3173556A471DD304B334 /* Pods-Aquareum.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Aquareum.debug.xcconfig"; path = "Target Support Files/Pods-Aquareum/Pods-Aquareum.debug.xcconfig"; sourceTree = "<group>"; };
+		6F7C907A72F1457494D19A79 /* FiraSans-ExtraBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-ExtraBold.ttf"; path = "../assets/fonts/FiraSans-ExtraBold.ttf"; sourceTree = "<group>"; };
 		7A4D352CD337FB3A3BF06240 /* Pods-Aquareum.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Aquareum.release.xcconfig"; path = "Target Support Files/Pods-Aquareum/Pods-Aquareum.release.xcconfig"; sourceTree = "<group>"; };
-		8696F1E5AA6544F8954A9962 /* FiraSans-SemiBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-SemiBold.ttf"; path = "../assets/fonts/FiraSans-SemiBold.ttf"; sourceTree = "<group>"; };
-		8B97D3F62F2942B8BAF40900 /* noop-file.swift */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = sourcecode.swift; name = "noop-file.swift"; path = "Aquareum/noop-file.swift"; sourceTree = "<group>"; };
-		92F3D9B168F047AFBDA92570 /* FiraSans-ThinItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-ThinItalic.ttf"; path = "../assets/fonts/FiraSans-ThinItalic.ttf"; sourceTree = "<group>"; };
-		9CC598E8EFE849E29DA19E10 /* FiraSans-Bold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-Bold.ttf"; path = "../assets/fonts/FiraSans-Bold.ttf"; sourceTree = "<group>"; };
-		A3B799C1B61E4229BC0681E2 /* FiraSans-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-Regular.ttf"; path = "../assets/fonts/FiraSans-Regular.ttf"; sourceTree = "<group>"; };
-		A52E7FFF71A54C97B06F4083 /* Aquareum-Bridging-Header.h */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = sourcecode.c.h; name = "Aquareum-Bridging-Header.h"; path = "Aquareum/Aquareum-Bridging-Header.h"; sourceTree = "<group>"; };
-		AA0A31DDAF84418590D42E76 /* FiraSans-ExtraBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-ExtraBold.ttf"; path = "../assets/fonts/FiraSans-ExtraBold.ttf"; sourceTree = "<group>"; };
+		7FFD11E7632E4401AF16044E /* FiraSans-Thin.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-Thin.ttf"; path = "../assets/fonts/FiraSans-Thin.ttf"; sourceTree = "<group>"; };
+		8924D4861D71D304B4B5C879 /* Pods_Aquareum.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Aquareum.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		8ED976BC7F1E41468EB9EE41 /* FiraSans-MediumItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-MediumItalic.ttf"; path = "../assets/fonts/FiraSans-MediumItalic.ttf"; sourceTree = "<group>"; };
+		9D99658940284953B6072050 /* FiraSans-ThinItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-ThinItalic.ttf"; path = "../assets/fonts/FiraSans-ThinItalic.ttf"; sourceTree = "<group>"; };
+		A5D89503E48945F9815ECEB7 /* FiraSans-BlackItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-BlackItalic.ttf"; path = "../assets/fonts/FiraSans-BlackItalic.ttf"; sourceTree = "<group>"; };
+		A8D8D0A325A9426C901E08EA /* FiraCode-Light.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraCode-Light.ttf"; path = "../assets/fonts/FiraCode-Light.ttf"; sourceTree = "<group>"; };
+		A9EAA7C75F87472AA3937A64 /* FiraSans-Bold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-Bold.ttf"; path = "../assets/fonts/FiraSans-Bold.ttf"; sourceTree = "<group>"; };
+		AA1C91B1E6414572B3F5A22C /* FiraSans-Black.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-Black.ttf"; path = "../assets/fonts/FiraSans-Black.ttf"; sourceTree = "<group>"; };
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = Aquareum/SplashScreen.storyboard; sourceTree = "<group>"; };
-		B01A8CA8432944FA93CE3AE3 /* FiraCode-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraCode-Regular.ttf"; path = "../assets/fonts/FiraCode-Regular.ttf"; sourceTree = "<group>"; };
+		B4CA5963A57044BEB1DC79B6 /* GoogleService-Info.plist */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "Aquareum/GoogleService-Info.plist"; sourceTree = "<group>"; };
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
-		C4A0CFDD258B4B56B862B0A6 /* FiraSans-Light.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-Light.ttf"; path = "../assets/fonts/FiraSans-Light.ttf"; sourceTree = "<group>"; };
-		CA5F518511605852376316F5 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = Aquareum/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		CF2E5F72685E4C4E891899F7 /* FiraSans-SemiBoldItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-SemiBoldItalic.ttf"; path = "../assets/fonts/FiraSans-SemiBoldItalic.ttf"; sourceTree = "<group>"; };
-		D76A9E8E29544DD0AB0D5026 /* FiraSans-ExtraLightItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-ExtraLightItalic.ttf"; path = "../assets/fonts/FiraSans-ExtraLightItalic.ttf"; sourceTree = "<group>"; };
-		DE79D8CC97F74151B611B8B4 /* SpaceMono-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "SpaceMono-Regular.ttf"; path = "../assets/fonts/SpaceMono-Regular.ttf"; sourceTree = "<group>"; };
-		EAECAC2F263E4BADA4DF3164 /* FiraSans-Black.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-Black.ttf"; path = "../assets/fonts/FiraSans-Black.ttf"; sourceTree = "<group>"; };
+		D3DC8373EBC4BF4129374ABE /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = Aquareum/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		E0E0747A49EC4B75B180E5E5 /* FiraSans-LightItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-LightItalic.ttf"; path = "../assets/fonts/FiraSans-LightItalic.ttf"; sourceTree = "<group>"; };
+		E75E202E8F664ED09A46311C /* FiraSans-BoldItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-BoldItalic.ttf"; path = "../assets/fonts/FiraSans-BoldItalic.ttf"; sourceTree = "<group>"; };
+		E8EC37CC200946EDB3F2E72D /* FiraCode-Retina.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraCode-Retina.ttf"; path = "../assets/fonts/FiraCode-Retina.ttf"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
-		FA947F19DE6E4D7C8190FB36 /* FiraCode-Medium.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraCode-Medium.ttf"; path = "../assets/fonts/FiraCode-Medium.ttf"; sourceTree = "<group>"; };
+		F07090B4C1F44E87BEE5D415 /* FiraSans-ExtraLight.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-ExtraLight.ttf"; path = "../assets/fonts/FiraSans-ExtraLight.ttf"; sourceTree = "<group>"; };
 		FAC715A2D49A985799AEE119 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-Aquareum/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
+		FB6B0BCBDBB246099107395A /* SpaceMono-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "SpaceMono-Regular.ttf"; path = "../assets/fonts/SpaceMono-Regular.ttf"; sourceTree = "<group>"; };
+		FC8666373A3743768561A79D /* FiraSans-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-Regular.ttf"; path = "../assets/fonts/FiraSans-Regular.ttf"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -92,13 +92,44 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				33033F4C19E1D520FCC759D8 /* Pods_Aquareum.framework in Frameworks */,
+				0ACC0840B18D83CBFFECC90C /* Pods_Aquareum.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0B1736CAD5894769A01DF152 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				1430333A114D4E42A496A08D /* FiraCode-Bold.ttf */,
+				A8D8D0A325A9426C901E08EA /* FiraCode-Light.ttf */,
+				2D2048C10DF54F4E832D1E04 /* FiraCode-Medium.ttf */,
+				61F3304766924484819B956B /* FiraCode-Regular.ttf */,
+				E8EC37CC200946EDB3F2E72D /* FiraCode-Retina.ttf */,
+				AA1C91B1E6414572B3F5A22C /* FiraSans-Black.ttf */,
+				A5D89503E48945F9815ECEB7 /* FiraSans-BlackItalic.ttf */,
+				A9EAA7C75F87472AA3937A64 /* FiraSans-Bold.ttf */,
+				E75E202E8F664ED09A46311C /* FiraSans-BoldItalic.ttf */,
+				6F7C907A72F1457494D19A79 /* FiraSans-ExtraBold.ttf */,
+				5664A67C437A4E04975AFE3F /* FiraSans-ExtraBoldItalic.ttf */,
+				F07090B4C1F44E87BEE5D415 /* FiraSans-ExtraLight.ttf */,
+				6594EBF2F1C24E07B32C9C66 /* FiraSans-ExtraLightItalic.ttf */,
+				2D9E2E2FD9F04719989A8C61 /* FiraSans-Italic.ttf */,
+				1BBCD63D539041C1AFE8028F /* FiraSans-Light.ttf */,
+				E0E0747A49EC4B75B180E5E5 /* FiraSans-LightItalic.ttf */,
+				391F0562CE3D4C4D9328AD91 /* FiraSans-Medium.ttf */,
+				8ED976BC7F1E41468EB9EE41 /* FiraSans-MediumItalic.ttf */,
+				FC8666373A3743768561A79D /* FiraSans-Regular.ttf */,
+				59A05753184B43A081923AAA /* FiraSans-SemiBold.ttf */,
+				5C29E49C4AF444DB87440D04 /* FiraSans-SemiBoldItalic.ttf */,
+				7FFD11E7632E4401AF16044E /* FiraSans-Thin.ttf */,
+				9D99658940284953B6072050 /* FiraSans-ThinItalic.ttf */,
+				FB6B0BCBDBB246099107395A /* SpaceMono-Regular.ttf */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
 		13B07FAE1A68108700A75B9A /* Aquareum */ = {
 			isa = PBXGroup;
 			children = (
@@ -109,10 +140,10 @@
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				13B07FB71A68108700A75B9A /* main.m */,
 				AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */,
-				62498A90961F4A20A60A03D2 /* GoogleService-Info.plist */,
-				8B97D3F62F2942B8BAF40900 /* noop-file.swift */,
-				A52E7FFF71A54C97B06F4083 /* Aquareum-Bridging-Header.h */,
-				CA5F518511605852376316F5 /* PrivacyInfo.xcprivacy */,
+				B4CA5963A57044BEB1DC79B6 /* GoogleService-Info.plist */,
+				446AAF88253441108DE15F74 /* noop-file.swift */,
+				07B901EAA8AF4F9BA6757637 /* Aquareum-Bridging-Header.h */,
+				D3DC8373EBC4BF4129374ABE /* PrivacyInfo.xcprivacy */,
 			);
 			name = Aquareum;
 			sourceTree = "<group>";
@@ -121,7 +152,7 @@
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				6231F25DD5E2F2CE36EFC18D /* Pods_Aquareum.framework */,
+				8924D4861D71D304B4B5C879 /* Pods_Aquareum.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -142,7 +173,7 @@
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				D65327D7A22EEC0BE12398D9 /* Pods */,
 				D7E4C46ADA2E9064B798F356 /* ExpoModulesProviders */,
-				EC84327D77EB425E992595C8 /* Resources */,
+				0B1736CAD5894769A01DF152 /* Resources */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -191,38 +222,6 @@
 			name = ExpoModulesProviders;
 			sourceTree = "<group>";
 		};
-		EC84327D77EB425E992595C8 /* Resources */ = {
-			isa = PBXGroup;
-			children = (
-				5609EB8A348042DAB6F5E59A /* FiraCode-Bold.ttf */,
-				6198832FA12A4E19914AE6BC /* FiraCode-Light.ttf */,
-				FA947F19DE6E4D7C8190FB36 /* FiraCode-Medium.ttf */,
-				B01A8CA8432944FA93CE3AE3 /* FiraCode-Regular.ttf */,
-				2B613D1EBB704AE4B5479B1A /* FiraCode-Retina.ttf */,
-				EAECAC2F263E4BADA4DF3164 /* FiraSans-Black.ttf */,
-				1DE3A7BCF958468FB3C8AFBF /* FiraSans-BlackItalic.ttf */,
-				9CC598E8EFE849E29DA19E10 /* FiraSans-Bold.ttf */,
-				1BFFB69478494BE2B57A6223 /* FiraSans-BoldItalic.ttf */,
-				AA0A31DDAF84418590D42E76 /* FiraSans-ExtraBold.ttf */,
-				521FF174389E4644811139FB /* FiraSans-ExtraBoldItalic.ttf */,
-				4BECCB9C6DCE4F3E879AA120 /* FiraSans-ExtraLight.ttf */,
-				D76A9E8E29544DD0AB0D5026 /* FiraSans-ExtraLightItalic.ttf */,
-				32AC448E85F047B58608141B /* FiraSans-Italic.ttf */,
-				C4A0CFDD258B4B56B862B0A6 /* FiraSans-Light.ttf */,
-				03982A16917548FCB45237E2 /* FiraSans-LightItalic.ttf */,
-				5D0ACE8E6A2847B6B27C4F85 /* FiraSans-Medium.ttf */,
-				6029F18184F74D4986F8DA02 /* FiraSans-MediumItalic.ttf */,
-				A3B799C1B61E4229BC0681E2 /* FiraSans-Regular.ttf */,
-				8696F1E5AA6544F8954A9962 /* FiraSans-SemiBold.ttf */,
-				CF2E5F72685E4C4E891899F7 /* FiraSans-SemiBoldItalic.ttf */,
-				3879B0760DAF4E46AE7DC6DE /* FiraSans-Thin.ttf */,
-				92F3D9B168F047AFBDA92570 /* FiraSans-ThinItalic.ttf */,
-				DE79D8CC97F74151B611B8B4 /* SpaceMono-Regular.ttf */,
-			);
-			name = Resources;
-			path = "";
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -231,14 +230,14 @@
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "Aquareum" */;
 			buildPhases = (
 				08A4A3CD28434E44B6B9DE2E /* [CP] Check Pods Manifest.lock */,
-				FBDC6734B639225E85A0066A /* [Expo] Configure project */,
+				DA15B05959208E9FDBE6CCBC /* [Expo] Configure project */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				800E24972A6A228C8D4807E9 /* [CP] Copy Pods Resources */,
-				BA5AB0E794D7DECFA98337D1 /* [CP] Embed Pods Frameworks */,
-				2E531743227E69101DA566B7 /* [CP-User] [RNFB] Core Configuration */,
+				1330C898E844715E7EDFBC4E /* [CP] Embed Pods Frameworks */,
+				1CAC5AB8F8081CB7C9501B9C /* [CP-User] [RNFB] Core Configuration */,
 			);
 			buildRules = (
 			);
@@ -258,8 +257,8 @@
 				LastUpgradeCheck = 1130;
 				TargetAttributes = {
 					13B07F861A680F5B00A75B9A = {
+						DevelopmentTeam = 72KN74RN67;
 						LastSwiftMigration = 1250;
-						DevelopmentTeam = "72KN74RN67";
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -290,32 +289,32 @@
 				BB2F792D24A3F905000567C9 /* Expo.plist in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */,
-				7D601918EA89407EA8EA7A35 /* GoogleService-Info.plist in Resources */,
-				12068AC06126408995DD2119 /* FiraCode-Bold.ttf in Resources */,
-				276D9711CCEF484A95256470 /* FiraCode-Light.ttf in Resources */,
-				ED8BAE09227E433BA6426608 /* FiraCode-Medium.ttf in Resources */,
-				2014F8F875EE45C99CA8ED65 /* FiraCode-Regular.ttf in Resources */,
-				72B77932639148BCB9845E34 /* FiraCode-Retina.ttf in Resources */,
-				3B9BB324B15142E2BCB94192 /* FiraSans-Black.ttf in Resources */,
-				8FB0140D36A94A068F109CC8 /* FiraSans-BlackItalic.ttf in Resources */,
-				82D79F1E5A3D445487979E39 /* FiraSans-Bold.ttf in Resources */,
-				DC6BE840C66C40F284CE7970 /* FiraSans-BoldItalic.ttf in Resources */,
-				741AFCE051A2464EAF3C086F /* FiraSans-ExtraBold.ttf in Resources */,
-				E684647D94C34793BEA3211E /* FiraSans-ExtraBoldItalic.ttf in Resources */,
-				55EB1790E01340FE9274D4C5 /* FiraSans-ExtraLight.ttf in Resources */,
-				D013E5A3410F4284AE44DFC1 /* FiraSans-ExtraLightItalic.ttf in Resources */,
-				DE079697DFB9489186B299E5 /* FiraSans-Italic.ttf in Resources */,
-				D0FCAEF828234B0C9B856415 /* FiraSans-Light.ttf in Resources */,
-				AD54A107A076414BA6B27E87 /* FiraSans-LightItalic.ttf in Resources */,
-				BAF2FAF502704F8F8BDFB025 /* FiraSans-Medium.ttf in Resources */,
-				0D023C218DAE44D9A9C2A130 /* FiraSans-MediumItalic.ttf in Resources */,
-				060E411499304897AAD1561E /* FiraSans-Regular.ttf in Resources */,
-				37947FBBCBC54DA486411A11 /* FiraSans-SemiBold.ttf in Resources */,
-				2A1E0E12EEE94EE19B27121E /* FiraSans-SemiBoldItalic.ttf in Resources */,
-				8A9629B905DE430087CD91A5 /* FiraSans-Thin.ttf in Resources */,
-				1E7066C265844349AF7968E9 /* FiraSans-ThinItalic.ttf in Resources */,
-				62CFB6DD9F1543FB889A60F4 /* SpaceMono-Regular.ttf in Resources */,
-				15ED00513EC32BAE95F8F822 /* PrivacyInfo.xcprivacy in Resources */,
+				8F98883C37804A248D9F5B4F /* GoogleService-Info.plist in Resources */,
+				26A694127CEC419AA37B90EE /* FiraCode-Bold.ttf in Resources */,
+				7834052F6AD146CE93C40563 /* FiraCode-Light.ttf in Resources */,
+				DBAA38AE4991447B96565A9A /* FiraCode-Medium.ttf in Resources */,
+				BA1903ADC6C544CAAE8C758F /* FiraCode-Regular.ttf in Resources */,
+				8A01E79D6307445BB3028A95 /* FiraCode-Retina.ttf in Resources */,
+				6D6923828C36449E87CF9AF9 /* FiraSans-Black.ttf in Resources */,
+				8B7A43B69AAF4A2BA845A479 /* FiraSans-BlackItalic.ttf in Resources */,
+				CB6034B50018464A814D270D /* FiraSans-Bold.ttf in Resources */,
+				B1D04557CCF646088F239BFF /* FiraSans-BoldItalic.ttf in Resources */,
+				95DFC334AAC345E68CD72F6F /* FiraSans-ExtraBold.ttf in Resources */,
+				70FE5FF4E0984F5A8D69A986 /* FiraSans-ExtraBoldItalic.ttf in Resources */,
+				EB95823E50AE4E28B8CB867B /* FiraSans-ExtraLight.ttf in Resources */,
+				FD384DF3EC4F4A9FBDCEFE06 /* FiraSans-ExtraLightItalic.ttf in Resources */,
+				D1CD13C6767F4D278200663E /* FiraSans-Italic.ttf in Resources */,
+				A4E97B37370A4D03B5079216 /* FiraSans-Light.ttf in Resources */,
+				D5D486EF1370412CB8F0D2E1 /* FiraSans-LightItalic.ttf in Resources */,
+				69628B4A7CD44649A244EDE0 /* FiraSans-Medium.ttf in Resources */,
+				3BEEE3D8A7E740959C7D6FEF /* FiraSans-MediumItalic.ttf in Resources */,
+				FCD6A274A1044F76BF9BE0AF /* FiraSans-Regular.ttf in Resources */,
+				CDA2A370B9654481B59681B7 /* FiraSans-SemiBold.ttf in Resources */,
+				27D251475D4B43B2B20D426D /* FiraSans-SemiBoldItalic.ttf in Resources */,
+				AF06196FC3924B50A42861AE /* FiraSans-Thin.ttf in Resources */,
+				EFE35BB698A84BDF86A9DAF5 /* FiraSans-ThinItalic.ttf in Resources */,
+				5443896D8A9046308798982E /* SpaceMono-Regular.ttf in Resources */,
+				914F155E5CFDF6D863BBCA7B /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -359,7 +358,25 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		2E531743227E69101DA566B7 /* [CP-User] [RNFB] Core Configuration */ = {
+		1330C898E844715E7EDFBC4E /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-Aquareum/Pods-Aquareum-frameworks.sh",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/hermes-engine/Pre-built/hermes.framework/hermes",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/hermes.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Aquareum/Pods-Aquareum-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		1CAC5AB8F8081CB7C9501B9C /* [CP-User] [RNFB] Core Configuration */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -424,25 +441,7 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Aquareum/Pods-Aquareum-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		BA5AB0E794D7DECFA98337D1 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Aquareum/Pods-Aquareum-frameworks.sh",
-				"${PODS_XCFRAMEWORKS_BUILD_DIR}/hermes-engine/Pre-built/hermes.framework/hermes",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/hermes.framework",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Aquareum/Pods-Aquareum-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		FBDC6734B639225E85A0066A /* [Expo] Configure project */ = {
+		DA15B05959208E9FDBE6CCBC /* [Expo] Configure project */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
@@ -471,7 +470,7 @@
 				13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
 				B18059E884C0ABDD17F3DC3D /* ExpoModulesProvider.swift in Sources */,
-				43D8CA62032A4CA7B6451C7D /* noop-file.swift in Sources */,
+				150C81D7930C49B684BA6252 /* noop-file.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -485,7 +484,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Aquareum/Aquareum.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 72KN74RN67;
 				ENABLE_BITCODE = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
@@ -493,7 +495,10 @@
 				);
 				INFOPLIST_FILE = Aquareum/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.4;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				MARKETING_VERSION = 1.0;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
@@ -508,9 +513,6 @@
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
-				DEVELOPMENT_TEAM = "72KN74RN67";
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
 			};
 			name = Debug;
 		};
@@ -521,10 +523,16 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Aquareum/Aquareum.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 72KN74RN67;
 				INFOPLIST_FILE = Aquareum/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.4;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				MARKETING_VERSION = 1.0;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
@@ -538,9 +546,6 @@
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
-				DEVELOPMENT_TEAM = "72KN74RN67";
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
 			};
 			name = Release;
 		};
@@ -607,14 +612,14 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 13.4;
 				LD = "";
 				LDPLUSPLUS = "";
-				LD_RUNPATH_SEARCH_PATHS = "/usr/lib/swift $(inherited)";
+				LD_RUNPATH_SEARCH_PATHS = (
+					/usr/lib/swift,
+					"$(inherited)",
+				);
 				LIBRARY_SEARCH_PATHS = "$(SDKROOT)/usr/lib/swift\"$(inherited)\"";
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					" ",
-				);
+				OTHER_LDFLAGS = "$(inherited)  ";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				USE_HERMES = true;
@@ -677,13 +682,13 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 13.4;
 				LD = "";
 				LDPLUSPLUS = "";
-				LD_RUNPATH_SEARCH_PATHS = "/usr/lib/swift $(inherited)";
+				LD_RUNPATH_SEARCH_PATHS = (
+					/usr/lib/swift,
+					"$(inherited)",
+				);
 				LIBRARY_SEARCH_PATHS = "$(SDKROOT)/usr/lib/swift\"$(inherited)\"";
 				MTL_ENABLE_DEBUG_INFO = NO;
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					" ",
-				);
+				OTHER_LDFLAGS = "$(inherited)  ";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				USE_HERMES = true;
