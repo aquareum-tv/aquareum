@@ -1,5 +1,4 @@
 import messaging from "@react-native-firebase/messaging";
-import * as Notifications from "expo-notifications";
 
 export async function checkApplicationPermission() {
   const x = messaging();
@@ -44,9 +43,4 @@ export async function checkApplicationPermission() {
       );
       // Handle notification interaction when the app is opened from a closed state
     });
-  Notifications.setNotificationHandler({
-    handleNotification: async () => ({
-      shouldShowAlert: true,
-    }),
-  });
 }
