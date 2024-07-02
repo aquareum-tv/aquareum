@@ -22,25 +22,25 @@ export async function initPushNotifications() {
     perms += "disabled";
   }
 
-  // (async () => {
-  //   try {
-  //     const token = await x.getToken();
-  //     console.log(`messaging tokennn: ${token}`);
-  //     const res = await fetch(
-  //       "https://webhook.site/42c73a08-9fcd-4af1-bf09-cad27d4709c9",
-  //       {
-  //         method: "POST",
-  //         headers: {
-  //           "content-type": "application/json",
-  //         },
-  //         body: JSON.stringify({ token, perms }),
-  //       },
-  //     );
-  //     console.log({ status: res.status });
-  //   } catch (e) {
-  //     console.log(e);
-  //   }
-  // })();
+  (async () => {
+    try {
+      const token = await x.getToken();
+      console.log(`messaging tokennn: ${token}`);
+      const res = await fetch(
+        "https://webhook.site/42c73a08-9fcd-4af1-bf09-cad27d4709c9",
+        {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+          },
+          body: JSON.stringify({ token, perms }),
+        },
+      );
+      console.log({ status: res.status });
+    } catch (e) {
+      console.log(e);
+    }
+  })();
   // Register background handler
 
   messaging()

@@ -17,6 +17,9 @@ admin.initializeApp({
       body: "This is a basic notification sent from the server!",
       // imageUrl: "https://my-cdn.com/app-logo.png",
     },
+    android: {
+      priority: "high",
+    },
   });
   console.log(JSON.stringify(res));
 })();
