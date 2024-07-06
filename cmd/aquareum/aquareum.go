@@ -1,52 +1,20 @@
 package main
 
 import (
-	"fmt"
-	"log"
-	"net/http"
-	"os"
+	"context"
 
-	"aquareum.tv/aquareum/packages/app"
-	"github.com/adrg/xdg"
+	"aquareum.tv/aquareum/pkg/log"
+
+	"aquareum.tv/aquareum/pkg/cmd"
 )
 
 var Version = "unknown"
 
 func main() {
-	err := start()
+	err := cmd.Start(&cmd.BuildFlags{
+		Version: Version,
+	})
 	if err != nil {
-		log.Fatal(err)
+		log.Log(context.Background(), "exited uncleanly", "error", err)
 	}
-}
-
-func start() error {
-	if xdg.Home == "/" {
-		home, err := os.UserHomeDir()
-		if err != nil {
-			return err
-		}
-		os.Setenv("HOME", home)
-		xdg.Reload()
-	}
-	if xdg.Home == "/" {
-		return fmt.Errorf("couldn't find users home directory")
-	}
-	tlsCrtFile, err := xdg.ConfigFile("aquareum/tls/tls.crt")
-	if err != nil {
-		log.Fatal(err)
-	}
-	tlsKeyFile, err := xdg.ConfigFile("aquareum/tls/tls.key")
-	if err != nil {
-		log.Fatal(err)
-	}
-	files, err := app.Files()
-	if err != nil {
-		return err
-	}
-	http.Handle("/", http.FileServer(http.FS(files)))
-	err = http.ListenAndServeTLS(":443", tlsCrtFile, tlsKeyFile, nil)
-	if err != nil {
-		return err
-	}
-	return nil
 }
