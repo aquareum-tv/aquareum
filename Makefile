@@ -83,7 +83,7 @@ ci-upload-file:
 		--fail-with-body \
 		--header "JOB-TOKEN: $$CI_JOB_TOKEN" \
 		--upload-file bin/$(upload_file) \
-		"$$CI_API_V4_URL/projects/$$CI_PROJECT_ID/js/generic/$(shell echo $$CI_COMMIT_BRANCH | sed 's/\//-/')/$(VERSION)/$(upload_file)";
+		"$$CI_API_V4_URL/projects/$$CI_PROJECT_ID/packages/generic/$(shell echo $$CI_COMMIT_BRANCH | sed 's/\//-/')/$(VERSION)/$(upload_file)";
 
 .PHONY: check
 check:
