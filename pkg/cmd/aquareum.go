@@ -8,10 +8,11 @@ import (
 	"os/signal"
 	"syscall"
 
-	"log"
+	"aquareum.tv/aquareum/pkg/log"
 
 	"aquareum.tv/aquareum/pkg/api"
 	"aquareum.tv/aquareum/pkg/config"
+	"aquareum.tv/aquareum/pkg/model"
 	"github.com/adrg/xdg"
 	"github.com/peterbourgon/ff/v3"
 	"golang.org/x/sync/errgroup"
@@ -38,6 +39,11 @@ func Start(build *BuildFlags) error {
 	if err != nil {
 		return err
 	}
+	dbFile, err := xdg.DataFile("aquareum/db.sqlite")
+	if err != nil {
+		return err
+	}
+	dbFile = fmt.Sprintf("sqlite://%s", dbFile)
 
 	fs := flag.NewFlagSet("aquareum", flag.ExitOnError)
 	cli := config.CLI{}
@@ -46,12 +52,18 @@ func Start(build *BuildFlags) error {
 	fs.BoolVar(&cli.Insecure, "insecure", false, "Run without HTTPS. not recomended, as WebRTC support requires HTTPS")
 	fs.StringVar(&cli.TLSCertPath, "tls-cert", tlsCertFile, "Path to TLS certificate")
 	fs.StringVar(&cli.TLSKeyPath, "tls-key", tlsKeyFile, "Path to TLS key")
+	fs.StringVar(&cli.DBPath, "db-path", dbFile, "path to sqlite database file")
 
 	ff.Parse(
 		fs, os.Args[1:],
 		ff.WithEnvVarPrefix("AQ"),
 		ff.WithEnvVarSplit(","),
 	)
+
+	_, err = model.MakeDB(cli.DBPath)
+	if err != nil {
+		return err
+	}
 
 	group, ctx := errgroup.WithContext(context.Background())
 
@@ -94,7 +106,7 @@ func handleSignals(ctx context.Context) error {
 	for {
 		select {
 		case s := <-c:
-			log.Printf("caught signal=%v, attempting clean shutdown", s)
+			log.Log(ctx, "caught signal, attempting clean shutdown", "signal", s)
 			return fmt.Errorf("caught signal=%v", s)
 		case <-ctx.Done():
 			return nil
