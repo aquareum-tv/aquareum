@@ -27,7 +27,7 @@ make node
 **App Development**
 
 ```
-cd packages/app
+cd js/app
 
 # iOS
 npx expo run:ios -d "Your iPhone"
