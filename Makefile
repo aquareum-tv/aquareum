@@ -30,11 +30,11 @@ ci: version install check app node-all-platforms ci-upload-node android ci-uploa
 
 .PHONY: android
 android: app
-	cd ./packages/app/android \
+	cd ./js/app/android \
 	&& ./gradlew build \
 	&& cd - \
-	&& mv ./packages/app/android/app/build/outputs/apk/release/app-release.apk ./bin/aquareum-$(VERSION)-android-release.apk \
-	&& mv ./packages/app/android/app/build/outputs/apk/debug/app-debug.apk ./bin/aquareum-$(VERSION)-android-debug.apk
+	&& mv ./js/app/android/app/build/outputs/apk/release/app-release.apk ./bin/aquareum-$(VERSION)-android-release.apk \
+	&& mv ./js/app/android/app/build/outputs/apk/debug/app-debug.apk ./bin/aquareum-$(VERSION)-android-debug.apk
 
 .PHONY: node-all-platforms
 node-all-platforms:

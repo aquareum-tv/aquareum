@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"aquareum.tv/aquareum/packages/app"
+	"aquareum.tv/aquareum/js/app"
 	"aquareum.tv/aquareum/pkg/config"
 	"aquareum.tv/aquareum/pkg/log"
 )

@@ -19,7 +19,7 @@
     "prettier": "^3.3.2"
   },
   "workspaces": [
-    "packages/*"
+    "js/*"
   ],
   "packageManager": "yarn@4.3.0"
 }
