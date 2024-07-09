@@ -60,24 +60,25 @@ func Start(build *BuildFlags) error {
 		ff.WithEnvVarSplit(","),
 	)
 
-	_, err = model.MakeDB(cli.DBPath)
+	mod, err := model.MakeDB(cli.DBPath)
 	if err != nil {
 		return err
 	}
 
 	group, ctx := errgroup.WithContext(context.Background())
+	ctx = log.WithLogValues(ctx, "version", Version)
 
 	group.Go(func() error {
 		return handleSignals(ctx)
 	})
 
 	group.Go(func() error {
-		return api.ServeHTTP(ctx, cli)
+		return api.ServeHTTP(ctx, cli, mod)
 	})
 
 	if !cli.Insecure {
 		group.Go(func() error {
-			return api.ServeHTTPS(ctx, cli)
+			return api.ServeHTTPS(ctx, cli, mod)
 		})
 	}
 

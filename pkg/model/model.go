@@ -14,6 +14,14 @@ import (
 	"gorm.io/gorm"
 )
 
+type DBModel struct {
+	DB *gorm.DB
+}
+
+type Model interface {
+	CreateNotification(token string) error
+}
+
 type Notification struct {
 	ID        string `gorm:"primarykey"`
 	CreatedAt time.Time
@@ -22,7 +30,7 @@ type Notification struct {
 	Token     string
 }
 
-func MakeDB(dbURL string) (*gorm.DB, error) {
+func MakeDB(dbURL string) (Model, error) {
 	log.Log(context.Background(), "starting database", "dbURL", dbURL)
 	if !strings.HasPrefix(dbURL, "sqlite://") {
 		return nil, fmt.Errorf("only sqlite:// urls currently supported, got %s", dbURL)
@@ -49,5 +57,15 @@ func MakeDB(dbURL string) (*gorm.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	return db, nil
+	return &DBModel{DB: db}, nil
+}
+
+func (m *DBModel) CreateNotification(token string) error {
+	err := m.DB.Model(Notification{}).Create(&Notification{
+		Token: token,
+	}).Error
+	if err != nil {
+		return err
+	}
+	return nil
 }
