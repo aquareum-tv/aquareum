@@ -16,19 +16,19 @@ PODS:
     - ExpoModulesCore
   - EXNotifications (0.28.9):
     - ExpoModulesCore
-  - Expo (51.0.14):
+  - Expo (51.0.18):
     - ExpoModulesCore
-  - ExpoAsset (10.0.9):
+  - ExpoAsset (10.0.10):
     - ExpoModulesCore
   - ExpoFileSystem (17.0.1):
     - ExpoModulesCore
   - ExpoFont (12.0.7):
     - ExpoModulesCore
-  - ExpoHead (3.5.16):
+  - ExpoHead (3.5.17):
     - ExpoModulesCore
   - ExpoKeepAwake (13.0.2):
     - ExpoModulesCore
-  - ExpoModulesCore (1.12.15):
+  - ExpoModulesCore (1.12.18):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -51,7 +51,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - ExpoSystemUI (3.0.6):
+  - ExpoSystemUI (3.0.7):
     - ExpoModulesCore
   - ExpoWebBrowser (13.0.3):
     - ExpoModulesCore
@@ -78,7 +78,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - Yoga
   - EXStructuredHeaders (3.8.0)
-  - EXUpdates (0.25.17):
+  - EXUpdates (0.25.18):
     - DoubleConversion
     - EASClient
     - EXManifests
@@ -1672,18 +1672,18 @@ SPEC CHECKSUMS:
   EXJSONUtils: 30c17fd9cc364d722c0946a550dfbf1be92ef6a4
   EXManifests: c1fab4c3237675e7b0299ea8df0bcb14baca4f42
   EXNotifications: fcecd5a47fc8448d4f6173490b6fa8ee747f687d
-  Expo: 9c87c876b45a6934894ba5e9353ee94fdba48125
-  ExpoAsset: 39e60dc31b16e204a9949caf3edb6dcda322e667
+  Expo: 56b642d0930789fc847dc7f424d2d599dfe59a5e
+  ExpoAsset: 323700f291684f110fb55f0d4022a3362ea9f875
   ExpoFileSystem: 80bfe850b1f9922c16905822ecbf97acd711dc51
   ExpoFont: 43b69559cef3d773db57c7ae7edd3cb0aa0dc610
-  ExpoHead: 430fba41a1d7a4f7bd440291ae992bd8e0f8d5e2
+  ExpoHead: 439510c5bec19592d5a0d78860e0cb6c59e28a34
   ExpoKeepAwake: 3b8815d9dd1d419ee474df004021c69fdd316d08
-  ExpoModulesCore: 2731dc119f8c1400636a994df4efbc19522defbd
-  ExpoSystemUI: 65007dd0537cb38649ee55b4670a6ed222769b3a
+  ExpoModulesCore: b2fa8cc3c12f0ba45a9ae125c0e3bcad04f3fb7b
+  ExpoSystemUI: d4f065a016cae6721b324eb659cdee4d4cf0cb26
   ExpoWebBrowser: 7595ccac6938eb65b076385fd23d035db9ecdc8e
   EXSplashScreen: d8b3c547b9b18a41d80c6f6b274c4c26664febd4
   EXStructuredHeaders: cb8d1f698e144f4c5547b4c4963e1552f5d2b457
-  EXUpdates: 8f7e032aeb1462ce7ddef9d3d842c75199af7181
+  EXUpdates: 974b7756e4a021159216df12d41ad2a89068a0f4
   EXUpdatesInterface: 996527fd7d1a5d271eb523258d603f8f92038f24
   FBLazyVector: 898d14d17bf19e2435cafd9ea2a1033efe445709
   Firebase: 26b040b20866a55f55eb3611b9fcf3ae64816b86
