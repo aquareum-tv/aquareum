@@ -84,8 +84,9 @@ func (v *VerboseLogger) log(ctx context.Context, message string, args ...any) {
 	valCol := color.New(color.FgGreen).SprintFunc()
 	messageCol := color.New(color.FgCyan).SprintFunc()
 	meta, _ := ctx.Value(clogContextKey).(metadata)
-	allArgs := append([]any{}, meta.Flat()...)
+	allArgs := []any{}
 	allArgs = append(allArgs, args...)
+	allArgs = append(allArgs, meta.Flat()...)
 	allArgs = append(allArgs, "caller", caller(3))
 	str := messageCol(message)
 	for i := range allArgs {

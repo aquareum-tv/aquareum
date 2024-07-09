@@ -18,8 +18,6 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-var Version = "unknown"
-
 type BuildFlags struct {
 	Version string
 }
@@ -66,7 +64,7 @@ func Start(build *BuildFlags) error {
 	}
 
 	group, ctx := errgroup.WithContext(context.Background())
-	ctx = log.WithLogValues(ctx, "version", Version)
+	ctx = log.WithLogValues(ctx, "version", build.Version)
 
 	group.Go(func() error {
 		return handleSignals(ctx)
