@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"aquareum.tv/aquareum/pkg/log"
+	"github.com/lmittmann/tint"
 	slogGorm "github.com/orandin/slog-gorm"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -43,7 +44,9 @@ func MakeDB(dbURL string) (Model, error) {
 	}
 	dial := sqlite.Open(sqliteSuffix)
 
-	gormLogger := slogGorm.New()
+	gormLogger := slogGorm.New(slogGorm.WithHandler(tint.NewHandler(os.Stderr, &tint.Options{
+		TimeFormat: time.RFC3339,
+	})))
 
 	db, err := gorm.Open(dial, &gorm.Config{
 		SkipDefaultTransaction: true,
