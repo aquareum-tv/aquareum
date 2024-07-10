@@ -24,11 +24,10 @@ type Model interface {
 }
 
 type Notification struct {
-	ID        string `gorm:"primarykey"`
+	Token     string `gorm:"primarykey"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`
-	Token     string
 }
 
 func MakeDB(dbURL string) (Model, error) {
