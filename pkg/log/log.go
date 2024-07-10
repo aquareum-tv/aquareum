@@ -7,14 +7,30 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"log/slog"
+	"os"
 	"path/filepath"
 	"runtime"
 	"strconv"
-	"strings"
+	"time"
 
-	"github.com/fatih/color"
 	"github.com/golang/glog"
+	"github.com/lmittmann/tint"
+	"github.com/mattn/go-isatty"
 )
+
+func init() {
+	w := os.Stderr
+
+	// set global logger with custom options
+	slog.SetDefault(slog.New(
+		tint.NewHandler(w, &tint.Options{
+			Level:      slog.LevelDebug,
+			TimeFormat: time.RFC3339,
+			NoColor:    !isatty.IsTerminal(w.Fd()),
+		}),
+	))
+}
 
 // unique type to prevent assignment.
 type clogContextKeyType struct{}
@@ -73,32 +89,17 @@ func WithLogValues(ctx context.Context, args ...string) context.Context {
 	return context.WithValue(ctx, clogContextKey, newMetadata)
 }
 
-var badGlyphs = " \n"
-
 // Actual log handler; the others have wrappers to properly handle stack depth
 func (v *VerboseLogger) log(ctx context.Context, message string, args ...any) {
 	if !glog.V(v.level) {
 		return
 	}
-	keyCol := color.New(color.FgMagenta).SprintFunc()
-	valCol := color.New(color.FgGreen).SprintFunc()
-	messageCol := color.New(color.FgCyan).SprintFunc()
 	meta, _ := ctx.Value(clogContextKey).(metadata)
-	allArgs := append([]any{}, meta.Flat()...)
+	allArgs := []any{}
 	allArgs = append(allArgs, args...)
+	allArgs = append(allArgs, meta.Flat()...)
 	allArgs = append(allArgs, "caller", caller(3))
-	str := messageCol(message)
-	for i := range allArgs {
-		if i%2 == 0 {
-			continue
-		}
-		safeVal := fmt.Sprintf("%s", allArgs[i])
-		if strings.ContainsAny(safeVal, badGlyphs) {
-			safeVal = fmt.Sprintf("%q", allArgs[i])
-		}
-		str = fmt.Sprintf("%s %s=%s", str, keyCol(allArgs[i-1]), valCol(safeVal))
-	}
-	fmt.Println(str)
+	slog.Info(message, allArgs...)
 }
 
 func (v *VerboseLogger) Log(ctx context.Context, message string, args ...any) {
