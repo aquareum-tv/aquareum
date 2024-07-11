@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"time"
 
@@ -22,6 +23,27 @@ func Handler(ctx context.Context, mod model.Model) (http.Handler, error) {
 	}
 	mux.Handle("/notification", HandleNotificationCreate(ctx, mod))
 	mux.Handle("/", http.FileServer(http.FS(files)))
+	return mux, nil
+}
+
+func RedirectHandler(ctx context.Context, cli config.CLI, mod model.Model) (http.Handler, error) {
+	_, tlsPort, err := net.SplitHostPort(cli.HttpsAddr)
+	if err != nil {
+		return nil, err
+	}
+	handleRedirect := func(w http.ResponseWriter, req *http.Request) {
+		host, _, _ := net.SplitHostPort(req.Host)
+		u := req.URL
+		if tlsPort == "443" {
+			u.Host = host
+		} else {
+			u.Host = net.JoinHostPort(host, tlsPort)
+		}
+		u.Scheme = "https"
+		http.Redirect(w, req, u.String(), http.StatusTemporaryRedirect)
+	}
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", handleRedirect)
 	return mux, nil
 }
 
@@ -55,15 +77,35 @@ func HandleNotificationCreate(ctx context.Context, mod model.Model) http.Handler
 }
 
 func ServeHTTP(ctx context.Context, cli config.CLI, mod model.Model) error {
-	return ServerWithShutdown(ctx, cli, mod, func(s *http.Server) error {
+	handler, err := Handler(ctx, mod)
+	if err != nil {
+		return err
+	}
+	return ServerWithShutdown(ctx, handler, cli, mod, func(s *http.Server) error {
 		s.Addr = cli.HttpAddr
 		log.Log(ctx, "http server starting", "addr", s.Addr)
 		return s.ListenAndServe()
 	})
 }
 
+func ServeHTTPRedirect(ctx context.Context, cli config.CLI, mod model.Model) error {
+	handler, err := RedirectHandler(ctx, cli, mod)
+	if err != nil {
+		return err
+	}
+	return ServerWithShutdown(ctx, handler, cli, mod, func(s *http.Server) error {
+		s.Addr = cli.HttpAddr
+		log.Log(ctx, "http tls redirecct server starting", "addr", s.Addr)
+		return s.ListenAndServe()
+	})
+}
+
 func ServeHTTPS(ctx context.Context, cli config.CLI, mod model.Model) error {
-	return ServerWithShutdown(ctx, cli, mod, func(s *http.Server) error {
+	handler, err := Handler(ctx, mod)
+	if err != nil {
+		return err
+	}
+	return ServerWithShutdown(ctx, handler, cli, mod, func(s *http.Server) error {
 		s.Addr = cli.HttpsAddr
 		log.Log(ctx, "https server starting",
 			"addr", s.Addr,
@@ -74,11 +116,7 @@ func ServeHTTPS(ctx context.Context, cli config.CLI, mod model.Model) error {
 	})
 }
 
-func ServerWithShutdown(ctx context.Context, cli config.CLI, mod model.Model, serve func(*http.Server) error) error {
-	handler, err := Handler(ctx, mod)
-	if err != nil {
-		return err
-	}
+func ServerWithShutdown(ctx context.Context, handler http.Handler, cli config.CLI, mod model.Model, serve func(*http.Server) error) error {
 	ctx, cancel := context.WithCancel(ctx)
 	server := http.Server{Handler: handler}
 	var serveErr error

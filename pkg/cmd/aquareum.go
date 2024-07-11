@@ -70,13 +70,16 @@ func Start(build *BuildFlags) error {
 		return handleSignals(ctx)
 	})
 
-	group.Go(func() error {
-		return api.ServeHTTP(ctx, cli, mod)
-	})
-
 	if !cli.Insecure {
 		group.Go(func() error {
 			return api.ServeHTTPS(ctx, cli, mod)
+		})
+		group.Go(func() error {
+			return api.ServeHTTPRedirect(ctx, cli, mod)
+		})
+	} else {
+		group.Go(func() error {
+			return api.ServeHTTP(ctx, cli, mod)
 		})
 	}
 
