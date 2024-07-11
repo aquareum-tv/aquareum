@@ -8,6 +8,7 @@ require (
 	github.com/lmittmann/tint v1.0.4
 	github.com/orandin/slog-gorm v1.3.2
 	github.com/peterbourgon/ff/v3 v3.3.1
+	github.com/stretchr/testify v1.9.0
 	golang.org/x/sync v0.6.0
 	gorm.io/driver/sqlite v1.5.5
 )
@@ -20,4 +21,9 @@ require (
 	gorm.io/gorm v1.25.9
 )
 
-require github.com/mattn/go-sqlite3 v1.14.22 // indirect
+require (
+	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/mattn/go-sqlite3 v1.14.22 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
+)

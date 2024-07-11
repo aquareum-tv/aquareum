@@ -8,6 +8,7 @@ import (
 
 	"aquareum.tv/aquareum/pkg/config"
 	"aquareum.tv/aquareum/pkg/model"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestRedirectHandler(t *testing.T) {
@@ -54,9 +55,7 @@ func TestRedirectHandler(t *testing.T) {
 			mod := model.DBModel{}
 
 			handler, err := RedirectHandler(context.Background(), cli, &mod)
-			if err != nil {
-				t.Fatalf("RedirectHandler() error = %v", err)
-			}
+			assert.NoError(t, err, "RedirectHandler should not return an error")
 
 			req := httptest.NewRequest("GET", tt.requestURL, nil)
 			rr := httptest.NewRecorder()
@@ -64,20 +63,12 @@ func TestRedirectHandler(t *testing.T) {
 			handler.ServeHTTP(rr, req)
 
 			result := rr.Result()
-			if result.StatusCode != http.StatusTemporaryRedirect {
-				t.Errorf("handler returned wrong status code: got %v want %v",
-					result.StatusCode, http.StatusTemporaryRedirect)
-			}
+			assert.Equal(t, http.StatusTemporaryRedirect, result.StatusCode, "handler returned wrong status code")
 
 			redirectURL, err := result.Location()
-			if err != nil {
-				t.Fatalf("Failed to get redirect location: %v", err)
-			}
+			assert.NoError(t, err, "Failed to get redirect location")
 
-			if redirectURL.String() != tt.expectedURL {
-				t.Errorf("handler returned unexpected redirect URL: got %v want %v",
-					redirectURL.String(), tt.expectedURL)
-			}
+			assert.Equal(t, tt.expectedURL, redirectURL.String(), "handler returned unexpected redirect URL")
 		})
 	}
 }
