@@ -1,10 +1,24 @@
 import messaging from "@react-native-firebase/messaging";
+import { PermissionsAndroid, Platform } from "react-native";
+
+const checkApplicationPermission = async () => {
+  if (Platform.OS === "android") {
+    try {
+      await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+      );
+    } catch (error) {
+      console.log("error getting notifications ", error);
+    }
+  }
+};
 
 export async function initPushNotifications() {
   const x = messaging();
   messaging().setBackgroundMessageHandler(async (remoteMessage) => {
     console.log("Message handled in the background!", remoteMessage);
   });
+  await checkApplicationPermission();
   const authorizationStatus = await x.requestPermission();
 
   let perms = "";
@@ -24,8 +38,8 @@ export async function initPushNotifications() {
 
   (async () => {
     if (typeof process.env.EXPO_PUBLIC_AQUAREUM_URL !== "string") {
-      console.log("process.env.EXPO_PUBLIC_AQUAREUM_URL undefined!")
-      return
+      console.log("process.env.EXPO_PUBLIC_AQUAREUM_URL undefined!");
+      return;
     }
     try {
       const token = await x.getToken();

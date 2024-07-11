@@ -58,7 +58,7 @@ function RootLayoutNav() {
 
   useEffect(() => {
     background();
-  }, [])
+  }, []);
 
   return (
     <Provider>
