@@ -7,4 +7,5 @@ type CLI struct {
 	Insecure    bool
 	HttpAddr    string
 	HttpsAddr   string
+	AdminSecret string
 }

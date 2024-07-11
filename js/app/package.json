@@ -12,12 +12,15 @@
     "test": "jest --watchAll",
     "build": "expo export -p web || expo export -p web",
     "prepare": "rm -rf android/app/src/main/assets/fonts && mkdir -p ./android/app/src/main/assets/fonts && cp -R ./assets/fonts ./android/app/src/main/assets",
-    "check": "npx tsc -p . --outFile $(mktemp)"
+    "check": "npx tsc -p . --outFile $(mktemp)",
+    "prebuild": "expo prebuild --clean && sed -i '' 's/org.gradle.jvmargs=-Xmx2048m -XX:MaxMetaspaceSize=512m/org.gradle.jvmargs=-Xmx8192m -XX:MaxMetaspaceSize=2048m/' android/gradle.properties && echo '\nnetworkTimeout=100000' >> android/gradle.properties"
   },
   "jest": {
     "preset": "jest-expo"
   },
   "dependencies": {
+    "@react-native-firebase/app": "^20.1.0",
+    "@react-native-firebase/messaging": "^20.1.0",
     "@react-navigation/native": "^6.1.17",
     "@tamagui/config": "^1.100.6",
     "@tamagui/lucide-icons": "^1.100.6",
@@ -26,8 +29,10 @@
     "burnt": "^0.12.2",
     "chrono-node": "^2.7.6",
     "expo": "~51.0.9",
+    "expo-build-properties": "^0.12.3",
     "expo-font": "~12.0.6",
     "expo-linking": "~6.3.1",
+    "expo-notifications": "~0.28.9",
     "expo-router": "~3.5.15",
     "expo-splash-screen": "~0.27.4",
     "expo-status-bar": "^1.12.1",

@@ -1,3 +1,4 @@
+import background from "./background";
 import "../tamagui-web.css";
 import { Link } from "expo-router";
 import { Anchor, Button, useTheme, Text, styled, isWeb } from "tamagui";
@@ -54,6 +55,10 @@ export const LinkNoUnderline = styled(Link, {});
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
+
+  useEffect(() => {
+    background();
+  }, []);
 
   return (
     <Provider>
