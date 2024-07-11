@@ -16,8 +16,6 @@ import { Provider } from "./Provider";
 import "./updates";
 import { Helmet } from "react-native-helmet-async";
 
-background();
-
 export {
   // Catch any errors thrown by the Layout component.
   ErrorBoundary,
@@ -57,6 +55,10 @@ export const LinkNoUnderline = styled(Link, {});
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme();
+
+  useEffect(() => {
+    background();
+  }, [])
 
   return (
     <Provider>

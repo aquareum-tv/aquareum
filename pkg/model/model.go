@@ -21,6 +21,7 @@ type DBModel struct {
 
 type Model interface {
 	CreateNotification(token string) error
+	ListNotifications() ([]Notification, error)
 }
 
 type Notification struct {
@@ -70,4 +71,13 @@ func (m *DBModel) CreateNotification(token string) error {
 		return err
 	}
 	return nil
+}
+
+func (m *DBModel) ListNotifications() ([]Notification, error) {
+	nots := []Notification{}
+	err := m.DB.Find(&nots).Error
+	if err != nil {
+		return nil, fmt.Errorf("error retrieving notifications: %w", err)
+	}
+	return nots, nil
 }

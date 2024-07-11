@@ -34,7 +34,8 @@ ci: version install check app test node-all-platforms ci-upload-node android ci-
 
 .PHONY: android
 android: app
-	cd ./js/app/android \
+	export NODE_ENV=production \
+	&& cd ./js/app/android \
 	&& ./gradlew build \
 	&& cd - \
 	&& mv ./js/app/android/app/build/outputs/apk/release/app-release.apk ./bin/aquareum-$(VERSION)-android-release.apk \

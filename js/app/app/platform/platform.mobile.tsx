@@ -23,17 +23,21 @@ export async function initPushNotifications() {
   }
 
   (async () => {
+    if (typeof process.env.EXPO_PUBLIC_AQUAREUM_URL !== "string") {
+      console.log("process.env.EXPO_PUBLIC_AQUAREUM_URL undefined!")
+      return
+    }
     try {
       const token = await x.getToken();
       console.log(`messaging tokennn: ${token}`);
       const res = await fetch(
-        "https://webhook.site/42c73a08-9fcd-4af1-bf09-cad27d4709c9",
+        `${process.env.EXPO_PUBLIC_AQUAREUM_URL}/api/notification`,
         {
           method: "POST",
           headers: {
             "content-type": "application/json",
           },
-          body: JSON.stringify({ token, perms }),
+          body: JSON.stringify({ token }),
         },
       );
       console.log({ status: res.status });
