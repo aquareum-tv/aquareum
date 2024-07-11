@@ -7,7 +7,7 @@
   "scripts": {
     "check": "yarn workspaces foreach --all run check && git ls-files | xargs prettier --check --ignore-unknown",
     "fix": "git ls-files | xargs prettier --write --ignore-unknown",
-    "prepare": "husky",
+    "postinstall": "husky && yarn run build",
     "build": "yarn workspaces foreach --all run build"
   },
   "keywords": [],

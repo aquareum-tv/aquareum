@@ -18,13 +18,13 @@ import (
 	"aquareum.tv/aquareum/pkg/model"
 )
 
-func Handler(ctx context.Context, mod model.Model) (http.Handler, error) {
+func Handler(ctx context.Context, cli config.CLI, mod model.Model) (http.Handler, error) {
 	mux := http.NewServeMux()
 	files, err := app.Files()
 	if err != nil {
 		return nil, err
 	}
-	mux.Handle("/api/notification", HandleNotification(ctx, mod))
+	mux.Handle("/api/notification", HandleNotification(ctx, cli, mod))
 	mux.Handle("/api", HandleAPI404(ctx, mod))
 	mux.Handle("/", http.FileServer(http.FS(files)))
 	handler := sloghttp.Recovery(mux)
@@ -66,7 +66,7 @@ func HandleAPI404(ctx context.Context, mod model.Model) http.HandlerFunc {
 	}
 }
 
-func HandleNotification(ctx context.Context, mod model.Model) http.HandlerFunc {
+func HandleNotification(ctx context.Context, cli config.CLI, mod model.Model) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		if req.Method == "POST" {
 			payload, err := io.ReadAll(req.Body)
@@ -91,6 +91,22 @@ func HandleNotification(ctx context.Context, mod model.Model) http.HandlerFunc {
 			log.Log(ctx, "successfully created notification", "token", n.Token)
 			w.WriteHeader(200)
 		} else if req.Method == "GET" {
+			// disallow unless we have an admin token
+			if cli.AdminSecret == "" {
+				w.WriteHeader(http.StatusNotImplemented)
+				return
+			}
+			log.Log(ctx, cli.AdminSecret)
+			auth := req.Header.Get("Authorization")
+			if auth == "" {
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			}
+			expected := fmt.Sprintf("Bearer %s", cli.AdminSecret)
+			if auth != expected {
+				w.WriteHeader(http.StatusForbidden)
+				return
+			}
 			nots, err := mod.ListNotifications()
 			if err != nil {
 				log.Log(ctx, "error listing notifications", "error", err)
@@ -105,13 +121,15 @@ func HandleNotification(ctx context.Context, mod model.Model) http.HandlerFunc {
 			}
 			w.WriteHeader(200)
 			w.Write(bs)
+		} else {
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			return
 		}
-
 	}
 }
 
 func ServeHTTP(ctx context.Context, cli config.CLI, mod model.Model) error {
-	handler, err := Handler(ctx, mod)
+	handler, err := Handler(ctx, cli, mod)
 	if err != nil {
 		return err
 	}
@@ -135,7 +153,7 @@ func ServeHTTPRedirect(ctx context.Context, cli config.CLI, mod model.Model) err
 }
 
 func ServeHTTPS(ctx context.Context, cli config.CLI, mod model.Model) error {
-	handler, err := Handler(ctx, mod)
+	handler, err := Handler(ctx, cli, mod)
 	if err != nil {
 		return err
 	}

@@ -51,6 +51,7 @@ func Start(build *BuildFlags) error {
 	fs.StringVar(&cli.TLSCertPath, "tls-cert", tlsCertFile, "Path to TLS certificate")
 	fs.StringVar(&cli.TLSKeyPath, "tls-key", tlsKeyFile, "Path to TLS key")
 	fs.StringVar(&cli.DBPath, "db-path", dbFile, "path to sqlite database file")
+	fs.StringVar(&cli.AdminSecret, "admin-secret", "", "secret admin token (to be replaced soon)")
 
 	ff.Parse(
 		fs, os.Args[1:],
