@@ -22,11 +22,15 @@ app: install
 node:
 	go build -ldflags="-X 'main.Version=$(VERSION)'" -o $(OUT_DIR)/aquareum ./cmd/aquareum
 
+.PHONY: test
+test:
+	go test ./pkg/... ./cmd/...
+
 .PHONY: all
-all: version install check app node-all-platforms android
+all: version install check app test node-all-platforms android
 
 .PHONY: ci
-ci: version install check app node-all-platforms ci-upload-node android ci-upload-android
+ci: version install check app test node-all-platforms ci-upload-node android ci-upload-android
 
 .PHONY: android
 android: app

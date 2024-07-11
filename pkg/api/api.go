@@ -32,7 +32,10 @@ func RedirectHandler(ctx context.Context, cli config.CLI, mod model.Model) (http
 		return nil, err
 	}
 	handleRedirect := func(w http.ResponseWriter, req *http.Request) {
-		host, _, _ := net.SplitHostPort(req.Host)
+		host, _, err := net.SplitHostPort(req.Host)
+		if err != nil {
+			host = req.Host
+		}
 		u := req.URL
 		if tlsPort == "443" {
 			u.Host = host
