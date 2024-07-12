@@ -1,7 +1,16 @@
 import background from "./background";
 import "../tamagui-web.css";
 import { Link } from "expo-router";
-import { Anchor, Button, useTheme, Text, styled, isWeb } from "tamagui";
+import {
+  Anchor,
+  Button,
+  useTheme,
+  Text,
+  styled,
+  isWeb,
+  View,
+  H4,
+} from "tamagui";
 
 import { useEffect } from "react";
 import { useColorScheme } from "hooks/useColorScheme";
@@ -76,14 +85,9 @@ function RootLayoutNav() {
               headerShown: true,
               headerRight: () => (
                 <Anchor href="https://explorer.livepeer.org/treasury/74518185892381909671177921640414850443801430499809418110611019961553289709442">
-                  <Button
-                    mr="$4"
-                    bg="rgb(189 110 134)"
-                    color="white"
-                    fontSize="$6"
-                  >
-                    What's Aquareum?
-                  </Button>
+                  <View bg="rgb(189 110 134)" br="$5" padding="$2">
+                    <H4 fontSize="$4">What's Aquareum?</H4>
+                  </View>
                 </Anchor>
               ),
             }}

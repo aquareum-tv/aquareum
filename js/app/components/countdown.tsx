@@ -20,8 +20,8 @@ const CountdownBox = styled(View, {
         alignSelf: "auto",
       },
     },
-  } as const,
-});
+  },
+} as const);
 const Line = styled(View, {
   // alignItems: "center",
   // flexWrap: "wrap",
@@ -30,15 +30,24 @@ const Line = styled(View, {
   variants: {
     small: {
       true: {
-        flex: 0,
-        flexDirection: "column",
+        // flex: 0,
+        // flexDirection: "column",
       },
     },
   },
 } as const);
 const Unit = styled(YStack, {
-  margin: "$4",
+  marginLeft: "$4",
+  marginRight: "$4",
   flex: 0,
+  variants: {
+    small: {
+      true: {
+        marginLeft: "$2",
+        marginRight: "$2",
+      },
+    },
+  },
 } as const);
 const BorderBox = styled(View, {
   borderColor: "white",
@@ -46,6 +55,15 @@ const BorderBox = styled(View, {
   borderBlockStyle: "solid",
   borderTopWidth: 4,
   // backgroundColor: "green",
+  variants: {
+    small: {
+      true: {
+        fontSize: "$5",
+        lineHeight: "$5",
+        borderTopWidth: 2,
+      },
+    },
+  },
 } as const);
 const TimeText = styled(Text, {
   fontFamily: "$mono",
@@ -54,15 +72,31 @@ const TimeText = styled(Text, {
   // position: "relative",
   // top: 5,
   lineHeight: "$10",
+  variants: {
+    small: {
+      true: {
+        fontSize: "$6",
+        lineHeight: "$6",
+      },
+    },
+  },
 } as const);
 const LabelText = styled(Text, {
   fontSize: "$7",
-});
+  variants: {
+    small: {
+      true: {
+        fontSize: "$6",
+        lineHeight: "$6",
+      },
+    },
+  },
+} as const);
 
-const LabelBox = ({ children }) => {
+const LabelBox = ({ children, small }) => {
   return (
-    <BorderBox>
-      <LabelText>{children}</LabelText>
+    <BorderBox small={small}>
+      <LabelText small={small}>{children}</LabelText>
     </BorderBox>
   );
 };
@@ -119,31 +153,31 @@ export function Countdown({ from, to }: { from?: string; to?: string } = {}) {
   return (
     <CountdownBox small={small}>
       <Line small={small}>
-        <Unit>
-          <TimeText>{years}</TimeText>
-          <LabelBox>YEARS</LabelBox>
+        <Unit small={small}>
+          <TimeText small={small}>{years}</TimeText>
+          <LabelBox small={small}>YEARS</LabelBox>
         </Unit>
-        <Unit>
-          <TimeText>{days}</TimeText>
-          <LabelBox>DAYS</LabelBox>
+        <Unit small={small}>
+          <TimeText small={small}>{days}</TimeText>
+          <LabelBox small={small}>DAYS</LabelBox>
         </Unit>
-        <Unit>
-          <TimeText>{hrs}</TimeText>
-          <LabelBox>HRS</LabelBox>
+        <Unit small={small}>
+          <TimeText small={small}>{hrs}</TimeText>
+          <LabelBox small={small}>HRS</LabelBox>
         </Unit>
       </Line>
       <Line small={small}>
-        <Unit>
-          <TimeText>{min}</TimeText>
-          <LabelBox>MIN</LabelBox>
+        <Unit small={small}>
+          <TimeText small={small}>{min}</TimeText>
+          <LabelBox small={small}>MIN</LabelBox>
         </Unit>
-        <Unit>
-          <TimeText>{sec}</TimeText>
-          <LabelBox>SEC</LabelBox>
+        <Unit small={small}>
+          <TimeText small={small}>{sec}</TimeText>
+          <LabelBox small={small}>SEC</LabelBox>
         </Unit>
-        <Unit>
-          <TimeText>{ms}</TimeText>
-          <LabelBox>MS</LabelBox>
+        <Unit small={small}>
+          <TimeText small={small}>{ms}</TimeText>
+          <LabelBox small={small}>MS</LabelBox>
         </Unit>
       </Line>
     </CountdownBox>
