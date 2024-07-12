@@ -20,8 +20,8 @@ const CountdownBox = styled(View, {
         alignSelf: "auto",
       },
     },
-  } as const,
-});
+  },
+} as const);
 const Line = styled(View, {
   // alignItems: "center",
   // flexWrap: "wrap",
@@ -91,7 +91,7 @@ const LabelText = styled(Text, {
       },
     },
   },
-});
+} as const);
 
 const LabelBox = ({ children, small }) => {
   return (

@@ -8,7 +8,8 @@
     "check": "yarn workspaces foreach --all run check && git ls-files | xargs prettier --check --ignore-unknown",
     "fix": "git ls-files | xargs prettier --write --ignore-unknown",
     "postinstall": "husky && yarn run build",
-    "build": "yarn workspaces foreach --all run build"
+    "build": "yarn workspaces foreach --all run build",
+    "prepare": "husky"
   },
   "keywords": [],
   "author": "Aquareum",
