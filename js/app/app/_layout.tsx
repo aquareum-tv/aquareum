@@ -92,18 +92,6 @@ function RootLayoutNav() {
               ),
             }}
           />
-
-          {/* <Stack.Screen
-            name="about"
-            options={{
-              title: "What's Aquareum?",
-              presentation: "modal",
-              animation: "slide_from_right",
-              gestureEnabled: true,
-              gestureDirection: "horizontal",
-              headerShown: true,
-            }}
-          /> */}
         </Stack>
       </ThemeProvider>
     </Provider>

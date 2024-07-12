@@ -3,88 +3,88 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 54;
+	objectVersion = 46;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.mm */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
-		1C3ACCE767924EE98FF94D71 /* FiraSans-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A3632A32AEB74786BF8D14B4 /* FiraSans-Bold.ttf */; };
-		2387FFF9E6E94A76A2E03869 /* FiraSans-BoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 6D37E47E6E9D420293BF08C9 /* FiraSans-BoldItalic.ttf */; };
-		2438B1D3F8B143568ACE4D93 /* FiraCode-Retina.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 5AA3E3C6ED7849859E8EA647 /* FiraCode-Retina.ttf */; };
-		3A60E620515A4CF491ED4E19 /* FiraSans-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 535C6B2C791448D8BAA9D230 /* FiraSans-SemiBold.ttf */; };
+		1892F27F116842C9910A1D39 /* FiraCode-Retina.ttf in Resources */ = {isa = PBXBuildFile; fileRef = D049209BAFA4461D9F402EB2 /* FiraCode-Retina.ttf */; };
+		2247B269E634498E8789244A /* FiraSans-LightItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 68D11E7AE6F14B1081009E1A /* FiraSans-LightItalic.ttf */; };
+		22E5CEE517DB4BCDB4C95E81 /* FiraSans-ExtraLightItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = CB06543908844D1083B21009 /* FiraSans-ExtraLightItalic.ttf */; };
+		23320F66ABD14BC787037586 /* FiraCode-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DFCB1BDD924C48AB9F84DBB4 /* FiraCode-Bold.ttf */; };
+		2732302597044D4A81EEE861 /* FiraSans-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = E4DB1632E7414600822F90F9 /* FiraSans-Italic.ttf */; };
+		34F92D256DF14CBE8AD7C420 /* SpaceMono-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 169DAE11CB334EA1B0FF86E7 /* SpaceMono-Regular.ttf */; };
+		3A7F113EEA9942E989AF5865 /* FiraSans-MediumItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 1DC4692809EE48D2B2181B9A /* FiraSans-MediumItalic.ttf */; };
 		3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */; };
-		3E697487A7FD4B078A9A9A9B /* FiraSans-BlackItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FE112FB6190043798CBBBA6E /* FiraSans-BlackItalic.ttf */; };
-		4238A598BCEC4618ADAC009C /* FiraSans-SemiBoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 996FACC367484BD689A2F29F /* FiraSans-SemiBoldItalic.ttf */; };
-		4417AAE84A874A16A4FFE748 /* FiraSans-ExtraLightItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = C8D35CC98980457C93D1DCC5 /* FiraSans-ExtraLightItalic.ttf */; };
-		4868CF9369464DF08FEBCA04 /* noop-file.swift in Sources */ = {isa = PBXBuildFile; fileRef = 312F2460C9864CECA4914369 /* noop-file.swift */; };
-		4A60092C134C44CF84D2C361 /* FiraSans-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = C958DB5F5539407FA3C986D9 /* FiraSans-Regular.ttf */; };
-		610D113366B54830A3EC443C /* FiraSans-MediumItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7428389E93944D3EA41A3DA2 /* FiraSans-MediumItalic.ttf */; };
-		6340BA88423F4D0B817C87CC /* FiraSans-ExtraBoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A07D5820B2E14BBE8DCB5BF1 /* FiraSans-ExtraBoldItalic.ttf */; };
-		654338E9DB20BC4E0FF67692 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = DD39772325822E0CA3CE0872 /* PrivacyInfo.xcprivacy */; };
-		69637EB7E2EEA755E4C73899 /* Pods_Aquareum.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B92B9D3E71EC6D6BB0A9EC8 /* Pods_Aquareum.framework */; };
-		6F8953D6ED6245C1AFC9D2DA /* FiraSans-ExtraLight.ttf in Resources */ = {isa = PBXBuildFile; fileRef = E345DA8E45A34512A8BA4148 /* FiraSans-ExtraLight.ttf */; };
-		7025845B393348C28C5E50CA /* FiraCode-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 0D41DBB330E04CF6BA47B858 /* FiraCode-Medium.ttf */; };
-		7CE8603F3F8B4C2EAF6AAEB5 /* FiraSans-ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 3D6493A257CC480191DCF070 /* FiraSans-ExtraBold.ttf */; };
-		A9CB12DE1DE74A338B5883B3 /* FiraSans-Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 4FFFE5443BA847C2BC5FA43F /* FiraSans-Black.ttf */; };
+		5578EC8A91664D30A64661F9 /* FiraSans-Thin.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 73E90B1F07704AD0887717F9 /* FiraSans-Thin.ttf */; };
+		6E4D461F59774B75A17645CF /* FiraSans-BoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = E8869EB97E08496488FB20DA /* FiraSans-BoldItalic.ttf */; };
+		76F7BEFEBCFB4E98A7467B92 /* FiraSans-ThinItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = C5C8693E5A0446DAB277FC56 /* FiraSans-ThinItalic.ttf */; };
+		8B948ECC93CC4A9091F7D349 /* FiraCode-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = CF8DAE77E5DF407DA91864D5 /* FiraCode-Regular.ttf */; };
+		8BD4DF85CFAF4088B5EC0C45 /* FiraCode-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 3E34B2DB55094D7CB993EA7E /* FiraCode-Light.ttf */; };
+		A0B5EDC1E560944DF40A9CEA /* Pods_Aquareum.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1718F5B92F47E49A68DFCCCC /* Pods_Aquareum.framework */; };
+		AB2D37B48D1C4EF5969259BD /* FiraSans-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8B6CE577CF4845CD8607E126 /* FiraSans-Regular.ttf */; };
 		B18059E884C0ABDD17F3DC3D /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAC715A2D49A985799AEE119 /* ExpoModulesProvider.swift */; };
+		B6AA1077A6A246F89E0C689A /* FiraSans-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7C4EDF2B13764C9B91297485 /* FiraSans-Bold.ttf */; };
+		B6EC8CD47C9B4A189638031D /* FiraCode-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8BA4F53A583E4FC4BC01F827 /* FiraCode-Medium.ttf */; };
+		BA61BC0E378A42899B592687 /* FiraSans-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A27AEA9FF0174D0BA1F55079 /* FiraSans-SemiBold.ttf */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
-		BC9B760C02D142B681996455 /* FiraSans-Italic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 919E3935E26744DD91082DBA /* FiraSans-Italic.ttf */; };
-		C1D1A9E941FE42CAA96B7086 /* FiraSans-Thin.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 278CCCEC978B4706B6CB77B1 /* FiraSans-Thin.ttf */; };
-		C47558F9C1A5483494DA0765 /* SpaceMono-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 6776931D83424A3DB2B5CFE2 /* SpaceMono-Regular.ttf */; };
-		D0568C3365B541B18563E607 /* FiraSans-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7AE593BA3C5D48FC82DF59F1 /* FiraSans-Medium.ttf */; };
-		D2C7E68140E6430E88AD6137 /* FiraCode-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FB14590539F844A4B79706A2 /* FiraCode-Light.ttf */; };
-		D32656B5DF2F4F0CBED70D21 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 09290AABA6C342F7A6770DE9 /* GoogleService-Info.plist */; };
-		D69BC96F626E460DA07790B5 /* FiraCode-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 35555B6176164410B752609D /* FiraCode-Regular.ttf */; };
-		D6F98B31C88D4A508EA519BB /* FiraSans-LightItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = ECEC7D33890E48D3A20A11AF /* FiraSans-LightItalic.ttf */; };
-		D9373E2769AC47A8BD770EC6 /* FiraSans-ThinItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 56045FC6C8E14B85AF950CBA /* FiraSans-ThinItalic.ttf */; };
-		E2322EE4181D46DEADAAE269 /* FiraCode-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = B365A2BA07F1481486588E15 /* FiraCode-Bold.ttf */; };
-		F9B90B46838A41F1B12E6536 /* FiraSans-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 26B7EFD4EC454D6886B25A02 /* FiraSans-Light.ttf */; };
+		C6CE58492F664EEDA058272E /* FiraSans-ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = C5390E6F9E164DF89D456101 /* FiraSans-ExtraBold.ttf */; };
+		D2D41264AB5964D0B16E15DC /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 7DA2FA061D81649F3220ECA7 /* PrivacyInfo.xcprivacy */; };
+		D8869396F67642DAAAFEF238 /* FiraSans-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8FF20D9B06514014BABB3244 /* FiraSans-Medium.ttf */; };
+		D9F37D6FE4FB413ABB8BDDE9 /* FiraSans-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 0245FA358F544D129DD90EAF /* FiraSans-Light.ttf */; };
+		DED72F3E3ACE458EA8D587D4 /* FiraSans-ExtraBoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = A8034D636B50454C93242318 /* FiraSans-ExtraBoldItalic.ttf */; };
+		E1F2304042954573B952EB05 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = C9CDCC9BD48E45218D50DE95 /* GoogleService-Info.plist */; };
+		E9D2287830724D148BF6F1C8 /* noop-file.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF6CD24ED036422BB216EE54 /* noop-file.swift */; };
+		F081480C3BF24B4A8C5835A5 /* FiraSans-SemiBoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 341823CA44094898BD4B38F1 /* FiraSans-SemiBoldItalic.ttf */; };
+		F0DCAB57F74946E98D32D5BE /* FiraSans-ExtraLight.ttf in Resources */ = {isa = PBXBuildFile; fileRef = E845C15594A746F2ABF6985A /* FiraSans-ExtraLight.ttf */; };
+		F3ABC0C6B9C043A896F4C7AF /* FiraSans-Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = AE61C32724644BB991A1CD01 /* FiraSans-Black.ttf */; };
+		F5594AA3E6E14A64A18D22AD /* FiraSans-BlackItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 28CE95310A87440AAA167D92 /* FiraSans-BlackItalic.ttf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		09290AABA6C342F7A6770DE9 /* GoogleService-Info.plist */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "Aquareum/GoogleService-Info.plist"; sourceTree = "<group>"; };
-		0D41DBB330E04CF6BA47B858 /* FiraCode-Medium.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraCode-Medium.ttf"; path = "../assets/fonts/FiraCode-Medium.ttf"; sourceTree = "<group>"; };
+		0245FA358F544D129DD90EAF /* FiraSans-Light.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-Light.ttf"; path = "../assets/fonts/FiraSans-Light.ttf"; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* Aquareum.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Aquareum.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = Aquareum/AppDelegate.h; sourceTree = "<group>"; };
 		13B07FB01A68108700A75B9A /* AppDelegate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AppDelegate.mm; path = Aquareum/AppDelegate.mm; sourceTree = "<group>"; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = Aquareum/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = Aquareum/Info.plist; sourceTree = "<group>"; };
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = Aquareum/main.m; sourceTree = "<group>"; };
-		26B7EFD4EC454D6886B25A02 /* FiraSans-Light.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-Light.ttf"; path = "../assets/fonts/FiraSans-Light.ttf"; sourceTree = "<group>"; };
-		278CCCEC978B4706B6CB77B1 /* FiraSans-Thin.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-Thin.ttf"; path = "../assets/fonts/FiraSans-Thin.ttf"; sourceTree = "<group>"; };
-		2B92B9D3E71EC6D6BB0A9EC8 /* Pods_Aquareum.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Aquareum.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		312F2460C9864CECA4914369 /* noop-file.swift */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = sourcecode.swift; name = "noop-file.swift"; path = "Aquareum/noop-file.swift"; sourceTree = "<group>"; };
-		35555B6176164410B752609D /* FiraCode-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraCode-Regular.ttf"; path = "../assets/fonts/FiraCode-Regular.ttf"; sourceTree = "<group>"; };
-		3D6493A257CC480191DCF070 /* FiraSans-ExtraBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-ExtraBold.ttf"; path = "../assets/fonts/FiraSans-ExtraBold.ttf"; sourceTree = "<group>"; };
-		4FFFE5443BA847C2BC5FA43F /* FiraSans-Black.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-Black.ttf"; path = "../assets/fonts/FiraSans-Black.ttf"; sourceTree = "<group>"; };
-		535C6B2C791448D8BAA9D230 /* FiraSans-SemiBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-SemiBold.ttf"; path = "../assets/fonts/FiraSans-SemiBold.ttf"; sourceTree = "<group>"; };
-		56045FC6C8E14B85AF950CBA /* FiraSans-ThinItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-ThinItalic.ttf"; path = "../assets/fonts/FiraSans-ThinItalic.ttf"; sourceTree = "<group>"; };
-		5AA3E3C6ED7849859E8EA647 /* FiraCode-Retina.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraCode-Retina.ttf"; path = "../assets/fonts/FiraCode-Retina.ttf"; sourceTree = "<group>"; };
-		6776931D83424A3DB2B5CFE2 /* SpaceMono-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "SpaceMono-Regular.ttf"; path = "../assets/fonts/SpaceMono-Regular.ttf"; sourceTree = "<group>"; };
+		169DAE11CB334EA1B0FF86E7 /* SpaceMono-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "SpaceMono-Regular.ttf"; path = "../assets/fonts/SpaceMono-Regular.ttf"; sourceTree = "<group>"; };
+		1718F5B92F47E49A68DFCCCC /* Pods_Aquareum.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Aquareum.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		1DC4692809EE48D2B2181B9A /* FiraSans-MediumItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-MediumItalic.ttf"; path = "../assets/fonts/FiraSans-MediumItalic.ttf"; sourceTree = "<group>"; };
+		28CE95310A87440AAA167D92 /* FiraSans-BlackItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-BlackItalic.ttf"; path = "../assets/fonts/FiraSans-BlackItalic.ttf"; sourceTree = "<group>"; };
+		341823CA44094898BD4B38F1 /* FiraSans-SemiBoldItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-SemiBoldItalic.ttf"; path = "../assets/fonts/FiraSans-SemiBoldItalic.ttf"; sourceTree = "<group>"; };
+		3E34B2DB55094D7CB993EA7E /* FiraCode-Light.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraCode-Light.ttf"; path = "../assets/fonts/FiraCode-Light.ttf"; sourceTree = "<group>"; };
+		68D11E7AE6F14B1081009E1A /* FiraSans-LightItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-LightItalic.ttf"; path = "../assets/fonts/FiraSans-LightItalic.ttf"; sourceTree = "<group>"; };
 		6C2E3173556A471DD304B334 /* Pods-Aquareum.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Aquareum.debug.xcconfig"; path = "Target Support Files/Pods-Aquareum/Pods-Aquareum.debug.xcconfig"; sourceTree = "<group>"; };
-		6D37E47E6E9D420293BF08C9 /* FiraSans-BoldItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-BoldItalic.ttf"; path = "../assets/fonts/FiraSans-BoldItalic.ttf"; sourceTree = "<group>"; };
-		7428389E93944D3EA41A3DA2 /* FiraSans-MediumItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-MediumItalic.ttf"; path = "../assets/fonts/FiraSans-MediumItalic.ttf"; sourceTree = "<group>"; };
+		6DE4D15E979B45BABE24C7CC /* Aquareum-Bridging-Header.h */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = sourcecode.c.h; name = "Aquareum-Bridging-Header.h"; path = "Aquareum/Aquareum-Bridging-Header.h"; sourceTree = "<group>"; };
+		73E90B1F07704AD0887717F9 /* FiraSans-Thin.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-Thin.ttf"; path = "../assets/fonts/FiraSans-Thin.ttf"; sourceTree = "<group>"; };
 		7A4D352CD337FB3A3BF06240 /* Pods-Aquareum.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Aquareum.release.xcconfig"; path = "Target Support Files/Pods-Aquareum/Pods-Aquareum.release.xcconfig"; sourceTree = "<group>"; };
-		7AE593BA3C5D48FC82DF59F1 /* FiraSans-Medium.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-Medium.ttf"; path = "../assets/fonts/FiraSans-Medium.ttf"; sourceTree = "<group>"; };
-		8F19A854317E4B7EA81EA111 /* Aquareum-Bridging-Header.h */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = sourcecode.c.h; name = "Aquareum-Bridging-Header.h"; path = "Aquareum/Aquareum-Bridging-Header.h"; sourceTree = "<group>"; };
-		919E3935E26744DD91082DBA /* FiraSans-Italic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-Italic.ttf"; path = "../assets/fonts/FiraSans-Italic.ttf"; sourceTree = "<group>"; };
-		996FACC367484BD689A2F29F /* FiraSans-SemiBoldItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-SemiBoldItalic.ttf"; path = "../assets/fonts/FiraSans-SemiBoldItalic.ttf"; sourceTree = "<group>"; };
-		A07D5820B2E14BBE8DCB5BF1 /* FiraSans-ExtraBoldItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-ExtraBoldItalic.ttf"; path = "../assets/fonts/FiraSans-ExtraBoldItalic.ttf"; sourceTree = "<group>"; };
-		A3632A32AEB74786BF8D14B4 /* FiraSans-Bold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-Bold.ttf"; path = "../assets/fonts/FiraSans-Bold.ttf"; sourceTree = "<group>"; };
+		7C4EDF2B13764C9B91297485 /* FiraSans-Bold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-Bold.ttf"; path = "../assets/fonts/FiraSans-Bold.ttf"; sourceTree = "<group>"; };
+		7DA2FA061D81649F3220ECA7 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = Aquareum/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		8B6CE577CF4845CD8607E126 /* FiraSans-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-Regular.ttf"; path = "../assets/fonts/FiraSans-Regular.ttf"; sourceTree = "<group>"; };
+		8BA4F53A583E4FC4BC01F827 /* FiraCode-Medium.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraCode-Medium.ttf"; path = "../assets/fonts/FiraCode-Medium.ttf"; sourceTree = "<group>"; };
+		8FF20D9B06514014BABB3244 /* FiraSans-Medium.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-Medium.ttf"; path = "../assets/fonts/FiraSans-Medium.ttf"; sourceTree = "<group>"; };
+		A27AEA9FF0174D0BA1F55079 /* FiraSans-SemiBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-SemiBold.ttf"; path = "../assets/fonts/FiraSans-SemiBold.ttf"; sourceTree = "<group>"; };
+		A8034D636B50454C93242318 /* FiraSans-ExtraBoldItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-ExtraBoldItalic.ttf"; path = "../assets/fonts/FiraSans-ExtraBoldItalic.ttf"; sourceTree = "<group>"; };
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = Aquareum/SplashScreen.storyboard; sourceTree = "<group>"; };
-		B365A2BA07F1481486588E15 /* FiraCode-Bold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraCode-Bold.ttf"; path = "../assets/fonts/FiraCode-Bold.ttf"; sourceTree = "<group>"; };
+		AE61C32724644BB991A1CD01 /* FiraSans-Black.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-Black.ttf"; path = "../assets/fonts/FiraSans-Black.ttf"; sourceTree = "<group>"; };
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
-		C8D35CC98980457C93D1DCC5 /* FiraSans-ExtraLightItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-ExtraLightItalic.ttf"; path = "../assets/fonts/FiraSans-ExtraLightItalic.ttf"; sourceTree = "<group>"; };
-		C958DB5F5539407FA3C986D9 /* FiraSans-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-Regular.ttf"; path = "../assets/fonts/FiraSans-Regular.ttf"; sourceTree = "<group>"; };
-		DD39772325822E0CA3CE0872 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = Aquareum/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		E345DA8E45A34512A8BA4148 /* FiraSans-ExtraLight.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-ExtraLight.ttf"; path = "../assets/fonts/FiraSans-ExtraLight.ttf"; sourceTree = "<group>"; };
-		ECEC7D33890E48D3A20A11AF /* FiraSans-LightItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-LightItalic.ttf"; path = "../assets/fonts/FiraSans-LightItalic.ttf"; sourceTree = "<group>"; };
+		C5390E6F9E164DF89D456101 /* FiraSans-ExtraBold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-ExtraBold.ttf"; path = "../assets/fonts/FiraSans-ExtraBold.ttf"; sourceTree = "<group>"; };
+		C5C8693E5A0446DAB277FC56 /* FiraSans-ThinItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-ThinItalic.ttf"; path = "../assets/fonts/FiraSans-ThinItalic.ttf"; sourceTree = "<group>"; };
+		C9CDCC9BD48E45218D50DE95 /* GoogleService-Info.plist */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "Aquareum/GoogleService-Info.plist"; sourceTree = "<group>"; };
+		CB06543908844D1083B21009 /* FiraSans-ExtraLightItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-ExtraLightItalic.ttf"; path = "../assets/fonts/FiraSans-ExtraLightItalic.ttf"; sourceTree = "<group>"; };
+		CF8DAE77E5DF407DA91864D5 /* FiraCode-Regular.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraCode-Regular.ttf"; path = "../assets/fonts/FiraCode-Regular.ttf"; sourceTree = "<group>"; };
+		D049209BAFA4461D9F402EB2 /* FiraCode-Retina.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraCode-Retina.ttf"; path = "../assets/fonts/FiraCode-Retina.ttf"; sourceTree = "<group>"; };
+		DFCB1BDD924C48AB9F84DBB4 /* FiraCode-Bold.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraCode-Bold.ttf"; path = "../assets/fonts/FiraCode-Bold.ttf"; sourceTree = "<group>"; };
+		E4DB1632E7414600822F90F9 /* FiraSans-Italic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-Italic.ttf"; path = "../assets/fonts/FiraSans-Italic.ttf"; sourceTree = "<group>"; };
+		E845C15594A746F2ABF6985A /* FiraSans-ExtraLight.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-ExtraLight.ttf"; path = "../assets/fonts/FiraSans-ExtraLight.ttf"; sourceTree = "<group>"; };
+		E8869EB97E08496488FB20DA /* FiraSans-BoldItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = undefined; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-BoldItalic.ttf"; path = "../assets/fonts/FiraSans-BoldItalic.ttf"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		FAC715A2D49A985799AEE119 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-Aquareum/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
-		FB14590539F844A4B79706A2 /* FiraCode-Light.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraCode-Light.ttf"; path = "../assets/fonts/FiraCode-Light.ttf"; sourceTree = "<group>"; };
-		FE112FB6190043798CBBBA6E /* FiraSans-BlackItalic.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "FiraSans-BlackItalic.ttf"; path = "../assets/fonts/FiraSans-BlackItalic.ttf"; sourceTree = "<group>"; };
+		FF6CD24ED036422BB216EE54 /* noop-file.swift */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = sourcecode.swift; name = "noop-file.swift"; path = "Aquareum/noop-file.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -92,7 +92,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				69637EB7E2EEA755E4C73899 /* Pods_Aquareum.framework in Frameworks */,
+				A0B5EDC1E560944DF40A9CEA /* Pods_Aquareum.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -109,10 +109,10 @@
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				13B07FB71A68108700A75B9A /* main.m */,
 				AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */,
-				09290AABA6C342F7A6770DE9 /* GoogleService-Info.plist */,
-				312F2460C9864CECA4914369 /* noop-file.swift */,
-				8F19A854317E4B7EA81EA111 /* Aquareum-Bridging-Header.h */,
-				DD39772325822E0CA3CE0872 /* PrivacyInfo.xcprivacy */,
+				C9CDCC9BD48E45218D50DE95 /* GoogleService-Info.plist */,
+				FF6CD24ED036422BB216EE54 /* noop-file.swift */,
+				6DE4D15E979B45BABE24C7CC /* Aquareum-Bridging-Header.h */,
+				7DA2FA061D81649F3220ECA7 /* PrivacyInfo.xcprivacy */,
 			);
 			name = Aquareum;
 			sourceTree = "<group>";
@@ -121,7 +121,7 @@
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				2B92B9D3E71EC6D6BB0A9EC8 /* Pods_Aquareum.framework */,
+				1718F5B92F47E49A68DFCCCC /* Pods_Aquareum.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -142,7 +142,7 @@
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				D65327D7A22EEC0BE12398D9 /* Pods */,
 				D7E4C46ADA2E9064B798F356 /* ExpoModulesProviders */,
-				FDEB3523E77E41CD9826EE22 /* Resources */,
+				C0BC85B27BDF4163A83F2967 /* Resources */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -174,6 +174,38 @@
 			path = Aquareum/Supporting;
 			sourceTree = "<group>";
 		};
+		C0BC85B27BDF4163A83F2967 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				DFCB1BDD924C48AB9F84DBB4 /* FiraCode-Bold.ttf */,
+				3E34B2DB55094D7CB993EA7E /* FiraCode-Light.ttf */,
+				8BA4F53A583E4FC4BC01F827 /* FiraCode-Medium.ttf */,
+				CF8DAE77E5DF407DA91864D5 /* FiraCode-Regular.ttf */,
+				D049209BAFA4461D9F402EB2 /* FiraCode-Retina.ttf */,
+				AE61C32724644BB991A1CD01 /* FiraSans-Black.ttf */,
+				28CE95310A87440AAA167D92 /* FiraSans-BlackItalic.ttf */,
+				7C4EDF2B13764C9B91297485 /* FiraSans-Bold.ttf */,
+				E8869EB97E08496488FB20DA /* FiraSans-BoldItalic.ttf */,
+				C5390E6F9E164DF89D456101 /* FiraSans-ExtraBold.ttf */,
+				A8034D636B50454C93242318 /* FiraSans-ExtraBoldItalic.ttf */,
+				E845C15594A746F2ABF6985A /* FiraSans-ExtraLight.ttf */,
+				CB06543908844D1083B21009 /* FiraSans-ExtraLightItalic.ttf */,
+				E4DB1632E7414600822F90F9 /* FiraSans-Italic.ttf */,
+				0245FA358F544D129DD90EAF /* FiraSans-Light.ttf */,
+				68D11E7AE6F14B1081009E1A /* FiraSans-LightItalic.ttf */,
+				8FF20D9B06514014BABB3244 /* FiraSans-Medium.ttf */,
+				1DC4692809EE48D2B2181B9A /* FiraSans-MediumItalic.ttf */,
+				8B6CE577CF4845CD8607E126 /* FiraSans-Regular.ttf */,
+				A27AEA9FF0174D0BA1F55079 /* FiraSans-SemiBold.ttf */,
+				341823CA44094898BD4B38F1 /* FiraSans-SemiBoldItalic.ttf */,
+				73E90B1F07704AD0887717F9 /* FiraSans-Thin.ttf */,
+				C5C8693E5A0446DAB277FC56 /* FiraSans-ThinItalic.ttf */,
+				169DAE11CB334EA1B0FF86E7 /* SpaceMono-Regular.ttf */,
+			);
+			name = Resources;
+			path = "";
+			sourceTree = "<group>";
+		};
 		D65327D7A22EEC0BE12398D9 /* Pods */ = {
 			isa = PBXGroup;
 			children = (
@@ -191,37 +223,6 @@
 			name = ExpoModulesProviders;
 			sourceTree = "<group>";
 		};
-		FDEB3523E77E41CD9826EE22 /* Resources */ = {
-			isa = PBXGroup;
-			children = (
-				B365A2BA07F1481486588E15 /* FiraCode-Bold.ttf */,
-				FB14590539F844A4B79706A2 /* FiraCode-Light.ttf */,
-				0D41DBB330E04CF6BA47B858 /* FiraCode-Medium.ttf */,
-				35555B6176164410B752609D /* FiraCode-Regular.ttf */,
-				5AA3E3C6ED7849859E8EA647 /* FiraCode-Retina.ttf */,
-				4FFFE5443BA847C2BC5FA43F /* FiraSans-Black.ttf */,
-				FE112FB6190043798CBBBA6E /* FiraSans-BlackItalic.ttf */,
-				A3632A32AEB74786BF8D14B4 /* FiraSans-Bold.ttf */,
-				6D37E47E6E9D420293BF08C9 /* FiraSans-BoldItalic.ttf */,
-				3D6493A257CC480191DCF070 /* FiraSans-ExtraBold.ttf */,
-				A07D5820B2E14BBE8DCB5BF1 /* FiraSans-ExtraBoldItalic.ttf */,
-				E345DA8E45A34512A8BA4148 /* FiraSans-ExtraLight.ttf */,
-				C8D35CC98980457C93D1DCC5 /* FiraSans-ExtraLightItalic.ttf */,
-				919E3935E26744DD91082DBA /* FiraSans-Italic.ttf */,
-				26B7EFD4EC454D6886B25A02 /* FiraSans-Light.ttf */,
-				ECEC7D33890E48D3A20A11AF /* FiraSans-LightItalic.ttf */,
-				7AE593BA3C5D48FC82DF59F1 /* FiraSans-Medium.ttf */,
-				7428389E93944D3EA41A3DA2 /* FiraSans-MediumItalic.ttf */,
-				C958DB5F5539407FA3C986D9 /* FiraSans-Regular.ttf */,
-				535C6B2C791448D8BAA9D230 /* FiraSans-SemiBold.ttf */,
-				996FACC367484BD689A2F29F /* FiraSans-SemiBoldItalic.ttf */,
-				278CCCEC978B4706B6CB77B1 /* FiraSans-Thin.ttf */,
-				56045FC6C8E14B85AF950CBA /* FiraSans-ThinItalic.ttf */,
-				6776931D83424A3DB2B5CFE2 /* SpaceMono-Regular.ttf */,
-			);
-			name = Resources;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -230,14 +231,14 @@
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "Aquareum" */;
 			buildPhases = (
 				08A4A3CD28434E44B6B9DE2E /* [CP] Check Pods Manifest.lock */,
-				FD0749BEA3027A28CB391074 /* [Expo] Configure project */,
+				B1AEA40E87BAD56283C2AEB1 /* [Expo] Configure project */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				800E24972A6A228C8D4807E9 /* [CP] Copy Pods Resources */,
-				A0B62D4F985744C84BDC8673 /* [CP] Embed Pods Frameworks */,
-				61C08053EB1DF1CB36901038 /* [CP-User] [RNFB] Core Configuration */,
+				4654B904408C6BF8380395E8 /* [CP] Embed Pods Frameworks */,
+				A73AC0DF05776AD9E565ECEF /* [CP-User] [RNFB] Core Configuration */,
 			);
 			buildRules = (
 			);
@@ -257,7 +258,9 @@
 				LastUpgradeCheck = 1130;
 				TargetAttributes = {
 					13B07F861A680F5B00A75B9A = {
+						DevelopmentTeam = 4YQU59T698;
 						LastSwiftMigration = 1250;
+						ProvisioningStyle = Automatic;
 					};
 				};
 			};
@@ -287,32 +290,32 @@
 				BB2F792D24A3F905000567C9 /* Expo.plist in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */,
-				D32656B5DF2F4F0CBED70D21 /* GoogleService-Info.plist in Resources */,
-				E2322EE4181D46DEADAAE269 /* FiraCode-Bold.ttf in Resources */,
-				D2C7E68140E6430E88AD6137 /* FiraCode-Light.ttf in Resources */,
-				7025845B393348C28C5E50CA /* FiraCode-Medium.ttf in Resources */,
-				D69BC96F626E460DA07790B5 /* FiraCode-Regular.ttf in Resources */,
-				2438B1D3F8B143568ACE4D93 /* FiraCode-Retina.ttf in Resources */,
-				A9CB12DE1DE74A338B5883B3 /* FiraSans-Black.ttf in Resources */,
-				3E697487A7FD4B078A9A9A9B /* FiraSans-BlackItalic.ttf in Resources */,
-				1C3ACCE767924EE98FF94D71 /* FiraSans-Bold.ttf in Resources */,
-				2387FFF9E6E94A76A2E03869 /* FiraSans-BoldItalic.ttf in Resources */,
-				7CE8603F3F8B4C2EAF6AAEB5 /* FiraSans-ExtraBold.ttf in Resources */,
-				6340BA88423F4D0B817C87CC /* FiraSans-ExtraBoldItalic.ttf in Resources */,
-				6F8953D6ED6245C1AFC9D2DA /* FiraSans-ExtraLight.ttf in Resources */,
-				4417AAE84A874A16A4FFE748 /* FiraSans-ExtraLightItalic.ttf in Resources */,
-				BC9B760C02D142B681996455 /* FiraSans-Italic.ttf in Resources */,
-				F9B90B46838A41F1B12E6536 /* FiraSans-Light.ttf in Resources */,
-				D6F98B31C88D4A508EA519BB /* FiraSans-LightItalic.ttf in Resources */,
-				D0568C3365B541B18563E607 /* FiraSans-Medium.ttf in Resources */,
-				610D113366B54830A3EC443C /* FiraSans-MediumItalic.ttf in Resources */,
-				4A60092C134C44CF84D2C361 /* FiraSans-Regular.ttf in Resources */,
-				3A60E620515A4CF491ED4E19 /* FiraSans-SemiBold.ttf in Resources */,
-				4238A598BCEC4618ADAC009C /* FiraSans-SemiBoldItalic.ttf in Resources */,
-				C1D1A9E941FE42CAA96B7086 /* FiraSans-Thin.ttf in Resources */,
-				D9373E2769AC47A8BD770EC6 /* FiraSans-ThinItalic.ttf in Resources */,
-				C47558F9C1A5483494DA0765 /* SpaceMono-Regular.ttf in Resources */,
-				654338E9DB20BC4E0FF67692 /* PrivacyInfo.xcprivacy in Resources */,
+				E1F2304042954573B952EB05 /* GoogleService-Info.plist in Resources */,
+				23320F66ABD14BC787037586 /* FiraCode-Bold.ttf in Resources */,
+				8BD4DF85CFAF4088B5EC0C45 /* FiraCode-Light.ttf in Resources */,
+				B6EC8CD47C9B4A189638031D /* FiraCode-Medium.ttf in Resources */,
+				8B948ECC93CC4A9091F7D349 /* FiraCode-Regular.ttf in Resources */,
+				1892F27F116842C9910A1D39 /* FiraCode-Retina.ttf in Resources */,
+				F3ABC0C6B9C043A896F4C7AF /* FiraSans-Black.ttf in Resources */,
+				F5594AA3E6E14A64A18D22AD /* FiraSans-BlackItalic.ttf in Resources */,
+				B6AA1077A6A246F89E0C689A /* FiraSans-Bold.ttf in Resources */,
+				6E4D461F59774B75A17645CF /* FiraSans-BoldItalic.ttf in Resources */,
+				C6CE58492F664EEDA058272E /* FiraSans-ExtraBold.ttf in Resources */,
+				DED72F3E3ACE458EA8D587D4 /* FiraSans-ExtraBoldItalic.ttf in Resources */,
+				F0DCAB57F74946E98D32D5BE /* FiraSans-ExtraLight.ttf in Resources */,
+				22E5CEE517DB4BCDB4C95E81 /* FiraSans-ExtraLightItalic.ttf in Resources */,
+				2732302597044D4A81EEE861 /* FiraSans-Italic.ttf in Resources */,
+				D9F37D6FE4FB413ABB8BDDE9 /* FiraSans-Light.ttf in Resources */,
+				2247B269E634498E8789244A /* FiraSans-LightItalic.ttf in Resources */,
+				D8869396F67642DAAAFEF238 /* FiraSans-Medium.ttf in Resources */,
+				3A7F113EEA9942E989AF5865 /* FiraSans-MediumItalic.ttf in Resources */,
+				AB2D37B48D1C4EF5969259BD /* FiraSans-Regular.ttf in Resources */,
+				BA61BC0E378A42899B592687 /* FiraSans-SemiBold.ttf in Resources */,
+				F081480C3BF24B4A8C5835A5 /* FiraSans-SemiBoldItalic.ttf in Resources */,
+				5578EC8A91664D30A64661F9 /* FiraSans-Thin.ttf in Resources */,
+				76F7BEFEBCFB4E98A7467B92 /* FiraSans-ThinItalic.ttf in Resources */,
+				34F92D256DF14CBE8AD7C420 /* SpaceMono-Regular.ttf in Resources */,
+				D2D41264AB5964D0B16E15DC /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -356,18 +359,23 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		61C08053EB1DF1CB36901038 /* [CP-User] [RNFB] Core Configuration */ = {
+		4654B904408C6BF8380395E8 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
-				"$(BUILT_PRODUCTS_DIR)/$(INFOPLIST_PATH)",
+				"${PODS_ROOT}/Target Support Files/Pods-Aquareum/Pods-Aquareum-frameworks.sh",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/hermes-engine/Pre-built/hermes.framework/hermes",
 			);
-			name = "[CP-User] [RNFB] Core Configuration";
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/hermes.framework",
+			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "#!/usr/bin/env bash\n#\n# Copyright (c) 2016-present Invertase Limited & Contributors\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this library except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#   http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n#\n\n##########################################################################\n##########################################################################\n#\n#  NOTE THAT IF YOU CHANGE THIS FILE YOU MUST RUN pod install AFTERWARDS\n#\n#  This file is installed as an Xcode build script in the project file\n#  by cocoapods, and you will not see your changes until you pod install\n#\n##########################################################################\n##########################################################################\n\nset -e\n\n_MAX_LOOKUPS=2;\n_SEARCH_RESULT=''\n_RN_ROOT_EXISTS=''\n_CURRENT_LOOKUPS=1\n_JSON_ROOT=\"'react-native'\"\n_JSON_FILE_NAME='firebase.json'\n_JSON_OUTPUT_BASE64='e30=' # { }\n_CURRENT_SEARCH_DIR=${PROJECT_DIR}\n_PLIST_BUDDY=/usr/libexec/PlistBuddy\n_TARGET_PLIST=\"${BUILT_PRODUCTS_DIR}/${INFOPLIST_PATH}\"\n_DSYM_PLIST=\"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Info.plist\"\n\n# plist arrays\n_PLIST_ENTRY_KEYS=()\n_PLIST_ENTRY_TYPES=()\n_PLIST_ENTRY_VALUES=()\n\nfunction setPlistValue {\n  echo \"info:      setting plist entry '$1' of type '$2' in file '$4'\"\n  ${_PLIST_BUDDY} -c \"Add :$1 $2 '$3'\" $4 || echo \"info:      '$1' already exists\"\n}\n\nfunction getFirebaseJsonKeyValue () {\n  if [[ ${_RN_ROOT_EXISTS} ]]; then\n    ruby -Ku -e \"require 'rubygems';require 'json'; output=JSON.parse('$1'); puts output[$_JSON_ROOT]['$2']\"\n  else\n    echo \"\"\n  fi;\n}\n\nfunction jsonBoolToYesNo () {\n  if [[ $1 == \"false\" ]]; then\n    echo \"NO\"\n  elif [[ $1 == \"true\" ]]; then\n    echo \"YES\"\n  else echo \"NO\"\n  fi\n}\n\necho \"info: -> RNFB build script started\"\necho \"info: 1) Locating ${_JSON_FILE_NAME} file:\"\n\nif [[ -z ${_CURRENT_SEARCH_DIR} ]]; then\n  _CURRENT_SEARCH_DIR=$(pwd)\nfi;\n\nwhile true; do\n  _CURRENT_SEARCH_DIR=$(dirname \"$_CURRENT_SEARCH_DIR\")\n  if [[ \"$_CURRENT_SEARCH_DIR\" == \"/\" ]] || [[ ${_CURRENT_LOOKUPS} -gt ${_MAX_LOOKUPS} ]]; then break; fi;\n  echo \"info:      ($_CURRENT_LOOKUPS of $_MAX_LOOKUPS) Searching in '$_CURRENT_SEARCH_DIR' for a ${_JSON_FILE_NAME} file.\"\n  _SEARCH_RESULT=$(find \"$_CURRENT_SEARCH_DIR\" -maxdepth 2 -name ${_JSON_FILE_NAME} -print | /usr/bin/head -n 1)\n  if [[ ${_SEARCH_RESULT} ]]; then\n    echo \"info:      ${_JSON_FILE_NAME} found at $_SEARCH_RESULT\"\n    break;\n  fi;\n  _CURRENT_LOOKUPS=$((_CURRENT_LOOKUPS+1))\ndone\n\nif [[ ${_SEARCH_RESULT} ]]; then\n  _JSON_OUTPUT_RAW=$(cat \"${_SEARCH_RESULT}\")\n  _RN_ROOT_EXISTS=$(ruby -Ku -e \"require 'rubygems';require 'json'; output=JSON.parse('$_JSON_OUTPUT_RAW'); puts output[$_JSON_ROOT]\" || echo '')\n\n  if [[ ${_RN_ROOT_EXISTS} ]]; then\n    if ! python3 --version >/dev/null 2>&1; then echo \"python3 not found, firebase.json file processing error.\" && exit 1; fi\n    _JSON_OUTPUT_BASE64=$(python3 -c 'import json,sys,base64;print(base64.b64encode(bytes(json.dumps(json.loads(open('\"'${_SEARCH_RESULT}'\"', '\"'rb'\"').read())['${_JSON_ROOT}']), '\"'utf-8'\"')).decode())' || echo \"e30=\")\n  fi\n\n  _PLIST_ENTRY_KEYS+=(\"firebase_json_raw\")\n  _PLIST_ENTRY_TYPES+=(\"string\")\n  _PLIST_ENTRY_VALUES+=(\"$_JSON_OUTPUT_BASE64\")\n\n  # config.app_data_collection_default_enabled\n  _APP_DATA_COLLECTION_ENABLED=$(getFirebaseJsonKeyValue \"$_JSON_OUTPUT_RAW\" \"app_data_collection_default_enabled\")\n  if [[ $_APP_DATA_COLLECTION_ENABLED ]]; then\n    _PLIST_ENTRY_KEYS+=(\"FirebaseDataCollectionDefaultEnabled\")\n    _PLIST_ENTRY_TYPES+=(\"bool\")\n    _PLIST_ENTRY_VALUES+=(\"$(jsonBoolToYesNo \"$_APP_DATA_COLLECTION_ENABLED\")\")\n  fi\n\n  # config.analytics_auto_collection_enabled\n  _ANALYTICS_AUTO_COLLECTION=$(getFirebaseJsonKeyValue \"$_JSON_OUTPUT_RAW\" \"analytics_auto_collection_enabled\")\n  if [[ $_ANALYTICS_AUTO_COLLECTION ]]; then\n    _PLIST_ENTRY_KEYS+=(\"FIREBASE_ANALYTICS_COLLECTION_ENABLED\")\n    _PLIST_ENTRY_TYPES+=(\"bool\")\n    _PLIST_ENTRY_VALUES+=(\"$(jsonBoolToYesNo \"$_ANALYTICS_AUTO_COLLECTION\")\")\n  fi\n\n  # config.analytics_collection_deactivated\n  _ANALYTICS_DEACTIVATED=$(getFirebaseJsonKeyValue \"$_JSON_OUTPUT_RAW\" \"analytics_collection_deactivated\")\n  if [[ $_ANALYTICS_DEACTIVATED ]]; then\n    _PLIST_ENTRY_KEYS+=(\"FIREBASE_ANALYTICS_COLLECTION_DEACTIVATED\")\n    _PLIST_ENTRY_TYPES+=(\"bool\")\n    _PLIST_ENTRY_VALUES+=(\"$(jsonBoolToYesNo \"$_ANALYTICS_DEACTIVATED\")\")\n  fi\n\n  # config.analytics_idfv_collection_enabled\n  _ANALYTICS_IDFV_COLLECTION=$(getFirebaseJsonKeyValue \"$_JSON_OUTPUT_RAW\" \"analytics_idfv_collection_enabled\")\n  if [[ $_ANALYTICS_IDFV_COLLECTION ]]; then\n    _PLIST_ENTRY_KEYS+=(\"GOOGLE_ANALYTICS_IDFV_COLLECTION_ENABLED\")\n    _PLIST_ENTRY_TYPES+=(\"bool\")\n    _PLIST_ENTRY_VALUES+=(\"$(jsonBoolToYesNo \"$_ANALYTICS_IDFV_COLLECTION\")\")\n  fi\n\n  # config.analytics_default_allow_analytics_storage\n  _ANALYTICS_STORAGE=$(getFirebaseJsonKeyValue \"$_JSON_OUTPUT_RAW\" \"analytics_default_allow_analytics_storage\")\n  if [[ $_ANALYTICS_STORAGE ]]; then\n    _PLIST_ENTRY_KEYS+=(\"GOOGLE_ANALYTICS_DEFAULT_ALLOW_ANALYTICS_STORAGE\")\n    _PLIST_ENTRY_TYPES+=(\"bool\")\n    _PLIST_ENTRY_VALUES+=(\"$(jsonBoolToYesNo \"$_ANALYTICS_STORAGE\")\")\n  fi\n\n  # config.analytics_default_allow_ad_storage\n  _ANALYTICS_AD_STORAGE=$(getFirebaseJsonKeyValue \"$_JSON_OUTPUT_RAW\" \"analytics_default_allow_ad_storage\")\n  if [[ $_ANALYTICS_AD_STORAGE ]]; then\n    _PLIST_ENTRY_KEYS+=(\"GOOGLE_ANALYTICS_DEFAULT_ALLOW_AD_STORAGE\")\n    _PLIST_ENTRY_TYPES+=(\"bool\")\n    _PLIST_ENTRY_VALUES+=(\"$(jsonBoolToYesNo \"$_ANALYTICS_AD_STORAGE\")\")\n  fi\n\n  # config.analytics_default_allow_ad_user_data\n  _ANALYTICS_AD_USER_DATA=$(getFirebaseJsonKeyValue \"$_JSON_OUTPUT_RAW\" \"analytics_default_allow_ad_user_data\")\n  if [[ $_ANALYTICS_AD_USER_DATA ]]; then\n    _PLIST_ENTRY_KEYS+=(\"GOOGLE_ANALYTICS_DEFAULT_ALLOW_AD_USER_DATA\")\n    _PLIST_ENTRY_TYPES+=(\"bool\")\n    _PLIST_ENTRY_VALUES+=(\"$(jsonBoolToYesNo \"$_ANALYTICS_AD_USER_DATA\")\")\n  fi\n\n  # config.analytics_default_allow_ad_personalization_signals\n  _ANALYTICS_PERSONALIZATION=$(getFirebaseJsonKeyValue \"$_JSON_OUTPUT_RAW\" \"analytics_default_allow_ad_personalization_signals\")\n  if [[ $_ANALYTICS_PERSONALIZATION ]]; then\n    _PLIST_ENTRY_KEYS+=(\"GOOGLE_ANALYTICS_DEFAULT_ALLOW_AD_PERSONALIZATION_SIGNALS\")\n    _PLIST_ENTRY_TYPES+=(\"bool\")\n    _PLIST_ENTRY_VALUES+=(\"$(jsonBoolToYesNo \"$_ANALYTICS_PERSONALIZATION\")\")\n  fi\n\n  # config.analytics_registration_with_ad_network_enabled\n  _ANALYTICS_REGISTRATION_WITH_AD_NETWORK=$(getFirebaseJsonKeyValue \"$_JSON_OUTPUT_RAW\" \"google_analytics_registration_with_ad_network_enabled\")\n  if [[ $_ANALYTICS_REGISTRATION_WITH_AD_NETWORK ]]; then\n    _PLIST_ENTRY_KEYS+=(\"GOOGLE_ANALYTICS_REGISTRATION_WITH_AD_NETWORK_ENABLED\")\n    _PLIST_ENTRY_TYPES+=(\"bool\")\n    _PLIST_ENTRY_VALUES+=(\"$(jsonBoolToYesNo \"$_ANALYTICS_REGISTRATION_WITH_AD_NETWORK\")\")\n  fi\n\n  # config.google_analytics_automatic_screen_reporting_enabled\n  _ANALYTICS_AUTO_SCREEN_REPORTING=$(getFirebaseJsonKeyValue \"$_JSON_OUTPUT_RAW\" \"google_analytics_automatic_screen_reporting_enabled\")\n  if [[ $_ANALYTICS_AUTO_SCREEN_REPORTING ]]; then\n    _PLIST_ENTRY_KEYS+=(\"FirebaseAutomaticScreenReportingEnabled\")\n    _PLIST_ENTRY_TYPES+=(\"bool\")\n    _PLIST_ENTRY_VALUES+=(\"$(jsonBoolToYesNo \"$_ANALYTICS_AUTO_SCREEN_REPORTING\")\")\n  fi\n\n  # config.perf_auto_collection_enabled\n  _PERF_AUTO_COLLECTION=$(getFirebaseJsonKeyValue \"$_JSON_OUTPUT_RAW\" \"perf_auto_collection_enabled\")\n  if [[ $_PERF_AUTO_COLLECTION ]]; then\n    _PLIST_ENTRY_KEYS+=(\"firebase_performance_collection_enabled\")\n    _PLIST_ENTRY_TYPES+=(\"bool\")\n    _PLIST_ENTRY_VALUES+=(\"$(jsonBoolToYesNo \"$_PERF_AUTO_COLLECTION\")\")\n  fi\n\n  # config.perf_collection_deactivated\n  _PERF_DEACTIVATED=$(getFirebaseJsonKeyValue \"$_JSON_OUTPUT_RAW\" \"perf_collection_deactivated\")\n  if [[ $_PERF_DEACTIVATED ]]; then\n    _PLIST_ENTRY_KEYS+=(\"firebase_performance_collection_deactivated\")\n    _PLIST_ENTRY_TYPES+=(\"bool\")\n    _PLIST_ENTRY_VALUES+=(\"$(jsonBoolToYesNo \"$_PERF_DEACTIVATED\")\")\n  fi\n\n  # config.messaging_auto_init_enabled\n  _MESSAGING_AUTO_INIT=$(getFirebaseJsonKeyValue \"$_JSON_OUTPUT_RAW\" \"messaging_auto_init_enabled\")\n  if [[ $_MESSAGING_AUTO_INIT ]]; then\n    _PLIST_ENTRY_KEYS+=(\"FirebaseMessagingAutoInitEnabled\")\n    _PLIST_ENTRY_TYPES+=(\"bool\")\n    _PLIST_ENTRY_VALUES+=(\"$(jsonBoolToYesNo \"$_MESSAGING_AUTO_INIT\")\")\n  fi\n\n  # config.in_app_messaging_auto_colllection_enabled\n  _FIAM_AUTO_INIT=$(getFirebaseJsonKeyValue \"$_JSON_OUTPUT_RAW\" \"in_app_messaging_auto_collection_enabled\")\n  if [[ $_FIAM_AUTO_INIT ]]; then\n    _PLIST_ENTRY_KEYS+=(\"FirebaseInAppMessagingAutomaticDataCollectionEnabled\")\n    _PLIST_ENTRY_TYPES+=(\"bool\")\n    _PLIST_ENTRY_VALUES+=(\"$(jsonBoolToYesNo \"$_FIAM_AUTO_INIT\")\")\n  fi\n\n  # config.app_check_token_auto_refresh\n  _APP_CHECK_TOKEN_AUTO_REFRESH=$(getFirebaseJsonKeyValue \"$_JSON_OUTPUT_RAW\" \"app_check_token_auto_refresh\")\n  if [[ $_APP_CHECK_TOKEN_AUTO_REFRESH ]]; then\n    _PLIST_ENTRY_KEYS+=(\"FirebaseAppCheckTokenAutoRefreshEnabled\")\n    _PLIST_ENTRY_TYPES+=(\"bool\")\n    _PLIST_ENTRY_VALUES+=(\"$(jsonBoolToYesNo \"$_APP_CHECK_TOKEN_AUTO_REFRESH\")\")\n  fi\n\n  # config.crashlytics_disable_auto_disabler - undocumented for now - mainly for debugging, document if becomes useful\n  _CRASHLYTICS_AUTO_DISABLE_ENABLED=$(getFirebaseJsonKeyValue \"$_JSON_OUTPUT_RAW\" \"crashlytics_disable_auto_disabler\")\n  if [[ $_CRASHLYTICS_AUTO_DISABLE_ENABLED == \"true\" ]]; then\n    echo \"Disabled Crashlytics auto disabler.\" # do nothing\n  else\n    _PLIST_ENTRY_KEYS+=(\"FirebaseCrashlyticsCollectionEnabled\")\n    _PLIST_ENTRY_TYPES+=(\"bool\")\n    _PLIST_ENTRY_VALUES+=(\"NO\")\n  fi\nelse\n  _PLIST_ENTRY_KEYS+=(\"firebase_json_raw\")\n  _PLIST_ENTRY_TYPES+=(\"string\")\n  _PLIST_ENTRY_VALUES+=(\"$_JSON_OUTPUT_BASE64\")\n  echo \"warning:   A firebase.json file was not found, whilst this file is optional it is recommended to include it to configure firebase services in React Native Firebase.\"\nfi;\n\necho \"info: 2) Injecting Info.plist entries: \"\n\n# Log out the keys we're adding\nfor i in \"${!_PLIST_ENTRY_KEYS[@]}\"; do\n  echo \"    ->  $i) ${_PLIST_ENTRY_KEYS[$i]}\" \"${_PLIST_ENTRY_TYPES[$i]}\" \"${_PLIST_ENTRY_VALUES[$i]}\"\ndone\n\nfor plist in \"${_TARGET_PLIST}\" \"${_DSYM_PLIST}\" ; do\n  if [[ -f \"${plist}\" ]]; then\n\n    # paths with spaces break the call to setPlistValue. temporarily modify\n    # the shell internal field separator variable (IFS), which normally\n    # includes spaces, to consist only of line breaks\n    oldifs=$IFS\n    IFS=\"\n\"\n\n    for i in \"${!_PLIST_ENTRY_KEYS[@]}\"; do\n      setPlistValue \"${_PLIST_ENTRY_KEYS[$i]}\" \"${_PLIST_ENTRY_TYPES[$i]}\" \"${_PLIST_ENTRY_VALUES[$i]}\" \"${plist}\"\n    done\n\n    # restore the original internal field separator value\n    IFS=$oldifs\n  else\n    echo \"warning:   A Info.plist build output file was not found (${plist})\"\n  fi\ndone\n\necho \"info: <- RNFB build script finished\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Aquareum/Pods-Aquareum-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
 		};
 		800E24972A6A228C8D4807E9 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -421,25 +429,20 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Aquareum/Pods-Aquareum-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		A0B62D4F985744C84BDC8673 /* [CP] Embed Pods Frameworks */ = {
+		A73AC0DF05776AD9E565ECEF /* [CP-User] [RNFB] Core Configuration */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Aquareum/Pods-Aquareum-frameworks.sh",
-				"${PODS_XCFRAMEWORKS_BUILD_DIR}/hermes-engine/Pre-built/hermes.framework/hermes",
+				"$(BUILT_PRODUCTS_DIR)/$(INFOPLIST_PATH)",
 			);
-			name = "[CP] Embed Pods Frameworks";
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/hermes.framework",
-			);
+			name = "[CP-User] [RNFB] Core Configuration";
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Aquareum/Pods-Aquareum-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
+			shellScript = "#!/usr/bin/env bash\n#\n# Copyright (c) 2016-present Invertase Limited & Contributors\n#\n# Licensed under the Apache License, Version 2.0 (the \"License\");\n# you may not use this library except in compliance with the License.\n# You may obtain a copy of the License at\n#\n#   http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n#\n\n##########################################################################\n##########################################################################\n#\n#  NOTE THAT IF YOU CHANGE THIS FILE YOU MUST RUN pod install AFTERWARDS\n#\n#  This file is installed as an Xcode build script in the project file\n#  by cocoapods, and you will not see your changes until you pod install\n#\n##########################################################################\n##########################################################################\n\nset -e\n\n_MAX_LOOKUPS=2;\n_SEARCH_RESULT=''\n_RN_ROOT_EXISTS=''\n_CURRENT_LOOKUPS=1\n_JSON_ROOT=\"'react-native'\"\n_JSON_FILE_NAME='firebase.json'\n_JSON_OUTPUT_BASE64='e30=' # { }\n_CURRENT_SEARCH_DIR=${PROJECT_DIR}\n_PLIST_BUDDY=/usr/libexec/PlistBuddy\n_TARGET_PLIST=\"${BUILT_PRODUCTS_DIR}/${INFOPLIST_PATH}\"\n_DSYM_PLIST=\"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Info.plist\"\n\n# plist arrays\n_PLIST_ENTRY_KEYS=()\n_PLIST_ENTRY_TYPES=()\n_PLIST_ENTRY_VALUES=()\n\nfunction setPlistValue {\n  echo \"info:      setting plist entry '$1' of type '$2' in file '$4'\"\n  ${_PLIST_BUDDY} -c \"Add :$1 $2 '$3'\" $4 || echo \"info:      '$1' already exists\"\n}\n\nfunction getFirebaseJsonKeyValue () {\n  if [[ ${_RN_ROOT_EXISTS} ]]; then\n    ruby -Ku -e \"require 'rubygems';require 'json'; output=JSON.parse('$1'); puts output[$_JSON_ROOT]['$2']\"\n  else\n    echo \"\"\n  fi;\n}\n\nfunction jsonBoolToYesNo () {\n  if [[ $1 == \"false\" ]]; then\n    echo \"NO\"\n  elif [[ $1 == \"true\" ]]; then\n    echo \"YES\"\n  else echo \"NO\"\n  fi\n}\n\necho \"info: -> RNFB build script started\"\necho \"info: 1) Locating ${_JSON_FILE_NAME} file:\"\n\nif [[ -z ${_CURRENT_SEARCH_DIR} ]]; then\n  _CURRENT_SEARCH_DIR=$(pwd)\nfi;\n\nwhile true; do\n  _CURRENT_SEARCH_DIR=$(dirname \"$_CURRENT_SEARCH_DIR\")\n  if [[ \"$_CURRENT_SEARCH_DIR\" == \"/\" ]] || [[ ${_CURRENT_LOOKUPS} -gt ${_MAX_LOOKUPS} ]]; then break; fi;\n  echo \"info:      ($_CURRENT_LOOKUPS of $_MAX_LOOKUPS) Searching in '$_CURRENT_SEARCH_DIR' for a ${_JSON_FILE_NAME} file.\"\n  _SEARCH_RESULT=$(find \"$_CURRENT_SEARCH_DIR\" -maxdepth 2 -name ${_JSON_FILE_NAME} -print | /usr/bin/head -n 1)\n  if [[ ${_SEARCH_RESULT} ]]; then\n    echo \"info:      ${_JSON_FILE_NAME} found at $_SEARCH_RESULT\"\n    break;\n  fi;\n  _CURRENT_LOOKUPS=$((_CURRENT_LOOKUPS+1))\ndone\n\nif [[ ${_SEARCH_RESULT} ]]; then\n  _JSON_OUTPUT_RAW=$(cat \"${_SEARCH_RESULT}\")\n  _RN_ROOT_EXISTS=$(ruby -Ku -e \"require 'rubygems';require 'json'; output=JSON.parse('$_JSON_OUTPUT_RAW'); puts output[$_JSON_ROOT]\" || echo '')\n\n  if [[ ${_RN_ROOT_EXISTS} ]]; then\n    if ! python3 --version >/dev/null 2>&1; then echo \"python3 not found, firebase.json file processing error.\" && exit 1; fi\n    _JSON_OUTPUT_BASE64=$(python3 -c 'import json,sys,base64;print(base64.b64encode(bytes(json.dumps(json.loads(open('\"'${_SEARCH_RESULT}'\"', '\"'rb'\"').read())['${_JSON_ROOT}']), '\"'utf-8'\"')).decode())' || echo \"e30=\")\n  fi\n\n  _PLIST_ENTRY_KEYS+=(\"firebase_json_raw\")\n  _PLIST_ENTRY_TYPES+=(\"string\")\n  _PLIST_ENTRY_VALUES+=(\"$_JSON_OUTPUT_BASE64\")\n\n  # config.app_data_collection_default_enabled\n  _APP_DATA_COLLECTION_ENABLED=$(getFirebaseJsonKeyValue \"$_JSON_OUTPUT_RAW\" \"app_data_collection_default_enabled\")\n  if [[ $_APP_DATA_COLLECTION_ENABLED ]]; then\n    _PLIST_ENTRY_KEYS+=(\"FirebaseDataCollectionDefaultEnabled\")\n    _PLIST_ENTRY_TYPES+=(\"bool\")\n    _PLIST_ENTRY_VALUES+=(\"$(jsonBoolToYesNo \"$_APP_DATA_COLLECTION_ENABLED\")\")\n  fi\n\n  # config.analytics_auto_collection_enabled\n  _ANALYTICS_AUTO_COLLECTION=$(getFirebaseJsonKeyValue \"$_JSON_OUTPUT_RAW\" \"analytics_auto_collection_enabled\")\n  if [[ $_ANALYTICS_AUTO_COLLECTION ]]; then\n    _PLIST_ENTRY_KEYS+=(\"FIREBASE_ANALYTICS_COLLECTION_ENABLED\")\n    _PLIST_ENTRY_TYPES+=(\"bool\")\n    _PLIST_ENTRY_VALUES+=(\"$(jsonBoolToYesNo \"$_ANALYTICS_AUTO_COLLECTION\")\")\n  fi\n\n  # config.analytics_collection_deactivated\n  _ANALYTICS_DEACTIVATED=$(getFirebaseJsonKeyValue \"$_JSON_OUTPUT_RAW\" \"analytics_collection_deactivated\")\n  if [[ $_ANALYTICS_DEACTIVATED ]]; then\n    _PLIST_ENTRY_KEYS+=(\"FIREBASE_ANALYTICS_COLLECTION_DEACTIVATED\")\n    _PLIST_ENTRY_TYPES+=(\"bool\")\n    _PLIST_ENTRY_VALUES+=(\"$(jsonBoolToYesNo \"$_ANALYTICS_DEACTIVATED\")\")\n  fi\n\n  # config.analytics_idfv_collection_enabled\n  _ANALYTICS_IDFV_COLLECTION=$(getFirebaseJsonKeyValue \"$_JSON_OUTPUT_RAW\" \"analytics_idfv_collection_enabled\")\n  if [[ $_ANALYTICS_IDFV_COLLECTION ]]; then\n    _PLIST_ENTRY_KEYS+=(\"GOOGLE_ANALYTICS_IDFV_COLLECTION_ENABLED\")\n    _PLIST_ENTRY_TYPES+=(\"bool\")\n    _PLIST_ENTRY_VALUES+=(\"$(jsonBoolToYesNo \"$_ANALYTICS_IDFV_COLLECTION\")\")\n  fi\n\n  # config.analytics_default_allow_analytics_storage\n  _ANALYTICS_STORAGE=$(getFirebaseJsonKeyValue \"$_JSON_OUTPUT_RAW\" \"analytics_default_allow_analytics_storage\")\n  if [[ $_ANALYTICS_STORAGE ]]; then\n    _PLIST_ENTRY_KEYS+=(\"GOOGLE_ANALYTICS_DEFAULT_ALLOW_ANALYTICS_STORAGE\")\n    _PLIST_ENTRY_TYPES+=(\"bool\")\n    _PLIST_ENTRY_VALUES+=(\"$(jsonBoolToYesNo \"$_ANALYTICS_STORAGE\")\")\n  fi\n\n  # config.analytics_default_allow_ad_storage\n  _ANALYTICS_AD_STORAGE=$(getFirebaseJsonKeyValue \"$_JSON_OUTPUT_RAW\" \"analytics_default_allow_ad_storage\")\n  if [[ $_ANALYTICS_AD_STORAGE ]]; then\n    _PLIST_ENTRY_KEYS+=(\"GOOGLE_ANALYTICS_DEFAULT_ALLOW_AD_STORAGE\")\n    _PLIST_ENTRY_TYPES+=(\"bool\")\n    _PLIST_ENTRY_VALUES+=(\"$(jsonBoolToYesNo \"$_ANALYTICS_AD_STORAGE\")\")\n  fi\n\n  # config.analytics_default_allow_ad_user_data\n  _ANALYTICS_AD_USER_DATA=$(getFirebaseJsonKeyValue \"$_JSON_OUTPUT_RAW\" \"analytics_default_allow_ad_user_data\")\n  if [[ $_ANALYTICS_AD_USER_DATA ]]; then\n    _PLIST_ENTRY_KEYS+=(\"GOOGLE_ANALYTICS_DEFAULT_ALLOW_AD_USER_DATA\")\n    _PLIST_ENTRY_TYPES+=(\"bool\")\n    _PLIST_ENTRY_VALUES+=(\"$(jsonBoolToYesNo \"$_ANALYTICS_AD_USER_DATA\")\")\n  fi\n\n  # config.analytics_default_allow_ad_personalization_signals\n  _ANALYTICS_PERSONALIZATION=$(getFirebaseJsonKeyValue \"$_JSON_OUTPUT_RAW\" \"analytics_default_allow_ad_personalization_signals\")\n  if [[ $_ANALYTICS_PERSONALIZATION ]]; then\n    _PLIST_ENTRY_KEYS+=(\"GOOGLE_ANALYTICS_DEFAULT_ALLOW_AD_PERSONALIZATION_SIGNALS\")\n    _PLIST_ENTRY_TYPES+=(\"bool\")\n    _PLIST_ENTRY_VALUES+=(\"$(jsonBoolToYesNo \"$_ANALYTICS_PERSONALIZATION\")\")\n  fi\n\n  # config.analytics_registration_with_ad_network_enabled\n  _ANALYTICS_REGISTRATION_WITH_AD_NETWORK=$(getFirebaseJsonKeyValue \"$_JSON_OUTPUT_RAW\" \"google_analytics_registration_with_ad_network_enabled\")\n  if [[ $_ANALYTICS_REGISTRATION_WITH_AD_NETWORK ]]; then\n    _PLIST_ENTRY_KEYS+=(\"GOOGLE_ANALYTICS_REGISTRATION_WITH_AD_NETWORK_ENABLED\")\n    _PLIST_ENTRY_TYPES+=(\"bool\")\n    _PLIST_ENTRY_VALUES+=(\"$(jsonBoolToYesNo \"$_ANALYTICS_REGISTRATION_WITH_AD_NETWORK\")\")\n  fi\n\n  # config.google_analytics_automatic_screen_reporting_enabled\n  _ANALYTICS_AUTO_SCREEN_REPORTING=$(getFirebaseJsonKeyValue \"$_JSON_OUTPUT_RAW\" \"google_analytics_automatic_screen_reporting_enabled\")\n  if [[ $_ANALYTICS_AUTO_SCREEN_REPORTING ]]; then\n    _PLIST_ENTRY_KEYS+=(\"FirebaseAutomaticScreenReportingEnabled\")\n    _PLIST_ENTRY_TYPES+=(\"bool\")\n    _PLIST_ENTRY_VALUES+=(\"$(jsonBoolToYesNo \"$_ANALYTICS_AUTO_SCREEN_REPORTING\")\")\n  fi\n\n  # config.perf_auto_collection_enabled\n  _PERF_AUTO_COLLECTION=$(getFirebaseJsonKeyValue \"$_JSON_OUTPUT_RAW\" \"perf_auto_collection_enabled\")\n  if [[ $_PERF_AUTO_COLLECTION ]]; then\n    _PLIST_ENTRY_KEYS+=(\"firebase_performance_collection_enabled\")\n    _PLIST_ENTRY_TYPES+=(\"bool\")\n    _PLIST_ENTRY_VALUES+=(\"$(jsonBoolToYesNo \"$_PERF_AUTO_COLLECTION\")\")\n  fi\n\n  # config.perf_collection_deactivated\n  _PERF_DEACTIVATED=$(getFirebaseJsonKeyValue \"$_JSON_OUTPUT_RAW\" \"perf_collection_deactivated\")\n  if [[ $_PERF_DEACTIVATED ]]; then\n    _PLIST_ENTRY_KEYS+=(\"firebase_performance_collection_deactivated\")\n    _PLIST_ENTRY_TYPES+=(\"bool\")\n    _PLIST_ENTRY_VALUES+=(\"$(jsonBoolToYesNo \"$_PERF_DEACTIVATED\")\")\n  fi\n\n  # config.messaging_auto_init_enabled\n  _MESSAGING_AUTO_INIT=$(getFirebaseJsonKeyValue \"$_JSON_OUTPUT_RAW\" \"messaging_auto_init_enabled\")\n  if [[ $_MESSAGING_AUTO_INIT ]]; then\n    _PLIST_ENTRY_KEYS+=(\"FirebaseMessagingAutoInitEnabled\")\n    _PLIST_ENTRY_TYPES+=(\"bool\")\n    _PLIST_ENTRY_VALUES+=(\"$(jsonBoolToYesNo \"$_MESSAGING_AUTO_INIT\")\")\n  fi\n\n  # config.in_app_messaging_auto_colllection_enabled\n  _FIAM_AUTO_INIT=$(getFirebaseJsonKeyValue \"$_JSON_OUTPUT_RAW\" \"in_app_messaging_auto_collection_enabled\")\n  if [[ $_FIAM_AUTO_INIT ]]; then\n    _PLIST_ENTRY_KEYS+=(\"FirebaseInAppMessagingAutomaticDataCollectionEnabled\")\n    _PLIST_ENTRY_TYPES+=(\"bool\")\n    _PLIST_ENTRY_VALUES+=(\"$(jsonBoolToYesNo \"$_FIAM_AUTO_INIT\")\")\n  fi\n\n  # config.app_check_token_auto_refresh\n  _APP_CHECK_TOKEN_AUTO_REFRESH=$(getFirebaseJsonKeyValue \"$_JSON_OUTPUT_RAW\" \"app_check_token_auto_refresh\")\n  if [[ $_APP_CHECK_TOKEN_AUTO_REFRESH ]]; then\n    _PLIST_ENTRY_KEYS+=(\"FirebaseAppCheckTokenAutoRefreshEnabled\")\n    _PLIST_ENTRY_TYPES+=(\"bool\")\n    _PLIST_ENTRY_VALUES+=(\"$(jsonBoolToYesNo \"$_APP_CHECK_TOKEN_AUTO_REFRESH\")\")\n  fi\n\n  # config.crashlytics_disable_auto_disabler - undocumented for now - mainly for debugging, document if becomes useful\n  _CRASHLYTICS_AUTO_DISABLE_ENABLED=$(getFirebaseJsonKeyValue \"$_JSON_OUTPUT_RAW\" \"crashlytics_disable_auto_disabler\")\n  if [[ $_CRASHLYTICS_AUTO_DISABLE_ENABLED == \"true\" ]]; then\n    echo \"Disabled Crashlytics auto disabler.\" # do nothing\n  else\n    _PLIST_ENTRY_KEYS+=(\"FirebaseCrashlyticsCollectionEnabled\")\n    _PLIST_ENTRY_TYPES+=(\"bool\")\n    _PLIST_ENTRY_VALUES+=(\"NO\")\n  fi\nelse\n  _PLIST_ENTRY_KEYS+=(\"firebase_json_raw\")\n  _PLIST_ENTRY_TYPES+=(\"string\")\n  _PLIST_ENTRY_VALUES+=(\"$_JSON_OUTPUT_BASE64\")\n  echo \"warning:   A firebase.json file was not found, whilst this file is optional it is recommended to include it to configure firebase services in React Native Firebase.\"\nfi;\n\necho \"info: 2) Injecting Info.plist entries: \"\n\n# Log out the keys we're adding\nfor i in \"${!_PLIST_ENTRY_KEYS[@]}\"; do\n  echo \"    ->  $i) ${_PLIST_ENTRY_KEYS[$i]}\" \"${_PLIST_ENTRY_TYPES[$i]}\" \"${_PLIST_ENTRY_VALUES[$i]}\"\ndone\n\nfor plist in \"${_TARGET_PLIST}\" \"${_DSYM_PLIST}\" ; do\n  if [[ -f \"${plist}\" ]]; then\n\n    # paths with spaces break the call to setPlistValue. temporarily modify\n    # the shell internal field separator variable (IFS), which normally\n    # includes spaces, to consist only of line breaks\n    oldifs=$IFS\n    IFS=\"\n\"\n\n    for i in \"${!_PLIST_ENTRY_KEYS[@]}\"; do\n      setPlistValue \"${_PLIST_ENTRY_KEYS[$i]}\" \"${_PLIST_ENTRY_TYPES[$i]}\" \"${_PLIST_ENTRY_VALUES[$i]}\" \"${plist}\"\n    done\n\n    # restore the original internal field separator value\n    IFS=$oldifs\n  else\n    echo \"warning:   A Info.plist build output file was not found (${plist})\"\n  fi\ndone\n\necho \"info: <- RNFB build script finished\"\n";
 		};
-		FD0749BEA3027A28CB391074 /* [Expo] Configure project */ = {
+		B1AEA40E87BAD56283C2AEB1 /* [Expo] Configure project */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
@@ -468,7 +471,7 @@
 				13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
 				B18059E884C0ABDD17F3DC3D /* ExpoModulesProvider.swift in Sources */,
-				4868CF9369464DF08FEBCA04 /* noop-file.swift in Sources */,
+				E9D2287830724D148BF6F1C8 /* noop-file.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -484,7 +487,7 @@
 				CODE_SIGN_ENTITLEMENTS = Aquareum/Aquareum.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 0.0.1;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 4YQU59T698;
 				ENABLE_BITCODE = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
@@ -492,14 +495,9 @@
 					"FB_SONARKIT_ENABLED=1",
 				);
 				INFOPLIST_FILE = Aquareum/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Aquareum;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.video";
 				IPHONEOS_DEPLOYMENT_TARGET = 13.4;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 0.0.1;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MARKETING_VERSION = 1.0;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -508,7 +506,6 @@
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = tv.aquareum;
 				PRODUCT_NAME = Aquareum;
-				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "Aquareum/Aquareum-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -526,17 +523,12 @@
 				CODE_SIGN_ENTITLEMENTS = Aquareum/Aquareum.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 0.0.1;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 4YQU59T698;
 				INFOPLIST_FILE = Aquareum/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Aquareum;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.video";
 				IPHONEOS_DEPLOYMENT_TARGET = 13.4;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
-				MARKETING_VERSION = 0.0.1;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MARKETING_VERSION = 1.0;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -545,7 +537,6 @@
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
 				PRODUCT_BUNDLE_IDENTIFIER = tv.aquareum;
 				PRODUCT_NAME = Aquareum;
-				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "Aquareum/Aquareum-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -616,14 +607,14 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 13.4;
 				LD = "";
 				LDPLUSPLUS = "";
-				LD_RUNPATH_SEARCH_PATHS = (
-					/usr/lib/swift,
-					"$(inherited)",
-				);
+				LD_RUNPATH_SEARCH_PATHS = "/usr/lib/swift $(inherited)";
 				LIBRARY_SEARCH_PATHS = "$(SDKROOT)/usr/lib/swift\"$(inherited)\"";
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_LDFLAGS = "$(inherited)  ";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					" ",
+				);
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				USE_HERMES = true;
@@ -686,13 +677,13 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 13.4;
 				LD = "";
 				LDPLUSPLUS = "";
-				LD_RUNPATH_SEARCH_PATHS = (
-					/usr/lib/swift,
-					"$(inherited)",
-				);
+				LD_RUNPATH_SEARCH_PATHS = "/usr/lib/swift $(inherited)";
 				LIBRARY_SEARCH_PATHS = "$(SDKROOT)/usr/lib/swift\"$(inherited)\"";
 				MTL_ENABLE_DEBUG_INFO = NO;
-				OTHER_LDFLAGS = "$(inherited)  ";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					" ",
+				);
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				USE_HERMES = true;

@@ -1,7 +1,7 @@
 {
   "name": "aquareum",
   "main": "expo-router/entry",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "scripts": {
     "upgrade:tamagui": "yarn up '*tamagui*'@latest '@tamagui/*'@latest",
     "upgrade:tamagui:canary": "yarn up '*tamagui*'@canary '@tamagui/*'@canary",
@@ -48,6 +48,7 @@
     "react-native-screens": "~3.31.1",
     "react-native-svg": "15.2.0",
     "react-native-web": "^0.19.12",
+    "react-native-webview": "13.8.6",
     "tamagui": "^1.100.6"
   },
   "devDependencies": {
