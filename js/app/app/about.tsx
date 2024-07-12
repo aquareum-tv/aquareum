@@ -12,12 +12,9 @@ import {
   H6,
   isWeb,
 } from "tamagui";
-import { Asset } from "expo-asset";
-import { useEffect, useState } from "react";
 import Markdown from "react-native-markdown-display";
 import { description } from "./aquareum-description";
 import { SafeAreaView } from "react-native";
-import { Dimensions } from "react-native";
 
 const Code = styled(Text, { fontFamily: "$mono" });
 

@@ -45,6 +45,21 @@ import { WebView } from "react-native-webview";
 import { Countdown } from "components";
 import { ImageBackground } from "react-native";
 console.log(JSON.stringify(require(`assets/images/cube_small.png`)));
+
+const WebviewIframe = ({ src }) => {
+  if (isWeb) {
+    return <iframe src={src} style={{ border: 0, flex: 1 }}></iframe>;
+  } else {
+    return (
+      <WebView
+        scrollEnabled={false}
+        source={{ uri: src }}
+        style={{ flex: 1, backgroundColor: "transparent" }}
+      />
+    );
+  }
+};
+
 export default function TabOneScreen() {
   // const isLive = Date.now() >= 1721149200000;
   const isLive = false;
@@ -63,11 +78,7 @@ export default function TabOneScreen() {
         <CenteredH2>Aquareum: The Video Layer for Everything</CenteredH2>
       </View>
       <View fg={3} flexBasis={0} style={{ width: "100%" }}>
-        <WebView
-          scrollEnabled={false}
-          source={{ uri: "https://iame.li" }}
-          style={{ flex: 1, backgroundColor: "transparent" }}
-        />
+        <WebviewIframe src="https://iame.li" />
       </View>
       {!isLive && (
         <View>
