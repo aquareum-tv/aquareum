@@ -27,3 +27,15 @@ build:
   script:
     - git fetch --unshallow || echo 'already unshallow'
     - make ci
+
+build-mac:
+  stage: build
+  image: ghcr.io/cirruslabs/macos-ventura-base:latest
+  tags:
+    - tart-installed
+
+  script:
+    - uname -a
+
+  variables:
+    TART_EXECUTOR_HOST_DIR: "true"
