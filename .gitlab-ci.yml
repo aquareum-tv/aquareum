@@ -30,7 +30,7 @@ build:
 
 build-mac:
   stage: build
-  image: ghcr.io/cirruslabs/macos-ventura-base:latest
+  image: ghcr.io/cirruslabs/macos-runner:sonoma
   tags:
     - tart-installed
 
