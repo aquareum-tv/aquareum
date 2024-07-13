@@ -14,7 +14,8 @@
     "prepare": "rm -rf android/app/src/main/assets/fonts && mkdir -p ./android/app/src/main/assets/fonts && cp -R ./assets/fonts ./android/app/src/main/assets",
     "check": "npx tsc -p . --outFile $(mktemp)",
     "prebuild": "expo prebuild --clean && sed -i '' 's/org.gradle.jvmargs=-Xmx2048m -XX:MaxMetaspaceSize=512m/org.gradle.jvmargs=-Xmx8192m -XX:MaxMetaspaceSize=2048m/' android/gradle.properties && echo '\nnetworkTimeout=100000' >> android/gradle.properties",
-    "postinstall": "cd ios && pod install && yarn run find-node",
+    "postinstall": "which pod && yarn run postinstall-ios || echo 'not a mac, not installing pods'",
+    "postinstall-ios": "cd ios && pod install && yarn run find-node",
     "find-node": "node -p '`NODE_BINARY=${process.argv[0]}`' > ios/.xcode.env.local"
   },
   "jest": {
