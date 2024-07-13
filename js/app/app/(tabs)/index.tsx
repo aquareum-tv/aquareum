@@ -44,7 +44,6 @@ const CubeImage = styled(Image, {
 import { WebView } from "react-native-webview";
 import { Countdown } from "components";
 import { ImageBackground } from "react-native";
-console.log(JSON.stringify(require(`assets/images/cube_small.png`)));
 
 const WebviewIframe = ({ src }) => {
   if (isWeb) {
@@ -64,9 +63,9 @@ export default function TabOneScreen() {
   // const isLive = Date.now() >= 1721149200000;
   const isLive = false;
   return (
-    <YStack f={1} ai="center" gap="$8" pt="$5" width="100%" alignItems="center">
-      <YStack maxWidth="100%" width="100%" f={1} alignItems="center">
-        <View fg={1} flexBasis={0} style={{ width: "100%" }}>
+    <YStack f={1} ai="center" gap="$8" pt="$5" alignItems="stretch">
+      <YStack f={1} alignItems="stretch">
+        <View fg={1} flexBasis={0}>
           <ImageBackground
             source={{ uri: cube }}
             style={{ width: "100%", height: "100%" }}
@@ -74,14 +73,14 @@ export default function TabOneScreen() {
           ></ImageBackground>
         </View>
       </YStack>
-      <View flexShrink={0} flexGrow={0} maxWidth="100%">
+      <View flexShrink={0} flexGrow={0}>
         <CenteredH2>Aquareum: The Video Layer for Everything</CenteredH2>
       </View>
-      <View fg={3} flexBasis={0} style={{ width: "100%" }}>
+      <View fg={3} flexBasis={0}>
         <WebviewIframe src="https://iame.li" />
       </View>
       {!isLive && (
-        <View>
+        <View alignSelf="center">
           <Countdown to="2024-07-16T17:00:00.000Z" />
         </View>
       )}
