@@ -3,11 +3,13 @@ package api
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log/slog"
 	"net"
 	"net/http"
+	"os"
 	"time"
 
 	sloghttp "github.com/samber/slog-http"
@@ -18,6 +20,25 @@ import (
 	"aquareum.tv/aquareum/pkg/model"
 )
 
+type AppHostingFS struct {
+	http.FileSystem
+}
+
+func (fs AppHostingFS) Open(name string) (http.File, error) {
+	file, err1 := fs.FileSystem.Open(name)
+	if err1 == nil {
+		return file, nil
+	}
+	if !errors.Is(err1, os.ErrNotExist) {
+		return nil, err1
+	}
+	file, err2 := fs.FileSystem.Open(fmt.Sprintf(name + ".html"))
+	if err2 == nil {
+		return file, nil
+	}
+	return nil, err1
+}
+
 func Handler(ctx context.Context, cli config.CLI, mod model.Model) (http.Handler, error) {
 	mux := http.NewServeMux()
 	files, err := app.Files()
@@ -26,7 +47,7 @@ func Handler(ctx context.Context, cli config.CLI, mod model.Model) (http.Handler
 	}
 	mux.Handle("/api/notification", HandleNotification(ctx, cli, mod))
 	mux.Handle("/api", HandleAPI404(ctx, mod))
-	mux.Handle("/", http.FileServer(http.FS(files)))
+	mux.Handle("/", http.FileServer(AppHostingFS{http.FS(files)}))
 	handler := sloghttp.Recovery(mux)
 	handler = sloghttp.New(slog.Default())(handler)
 	return handler, nil
