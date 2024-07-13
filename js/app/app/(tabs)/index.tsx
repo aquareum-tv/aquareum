@@ -51,6 +51,7 @@ const WebviewIframe = ({ src }) => {
   } else {
     return (
       <WebView
+        allowsInlineMediaPlayback={true}
         scrollEnabled={false}
         source={{ uri: src }}
         style={{ flex: 1, backgroundColor: "transparent" }}
