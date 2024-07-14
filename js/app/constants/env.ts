@@ -1,0 +1,1 @@
+export const EXPO_PUBLIC_AQUAREUM_URL = process.env.EXPO_PUBLIC_AQUAREUM_URL;
