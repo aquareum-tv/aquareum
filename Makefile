@@ -52,8 +52,8 @@ android: app .build/bundletool.jar
 
 .PHONY: ios
 ios: app
-	xcodebuild -workspace ./js/app/ios/Aquareum.xcworkspace -sdk iphoneos -configuration Release -scheme Aquareum clean archive -archivePath ./bin/aquareum-$(VERSION)-ios-release.xcarchive \
-	&& xcodebuild -exportArchive -archivePath ./bin/aquareum-$(VERSION)-ios-release.xcarchive -exportOptionsPlist ./js/app/exportOptions.plist -exportPath ./bin/aquareum-$(VERSION)-ios-release.ipa
+	xcodebuild -workspace ./js/app/ios/Aquareum.xcworkspace -sdk iphoneos -configuration Release -scheme Aquareum clean archive -archivePath ./bin/aquareum-$(VERSION)-ios-release.xcarchive -allowProvisioningUpdates
+	xcodebuild -exportArchive -archivePath ./bin/aquareum-$(VERSION)-ios-release.xcarchive -exportOptionsPlist ./js/app/exportOptions.plist -exportPath ./bin/aquareum-$(VERSION)-ios-release.ipa
 
 .build/bundletool.jar:
 	mkdir -p .build \
