@@ -52,7 +52,17 @@ android: app .build/bundletool.jar
 
 .PHONY: ios
 ios: app
-	xcodebuild -workspace ./js/app/ios/Aquareum.xcworkspace -sdk iphoneos -configuration Release -scheme Aquareum clean archive -archivePath ./bin/aquareum-$(VERSION)-ios-release.xcarchive -allowProvisioningUpdates
+	xcodebuild \
+		-workspace ./js/app/ios/Aquareum.xcworkspace \
+		-sdk iphoneos \
+		-configuration Release \
+		-scheme Aquareum \
+		-archivePath ./bin/aquareum-$(VERSION)-ios-release.xcarchive \
+		CODE_SIGN_IDENTITY=- \
+  	AD_HOC_CODE_SIGNING_ALLOWED=YES \
+  	CODE_SIGN_STYLE=Automatic \
+  	DEVELOPMENT_TEAM=ZZZZZZZZZZ \
+		clean archive
 	xcodebuild -exportArchive -archivePath ./bin/aquareum-$(VERSION)-ios-release.xcarchive -exportOptionsPlist ./js/app/exportOptions.plist -exportPath ./bin/aquareum-$(VERSION)-ios-release.ipa
 
 .build/bundletool.jar:
