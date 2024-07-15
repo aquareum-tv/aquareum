@@ -35,7 +35,7 @@ build-mac:
     - tart-installed
 
   script:
-    - uname -a
+    - make ci-macos
 
   variables:
     TART_EXECUTOR_HOST_DIR: "true"

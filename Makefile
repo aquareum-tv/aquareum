@@ -32,6 +32,9 @@ all: version install check app test node-all-platforms android
 .PHONY: ci
 ci: version install check app test node-all-platforms ci-upload-node android ci-upload-android
 
+.PHONY: ci-macos
+ci-macos: version install check app ios ci-upload-ios
+
 .PHONY: android
 android: app .build/bundletool.jar
 	export NODE_ENV=production \
@@ -46,6 +49,11 @@ android: app .build/bundletool.jar
 	&& java -jar ../.build/bundletool.jar build-apks --bundle=aquareum-$(VERSION)-android-debug.aab --output=aquareum-$(VERSION)-android-debug.apks --mode=universal \
 	&& unzip aquareum-$(VERSION)-android-release.apks && mv universal.apk aquareum-$(VERSION)-android-release.apk && rm toc.pb \
 	&& unzip aquareum-$(VERSION)-android-debug.apks && mv universal.apk aquareum-$(VERSION)-android-debug.apk && rm toc.pb
+
+.PHONY: ios
+ios: app
+	xcodebuild -workspace ./js/app/ios/Aquareum.xcworkspace -sdk iphoneos -configuration Release -scheme Aquareum clean archive -archivePath ./bin/aquareum-$(VERSION)-ios-release.xcarchive \
+	&& xcodebuild -exportArchive -archivePath ./bin/aquareum-$(VERSION)-ios-release.xcarchive -exportOptionsPlist ./js/app/exportOptions.plist -exportPath ./bin/aquareum-$(VERSION)-ios-release.ipa
 
 .build/bundletool.jar:
 	mkdir -p .build \
@@ -92,6 +100,10 @@ ci-upload-android:
 	&& $(MAKE) ci-upload-file upload_file=aquareum-$(VERSION)-android-debug.apk \
 	&& $(MAKE) ci-upload-file upload_file=aquareum-$(VERSION)-android-debug.aab \
 	&& $(MAKE) ci-upload-file upload_file=aquareum-$(VERSION)-android-debug.aab
+
+.PHONY: ci-upload-ios
+ci-upload-ios:
+	$(MAKE) ci-upload-file ./bin/aquareum-$(VERSION)-ios-release.ipa
 
 upload_file?=""
 .PHONY: ci-upload-file
