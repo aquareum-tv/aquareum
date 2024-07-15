@@ -59,11 +59,14 @@ ios: app
 		-scheme Aquareum \
 		-archivePath ./bin/aquareum-$(VERSION)-ios-release.xcarchive \
 		CODE_SIGN_IDENTITY=- \
-  	AD_HOC_CODE_SIGNING_ALLOWED=YES \
-  	CODE_SIGN_STYLE=Automatic \
-  	DEVELOPMENT_TEAM=ZZZZZZZZZZ \
+		AD_HOC_CODE_SIGNING_ALLOWED=YES \
+		CODE_SIGN_STYLE=Automatic \
+		DEVELOPMENT_TEAM=ZZZZZZZZZZ \
 		clean archive
-	xcodebuild -exportArchive -archivePath ./bin/aquareum-$(VERSION)-ios-release.xcarchive -exportOptionsPlist ./js/app/exportOptions.plist -exportPath ./bin/aquareum-$(VERSION)-ios-release.ipa
+	cd bin
+	tar -czvf aquareum-$(VERSION)-ios-release.xcarchive.tar.gz aquareum-$(VERSION)-ios-release.xcarchive
+
+# xcodebuild -exportArchive -archivePath ./bin/aquareum-$(VERSION)-ios-release.xcarchive -exportOptionsPlist ./js/app/exportOptions.plist -exportPath ./bin/aquareum-$(VERSION)-ios-release.ipa
 
 .build/bundletool.jar:
 	mkdir -p .build \
@@ -113,7 +116,7 @@ ci-upload-android:
 
 .PHONY: ci-upload-ios
 ci-upload-ios:
-	$(MAKE) ci-upload-file ./bin/aquareum-$(VERSION)-ios-release.ipa
+	$(MAKE) ci-upload-file upload_file=aquareum-$(VERSION)-ios-release.xcarchive.tar.gz
 
 upload_file?=""
 .PHONY: ci-upload-file
