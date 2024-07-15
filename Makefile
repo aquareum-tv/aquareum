@@ -33,13 +33,23 @@ all: version install check app test node-all-platforms android
 ci: version install check app test node-all-platforms ci-upload-node android ci-upload-android
 
 .PHONY: android
-android: app
+android: app .build/bundletool.jar
 	export NODE_ENV=production \
 	&& cd ./js/app/android \
-	&& ./gradlew build \
+	&& ./gradlew :app:bundleRelease \
+	&& ./gradlew :app:bundleDebug \
 	&& cd - \
-	&& mv ./js/app/android/app/build/outputs/apk/release/app-release.apk ./bin/aquareum-$(VERSION)-android-release.apk \
-	&& mv ./js/app/android/app/build/outputs/apk/debug/app-debug.apk ./bin/aquareum-$(VERSION)-android-debug.apk
+	&& mv ./js/app/android/app/build/outputs/bundle/release/app-release.aab ./bin/aquareum-$(VERSION)-android-release.aab \
+	&& mv ./js/app/android/app/build/outputs/bundle/debug/app-debug.aab ./bin/aquareum-$(VERSION)-android-debug.aab \
+	&& cd bin \
+	&& java -jar ../.build/bundletool.jar build-apks --bundle=aquareum-$(VERSION)-android-release.aab --output=aquareum-$(VERSION)-android-release.apks --mode=universal \
+	&& java -jar ../.build/bundletool.jar build-apks --bundle=aquareum-$(VERSION)-android-debug.aab --output=aquareum-$(VERSION)-android-debug.apks --mode=universal \
+	&& unzip aquareum-$(VERSION)-android-release.apks && mv universal.apk aquareum-$(VERSION)-android-release.apk && rm toc.pb \
+	&& unzip aquareum-$(VERSION)-android-debug.apks && mv universal.apk aquareum-$(VERSION)-android-debug.apk && rm toc.pb
+
+.build/bundletool.jar:
+	mkdir -p .build \
+	&& curl -L -o ./.build/bundletool.jar https://github.com/google/bundletool/releases/download/1.17.0/bundletool-all-1.17.0.jar
 
 .PHONY: node-all-platforms
 node-all-platforms:
@@ -79,7 +89,9 @@ ci-upload-node:
 .PHONY: ci-upload-android
 ci-upload-android:
 	$(MAKE) ci-upload-file upload_file=aquareum-$(VERSION)-android-release.apk \
-	&& $(MAKE) ci-upload-file upload_file=aquareum-$(VERSION)-android-debug.apk
+	&& $(MAKE) ci-upload-file upload_file=aquareum-$(VERSION)-android-debug.apk \
+	&& $(MAKE) ci-upload-file upload_file=aquareum-$(VERSION)-android-debug.aab \
+	&& $(MAKE) ci-upload-file upload_file=aquareum-$(VERSION)-android-debug.aab
 
 upload_file?=""
 .PHONY: ci-upload-file
