@@ -62,10 +62,9 @@ ios: app
 		AD_HOC_CODE_SIGNING_ALLOWED=YES \
 		CODE_SIGN_STYLE=Automatic \
 		DEVELOPMENT_TEAM=ZZZZZZZZZZ \
-		clean archive
-	find bin
-	cd bin
-	tar -czvf aquareum-$(VERSION)-ios-release.xcarchive.tar.gz aquareum-$(VERSION)-ios-release.xcarchive
+		clean archive \
+	&& cd bin \
+	&& tar -czvf aquareum-$(VERSION)-ios-release.xcarchive.tar.gz aquareum-$(VERSION)-ios-release.xcarchive
 
 # xcodebuild -exportArchive -archivePath ./bin/aquareum-$(VERSION)-ios-release.xcarchive -exportOptionsPlist ./js/app/exportOptions.plist -exportPath ./bin/aquareum-$(VERSION)-ios-release.ipa
 
