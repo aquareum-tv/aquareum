@@ -63,6 +63,7 @@ ios: app
 		CODE_SIGN_STYLE=Automatic \
 		DEVELOPMENT_TEAM=ZZZZZZZZZZ \
 		clean archive
+	find bin
 	cd bin
 	tar -czvf aquareum-$(VERSION)-ios-release.xcarchive.tar.gz aquareum-$(VERSION)-ios-release.xcarchive
 
