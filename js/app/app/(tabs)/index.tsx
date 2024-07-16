@@ -49,7 +49,13 @@ import { useState } from "react";
 
 const WebviewIframe = ({ src }) => {
   if (isWeb) {
-    return <iframe src={src} style={{ border: 0, flex: 1 }}></iframe>;
+    return (
+      <iframe
+        allowFullScreen={true}
+        src={src}
+        style={{ border: 0, flex: 1 }}
+      ></iframe>
+    );
   } else {
     return (
       <WebView
@@ -83,7 +89,6 @@ export default function TabOneScreen() {
       setPresses(newTaps);
     }
   };
-  const isLive = false;
   return (
     <YStack f={1} ai="center" gap="$8" pt="$5" alignItems="stretch">
       <YStack f={1} alignItems="stretch">
@@ -109,11 +114,6 @@ export default function TabOneScreen() {
       <View fg={3} flexBasis={0}>
         <WebviewIframe src="https://iame.li" />
       </View>
-      {!isLive && (
-        <View alignSelf="center">
-          <Countdown to="2024-07-16T17:00:00.000Z" />
-        </View>
-      )}
       <View paddingBottom="$10"></View>
     </YStack>
   );
