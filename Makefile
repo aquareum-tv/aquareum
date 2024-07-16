@@ -32,14 +32,45 @@ all: version install check app test node-all-platforms android
 .PHONY: ci
 ci: version install check app test node-all-platforms ci-upload-node android ci-upload-android
 
+.PHONY: ci-macos
+ci-macos: version install check app ios ci-upload-ios
+
 .PHONY: android
-android: app
+android: app .build/bundletool.jar
 	export NODE_ENV=production \
 	&& cd ./js/app/android \
-	&& ./gradlew build \
+	&& ./gradlew :app:bundleRelease \
+	&& ./gradlew :app:bundleDebug \
 	&& cd - \
-	&& mv ./js/app/android/app/build/outputs/apk/release/app-release.apk ./bin/aquareum-$(VERSION)-android-release.apk \
-	&& mv ./js/app/android/app/build/outputs/apk/debug/app-debug.apk ./bin/aquareum-$(VERSION)-android-debug.apk
+	&& mv ./js/app/android/app/build/outputs/bundle/release/app-release.aab ./bin/aquareum-$(VERSION)-android-release.aab \
+	&& mv ./js/app/android/app/build/outputs/bundle/debug/app-debug.aab ./bin/aquareum-$(VERSION)-android-debug.aab \
+	&& cd bin \
+	&& java -jar ../.build/bundletool.jar build-apks --bundle=aquareum-$(VERSION)-android-release.aab --output=aquareum-$(VERSION)-android-release.apks --mode=universal \
+	&& java -jar ../.build/bundletool.jar build-apks --bundle=aquareum-$(VERSION)-android-debug.aab --output=aquareum-$(VERSION)-android-debug.apks --mode=universal \
+	&& unzip aquareum-$(VERSION)-android-release.apks && mv universal.apk aquareum-$(VERSION)-android-release.apk && rm toc.pb \
+	&& unzip aquareum-$(VERSION)-android-debug.apks && mv universal.apk aquareum-$(VERSION)-android-debug.apk && rm toc.pb
+
+.PHONY: ios
+ios: app
+	xcodebuild \
+		-workspace ./js/app/ios/Aquareum.xcworkspace \
+		-sdk iphoneos \
+		-configuration Release \
+		-scheme Aquareum \
+		-archivePath ./bin/aquareum-$(VERSION)-ios-release.xcarchive \
+		CODE_SIGN_IDENTITY=- \
+		AD_HOC_CODE_SIGNING_ALLOWED=YES \
+		CODE_SIGN_STYLE=Automatic \
+		DEVELOPMENT_TEAM=ZZZZZZZZZZ \
+		clean archive \
+	&& cd bin \
+	&& tar -czvf aquareum-$(VERSION)-ios-release.xcarchive.tar.gz aquareum-$(VERSION)-ios-release.xcarchive
+
+# xcodebuild -exportArchive -archivePath ./bin/aquareum-$(VERSION)-ios-release.xcarchive -exportOptionsPlist ./js/app/exportOptions.plist -exportPath ./bin/aquareum-$(VERSION)-ios-release.ipa
+
+.build/bundletool.jar:
+	mkdir -p .build \
+	&& curl -L -o ./.build/bundletool.jar https://github.com/google/bundletool/releases/download/1.17.0/bundletool-all-1.17.0.jar
 
 .PHONY: node-all-platforms
 node-all-platforms:
@@ -79,7 +110,13 @@ ci-upload-node:
 .PHONY: ci-upload-android
 ci-upload-android:
 	$(MAKE) ci-upload-file upload_file=aquareum-$(VERSION)-android-release.apk \
-	&& $(MAKE) ci-upload-file upload_file=aquareum-$(VERSION)-android-debug.apk
+	&& $(MAKE) ci-upload-file upload_file=aquareum-$(VERSION)-android-debug.apk \
+	&& $(MAKE) ci-upload-file upload_file=aquareum-$(VERSION)-android-debug.aab \
+	&& $(MAKE) ci-upload-file upload_file=aquareum-$(VERSION)-android-debug.aab
+
+.PHONY: ci-upload-ios
+ci-upload-ios:
+	$(MAKE) ci-upload-file upload_file=aquareum-$(VERSION)-ios-release.xcarchive.tar.gz
 
 upload_file?=""
 .PHONY: ci-upload-file

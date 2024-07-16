@@ -27,3 +27,15 @@ build:
   script:
     - git fetch --unshallow || echo 'already unshallow'
     - make ci
+
+build-mac:
+  stage: build
+  image: ghcr.io/cirruslabs/macos-runner:sonoma
+  tags:
+    - tart-installed
+
+  script:
+    - make ci-macos
+
+  # variables:
+  #   TART_EXECUTOR_HOST_DIR: "true"
