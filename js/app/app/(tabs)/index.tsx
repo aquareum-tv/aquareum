@@ -46,6 +46,7 @@ import { Countdown } from "components";
 import { ImageBackground } from "react-native";
 import * as env from "constants/env";
 import { useState } from "react";
+import GetApps from "components/get-apps";
 
 const WebviewIframe = ({ src }) => {
   if (isWeb) {
@@ -110,6 +111,9 @@ export default function TabOneScreen() {
       </YStack>
       <View flexShrink={0} flexGrow={0}>
         <CenteredH2>Aquareum: The Video Layer for Everything</CenteredH2>
+      </View>
+      <View>
+        <GetApps />
       </View>
       <View fg={3} flexBasis={0}>
         <WebviewIframe src="https://iame.li" />

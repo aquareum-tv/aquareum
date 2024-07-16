@@ -9,3 +9,4 @@ bin
 !.yarn/sdks
 !.yarn/versions
 .build
+.wrangler
