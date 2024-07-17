@@ -1,2 +1,2 @@
 ./node_modules/.bin/lint-staged
-make check
+cd js/app && yarn run check

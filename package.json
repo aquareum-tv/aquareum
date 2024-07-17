@@ -1,11 +1,12 @@
 {
   "name": "aquareum-monorepo",
   "private": true,
-  "version": "0.0.2",
+  "version": "0.0.0-monorepo",
   "description": "The video layer for everything.",
   "main": "index.js",
   "scripts": {
-    "check": "yarn workspaces foreach --all run check && git ls-files | xargs prettier --check --ignore-unknown",
+    "check": "yarn run check:workspaces && git ls-files | xargs prettier --check --ignore-unknown",
+    "check:workspaces": "cd js/app && yarn run check",
     "fix": "git ls-files | xargs prettier --write --ignore-unknown",
     "postinstall": "husky && yarn run build",
     "build": "yarn workspaces foreach --all run build",
@@ -16,6 +17,7 @@
   "license": "MIT",
   "devDependencies": {
     "husky": "^9.0.11",
+    "lerna": "^8.1.6",
     "lint-staged": "^15.2.7",
     "prettier": "^3.3.2"
   },
