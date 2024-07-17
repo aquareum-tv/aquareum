@@ -67,7 +67,9 @@ export default function () {
       ios: {
         supportsTablet: true,
         bundleIdentifier: bundle,
-        googleServicesFile: "./GoogleService-Info.plist",
+        googleServicesFile: IS_DEV_BUILD
+          ? undefined
+          : "./GoogleService-Info.plist",
         entitlements: {
           "aps-environment": "production",
         },
@@ -81,7 +83,7 @@ export default function () {
           backgroundColor: "#ffffff",
         },
         package: bundle,
-        googleServicesFile: "./google-services.json",
+        googleServicesFile: IS_DEV_BUILD ? undefined : "./google-services.json",
         permissions: [
           "android.permission.SCHEDULE_EXACT_ALARM",
           "android.permission.POST_NOTIFICATIONS",
@@ -125,16 +127,20 @@ export default function () {
             ],
           },
         ],
-        "@react-native-firebase/app",
-        "@react-native-firebase/messaging",
-        [
-          "expo-build-properties",
-          {
-            ios: {
-              useFrameworks: "static",
-            },
-          },
-        ],
+        ...(IS_DEV_BUILD
+          ? []
+          : [
+              "@react-native-firebase/app",
+              "@react-native-firebase/messaging",
+              [
+                "expo-build-properties",
+                {
+                  ios: {
+                    useFrameworks: "static",
+                  },
+                },
+              ],
+            ]),
         [withNotificationsIOS, {}],
         [withConsistentVersionNumber, { version: pkg.version }],
       ],
@@ -142,15 +148,15 @@ export default function () {
         typedRoutes: true,
       },
       updates: {
-        url: process.env.EXPO_PUBLIC_AQUAREUM_URL,
+        url: `${process.env.EXPO_PUBLIC_AQUAREUM_URL}/app-updates`,
         enabled: true,
         checkAutomatically: "ON_LOAD",
         fallbackToCacheTimeout: 0,
-        codeSigningCertificate: "./code-signing/certificate.pem",
-        codeSigningMetadata: {
-          keyid: "main",
-          alg: "rsa-v1_5-sha256",
-        },
+        // codeSigningCertificate: "./code-signing/certificate.pem",
+        // codeSigningMetadata: {
+        //   keyid: "main",
+        //   alg: "rsa-v1_5-sha256",
+        // },
       },
     },
   };

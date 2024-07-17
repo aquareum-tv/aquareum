@@ -46,6 +46,7 @@ func Handler(ctx context.Context, cli config.CLI, mod model.Model) (http.Handler
 		return nil, err
 	}
 	mux.Handle("/api/notification", HandleNotification(ctx, cli, mod))
+	mux.Handle("/app-updates", HandleAppUpdates(ctx, cli, mod))
 	mux.Handle("/api", HandleAPI404(ctx, mod))
 	mux.Handle("/", http.FileServer(AppHostingFS{http.FS(files)}))
 	handler := sloghttp.Recovery(mux)
