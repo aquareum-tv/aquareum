@@ -7,7 +7,10 @@ const HEIGHT = 200 / RATIO;
 export default function GetApps() {
   return (
     <XStack justifyContent="center">
-      <Anchor target="_blank" href="https://testflight.apple.com/join/FlXQaYfv">
+      <Anchor
+        target="_blank"
+        href="https://apps.apple.com/us/app/aquareum/id6535653195"
+      >
         <Image
           width={WIDTH}
           height={HEIGHT}
