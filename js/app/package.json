@@ -11,7 +11,7 @@
     "web": "npx expo start --web",
     "test": "jest --watchAll",
     "build": "expo export -p web || expo export -p web",
-    "prepare": "rm -rf android/app/src/main/assets/fonts && mkdir -p ./android/app/src/main/assets/fonts && cp -R ./assets/fonts ./android/app/src/main/assets",
+    "prepare": "yarn run prebuild",
     "check": "npx tsc -p . --outFile $(mktemp)",
     "prebuild": "expo prebuild --clean && sed -i.bak 's/org.gradle.jvmargs=-Xmx2048m -XX:MaxMetaspaceSize=512m/org.gradle.jvmargs=-Xmx8192m -XX:MaxMetaspaceSize=2048m/' android/gradle.properties && echo '\nnetworkTimeout=100000' >> android/gradle.properties",
     "postinstall": "which pod && yarn run postinstall-ios || echo 'not a mac, not installing pods'",
