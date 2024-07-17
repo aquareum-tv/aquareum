@@ -1,2 +1,2 @@
 ./node_modules/.bin/lint-staged
-yarn run check:workspaces
+cd js/app && yarn run check

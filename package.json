@@ -6,7 +6,7 @@
   "main": "index.js",
   "scripts": {
     "check": "yarn run check:workspaces && git ls-files | xargs prettier --check --ignore-unknown",
-    "check:workspaces": "yarn workspaces foreach --all run check",
+    "check:workspaces": "cd js/app && yarn run check",
     "fix": "git ls-files | xargs prettier --write --ignore-unknown",
     "postinstall": "husky && yarn run build",
     "build": "yarn workspaces foreach --all run build",
