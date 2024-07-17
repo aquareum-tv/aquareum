@@ -13,6 +13,36 @@ export const withNotificationsIOS: ConfigPlugin<{}> = (config, {}) => {
   return config;
 };
 
+const withConsistentVersionNumber = (
+  config,
+  { version }: { version: string },
+) => {
+  // if (!config.ios) {
+  //   config.ios = {};
+  // }
+  // if (!config.ios.infoPlist) {
+  //   config.ios.infoPlist = {};
+  // }
+  config = withXcodeProject(config, (config) => {
+    for (let [k, v] of Object.entries(
+      config.modResults.hash.project.objects.XCBuildConfiguration,
+    )) {
+      const obj = v as any;
+      if (!obj.buildSettings) {
+        continue;
+      }
+      if (typeof obj.buildSettings.MARKETING_VERSION !== "undefined") {
+        obj.buildSettings.MARKETING_VERSION = version;
+      }
+      if (typeof obj.buildSettings.CURRENT_PROJECT_VERSION !== "undefined") {
+        obj.buildSettings.CURRENT_PROJECT_VERSION = version;
+      }
+    }
+    return config;
+  });
+  return config;
+};
+
 export default function () {
   const pkg = require("./package.json");
   return {
@@ -100,6 +130,7 @@ export default function () {
           },
         ],
         [withNotificationsIOS, {}],
+        [withConsistentVersionNumber, { version: pkg.version }],
       ],
       experiments: {
         typedRoutes: true,
