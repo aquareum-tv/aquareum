@@ -13,7 +13,7 @@
     "build": "yarn run build:web && yarn run prebuild",
     "build:web": "expo export -p web || expo export -p web",
     "check": "npx tsc -p . --outFile $(mktemp)",
-    "prebuild": "EXPO_NO_GIT_STATUS=1 expo prebuild --clean && sed -i.bak 's/org.gradle.jvmargs=-Xmx2048m -XX:MaxMetaspaceSize=512m/org.gradle.jvmargs=-Xmx8192m -XX:MaxMetaspaceSize=2048m/' android/gradle.properties && echo '\nnetworkTimeout=100000' >> android/gradle.properties",
+    "prebuild": "EXPO_NO_GIT_STATUS=1 expo prebuild --clean && sed -i.bak 's/org.gradle.jvmargs=-Xmx2048m -XX:MaxMetaspaceSize=512m/org.gradle.jvmargs=-Xmx8192m -XX:MaxMetaspaceSize=2048m/' android/gradle.properties && echo '\nnetworkTimeout=100000' >> android/gradle.properties && yarn run find-node",
     "postinstall": "which pod && yarn run postinstall-ios || echo 'not a mac, not installing pods'",
     "postinstall-ios": "cd ios && pod install && yarn run find-node",
     "find-node": "node -p '`NODE_BINARY=${process.argv[0]}`' > ios/.xcode.env.local"
