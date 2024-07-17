@@ -68,6 +68,9 @@ export default function () {
         entitlements: {
           "aps-environment": "production",
         },
+        infoPlist: {
+          UIBackgroundModes: ["fetch", "remote-notification"],
+        },
       },
       android: {
         adaptiveIcon: {
