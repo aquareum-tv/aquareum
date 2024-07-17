@@ -1,3 +1,18 @@
+import {
+  ConfigPlugin,
+  withXcodeProject,
+  IOSConfig,
+  withEntitlementsPlist,
+} from "expo/config-plugins";
+
+export const withNotificationsIOS: ConfigPlugin<{}> = (config, {}) => {
+  config = withEntitlementsPlist(config, (config) => {
+    config.modResults["aps-environment"] = "production";
+    return config;
+  });
+  return config;
+};
+
 export default function () {
   const pkg = require("./package.json");
   return {
@@ -84,6 +99,7 @@ export default function () {
             },
           },
         ],
+        [withNotificationsIOS, {}],
       ],
       experiments: {
         typedRoutes: true,
