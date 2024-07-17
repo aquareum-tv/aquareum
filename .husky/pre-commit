@@ -1,2 +1,2 @@
 ./node_modules/.bin/lint-staged
-make check
+yarn run check:workspaces
