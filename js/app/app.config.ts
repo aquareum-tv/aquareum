@@ -44,11 +44,14 @@ const withConsistentVersionNumber = (
 };
 
 export default function () {
+  const IS_DEV_BUILD = process.env["AQUAREUM_DEV_BUILD"] === "true";
   const pkg = require("./package.json");
+  const name = IS_DEV_BUILD ? "Devquareum" : "Aquareum";
+  const bundle = IS_DEV_BUILD ? "tv.aquareum.dev" : "tv.aquareum";
   return {
     expo: {
-      name: "Aquareum",
-      slug: "Aquareum",
+      name: name,
+      slug: name,
       version: pkg.version,
       runtimeVersion: pkg.version,
       orientation: "portrait",
@@ -63,7 +66,7 @@ export default function () {
       assetBundlePatterns: ["**/*"],
       ios: {
         supportsTablet: true,
-        bundleIdentifier: "tv.aquareum",
+        bundleIdentifier: bundle,
         googleServicesFile: "./GoogleService-Info.plist",
         entitlements: {
           "aps-environment": "production",
@@ -77,7 +80,7 @@ export default function () {
           foregroundImage: "./assets/images/adaptive-icon.png",
           backgroundColor: "#ffffff",
         },
-        package: "tv.aquareum",
+        package: bundle,
         googleServicesFile: "./google-services.json",
         permissions: [
           "android.permission.SCHEDULE_EXACT_ALARM",
@@ -139,7 +142,7 @@ export default function () {
         typedRoutes: true,
       },
       updates: {
-        url: "https://aquareum.tv/app-updates",
+        url: process.env.EXPO_PUBLIC_AQUAREUM_URL,
         enabled: true,
         checkAutomatically: "ON_LOAD",
         fallbackToCacheTimeout: 0,
