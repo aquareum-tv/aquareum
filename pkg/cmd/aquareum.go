@@ -58,7 +58,7 @@ func Start(build *config.BuildFlags) error {
 	log.Log(context.Background(),
 		"starting aquareum",
 		"version", build.Version,
-		"buildTime", build.BuildTimeStrMillis(),
+		"buildTime", build.BuildTimeStr(),
 		"uuid", build.UUID)
 
 	mod, err := model.MakeDB(cli.DBPath)

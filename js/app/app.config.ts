@@ -134,6 +134,12 @@ export default function () {
             },
           },
         ],
+        [
+          "expo-asset",
+          {
+            assets: ["assets"],
+          },
+        ],
         [withNotificationsIOS, {}],
         [withConsistentVersionNumber, { version: pkg.version }],
       ],

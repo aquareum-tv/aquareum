@@ -2,11 +2,14 @@ package api
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
 	"mime"
 	"net/http"
+	"strings"
 
 	"aquareum.tv/aquareum/js/app"
 	"aquareum.tv/aquareum/pkg/config"
@@ -73,21 +76,34 @@ func (u *Updater) GetManifest(platform string) (*UpdateManifest, error) {
 		if typ == "" {
 			return nil, fmt.Errorf("unknown content-type for file extention %s", ext)
 		}
+		parts := strings.Split(ass.Path, "/")
+		hash, err := hashFile(ass.Path)
+		if err != nil {
+			return nil, err
+		}
 		assets = append(assets, UpdateAsset{
-			Key:           ass.Path,
+			Hash:          hash,
+			Key:           parts[len(parts)-1],
 			URL:           fmt.Sprintf("https://980b-24-19-207-220.ngrok-free.app/%s", ass.Path),
 			ContentType:   typ,
 			FileExtension: ass.Ext,
 		})
 	}
+	dashParts := strings.Split(plat.Bundle, "-")
+	dotParts := strings.Split(dashParts[len(dashParts)-1], ".")
+	hash, err := hashFile(plat.Bundle)
+	if err != nil {
+		return nil, err
+	}
 	man := UpdateManifest{
 		ID:             u.CLI.Build.UUID,
-		CreatedAt:      u.CLI.Build.BuildTimeStr(),
+		CreatedAt:      u.CLI.Build.BuildTimeStrExpo(),
 		RuntimeVersion: RUNTIME_VERSION,
 		LaunchAsset: UpdateAsset{
-			Key:         plat.Bundle,
+			Hash:        hash,
+			Key:         dotParts[0],
 			URL:         fmt.Sprintf("https://980b-24-19-207-220.ngrok-free.app/%s", plat.Bundle),
-			ContentType: "application/hermes",
+			ContentType: "application/javascript",
 		},
 		Assets:   assets,
 		Metadata: map[string]string{},
@@ -150,4 +166,27 @@ func (a *AquareumAPI) HandleAppUpdates(ctx context.Context) http.HandlerFunc {
 		w.WriteHeader(http.StatusOK)
 		w.Write(bs)
 	}
+}
+
+func hashFile(path string) (string, error) {
+	fs, err := app.Files()
+	if err != nil {
+		return "", err
+	}
+	file, err := fs.Open(path)
+	if err != nil {
+		return "", err
+	}
+	bs, err := io.ReadAll(file)
+	if err != nil {
+		return "", err
+	}
+	h := sha256.New()
+
+	h.Write(bs)
+
+	outbs := h.Sum(nil)
+
+	sEnc := base64.StdEncoding.EncodeToString(outbs)
+	return sEnc, nil
 }

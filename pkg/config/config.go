@@ -13,7 +13,7 @@ func (b BuildFlags) BuildTimeStr() string {
 	return ts.UTC().Format(time.RFC3339)
 }
 
-func (b BuildFlags) BuildTimeStrMillis() string {
+func (b BuildFlags) BuildTimeStrExpo() string {
 	ts := time.Unix(b.BuildTime, 0)
 	return ts.UTC().Format("2006-01-02T15:04:05.000Z")
 }
