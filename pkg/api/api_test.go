@@ -51,10 +51,11 @@ func TestRedirectHandler(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cli := config.CLI{HttpAddr: tt.httpAddr, HttpsAddr: tt.httpsAddr}
-			mod := model.DBModel{}
+			cli := &config.CLI{HttpAddr: tt.httpAddr, HttpsAddr: tt.httpsAddr}
+			mod := &model.DBModel{}
+			a := AquareumAPI{CLI: cli, Mod: mod}
 
-			handler, err := RedirectHandler(context.Background(), cli, &mod)
+			handler, err := a.RedirectHandler(context.Background())
 			assert.NoError(t, err, "RedirectHandler should not return an error")
 
 			req := httptest.NewRequest("GET", tt.requestURL, nil)

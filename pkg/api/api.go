@@ -20,6 +20,15 @@ import (
 	"aquareum.tv/aquareum/pkg/model"
 )
 
+type AquareumAPI struct {
+	CLI *config.CLI
+	Mod model.Model
+}
+
+func MakeAquareumAPI(cli *config.CLI, mod model.Model) (*AquareumAPI, error) {
+	return &AquareumAPI{CLI: cli, Mod: mod}, nil
+}
+
 type AppHostingFS struct {
 	http.FileSystem
 }
@@ -39,23 +48,23 @@ func (fs AppHostingFS) Open(name string) (http.File, error) {
 	return nil, err1
 }
 
-func Handler(ctx context.Context, cli config.CLI, mod model.Model) (http.Handler, error) {
+func (a *AquareumAPI) Handler(ctx context.Context) (http.Handler, error) {
 	mux := http.NewServeMux()
 	files, err := app.Files()
 	if err != nil {
 		return nil, err
 	}
-	mux.Handle("/api/notification", HandleNotification(ctx, cli, mod))
-	mux.Handle("/app-updates", HandleAppUpdates(ctx, cli, mod))
-	mux.Handle("/api", HandleAPI404(ctx, mod))
+	mux.Handle("/api/notification", a.HandleNotification(ctx))
+	mux.Handle("/app-updates", a.HandleAppUpdates(ctx))
+	mux.Handle("/api", a.HandleAPI404(ctx))
 	mux.Handle("/", http.FileServer(AppHostingFS{http.FS(files)}))
 	handler := sloghttp.Recovery(mux)
 	handler = sloghttp.New(slog.Default())(handler)
 	return handler, nil
 }
 
-func RedirectHandler(ctx context.Context, cli config.CLI, mod model.Model) (http.Handler, error) {
-	_, tlsPort, err := net.SplitHostPort(cli.HttpsAddr)
+func (a *AquareumAPI) RedirectHandler(ctx context.Context) (http.Handler, error) {
+	_, tlsPort, err := net.SplitHostPort(a.CLI.HttpsAddr)
 	if err != nil {
 		return nil, err
 	}
@@ -82,13 +91,13 @@ type NotificationPayload struct {
 	Token string `json:"token"`
 }
 
-func HandleAPI404(ctx context.Context, mod model.Model) http.HandlerFunc {
+func (a *AquareumAPI) HandleAPI404(ctx context.Context) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(404)
 	}
 }
 
-func HandleNotification(ctx context.Context, cli config.CLI, mod model.Model) http.HandlerFunc {
+func (a *AquareumAPI) HandleNotification(ctx context.Context) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		if req.Method == "POST" {
 			payload, err := io.ReadAll(req.Body)
@@ -104,7 +113,7 @@ func HandleNotification(ctx context.Context, cli config.CLI, mod model.Model) ht
 				w.WriteHeader(400)
 				return
 			}
-			err = mod.CreateNotification(n.Token)
+			err = a.Mod.CreateNotification(n.Token)
 			if err != nil {
 				log.Log(ctx, "error creating notification", "error", err)
 				w.WriteHeader(400)
@@ -114,22 +123,22 @@ func HandleNotification(ctx context.Context, cli config.CLI, mod model.Model) ht
 			w.WriteHeader(200)
 		} else if req.Method == "GET" {
 			// disallow unless we have an admin token
-			if cli.AdminSecret == "" {
+			if a.CLI.AdminSecret == "" {
 				w.WriteHeader(http.StatusNotImplemented)
 				return
 			}
-			log.Log(ctx, cli.AdminSecret)
+			log.Log(ctx, a.CLI.AdminSecret)
 			auth := req.Header.Get("Authorization")
 			if auth == "" {
 				w.WriteHeader(http.StatusUnauthorized)
 				return
 			}
-			expected := fmt.Sprintf("Bearer %s", cli.AdminSecret)
+			expected := fmt.Sprintf("Bearer %s", a.CLI.AdminSecret)
 			if auth != expected {
 				w.WriteHeader(http.StatusForbidden)
 				return
 			}
-			nots, err := mod.ListNotifications()
+			nots, err := a.Mod.ListNotifications()
 			if err != nil {
 				log.Log(ctx, "error listing notifications", "error", err)
 				w.WriteHeader(500)
@@ -150,47 +159,47 @@ func HandleNotification(ctx context.Context, cli config.CLI, mod model.Model) ht
 	}
 }
 
-func ServeHTTP(ctx context.Context, cli config.CLI, mod model.Model) error {
-	handler, err := Handler(ctx, cli, mod)
+func (a *AquareumAPI) ServeHTTP(ctx context.Context) error {
+	handler, err := a.Handler(ctx)
 	if err != nil {
 		return err
 	}
-	return ServerWithShutdown(ctx, handler, cli, mod, func(s *http.Server) error {
-		s.Addr = cli.HttpAddr
+	return a.ServerWithShutdown(ctx, handler, func(s *http.Server) error {
+		s.Addr = a.CLI.HttpAddr
 		log.Log(ctx, "http server starting", "addr", s.Addr)
 		return s.ListenAndServe()
 	})
 }
 
-func ServeHTTPRedirect(ctx context.Context, cli config.CLI, mod model.Model) error {
-	handler, err := RedirectHandler(ctx, cli, mod)
+func (a *AquareumAPI) ServeHTTPRedirect(ctx context.Context) error {
+	handler, err := a.RedirectHandler(ctx)
 	if err != nil {
 		return err
 	}
-	return ServerWithShutdown(ctx, handler, cli, mod, func(s *http.Server) error {
-		s.Addr = cli.HttpAddr
+	return a.ServerWithShutdown(ctx, handler, func(s *http.Server) error {
+		s.Addr = a.CLI.HttpAddr
 		log.Log(ctx, "http tls redirecct server starting", "addr", s.Addr)
 		return s.ListenAndServe()
 	})
 }
 
-func ServeHTTPS(ctx context.Context, cli config.CLI, mod model.Model) error {
-	handler, err := Handler(ctx, cli, mod)
+func (a *AquareumAPI) ServeHTTPS(ctx context.Context) error {
+	handler, err := a.Handler(ctx)
 	if err != nil {
 		return err
 	}
-	return ServerWithShutdown(ctx, handler, cli, mod, func(s *http.Server) error {
-		s.Addr = cli.HttpsAddr
+	return a.ServerWithShutdown(ctx, handler, func(s *http.Server) error {
+		s.Addr = a.CLI.HttpsAddr
 		log.Log(ctx, "https server starting",
 			"addr", s.Addr,
-			"certPath", cli.TLSCertPath,
-			"keyPath", cli.TLSKeyPath,
+			"certPath", a.CLI.TLSCertPath,
+			"keyPath", a.CLI.TLSKeyPath,
 		)
-		return s.ListenAndServeTLS(cli.TLSCertPath, cli.TLSKeyPath)
+		return s.ListenAndServeTLS(a.CLI.TLSCertPath, a.CLI.TLSKeyPath)
 	})
 }
 
-func ServerWithShutdown(ctx context.Context, handler http.Handler, cli config.CLI, mod model.Model, serve func(*http.Server) error) error {
+func (a *AquareumAPI) ServerWithShutdown(ctx context.Context, handler http.Handler, serve func(*http.Server) error) error {
 	ctx, cancel := context.WithCancel(ctx)
 	server := http.Server{Handler: handler}
 	var serveErr error

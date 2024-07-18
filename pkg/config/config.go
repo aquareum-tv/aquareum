@@ -1,5 +1,10 @@
 package config
 
+type BuildFlags struct {
+	Version   string
+	BuildTime int64
+}
+
 type CLI struct {
 	TLSCertPath string
 	TLSKeyPath  string
@@ -8,4 +13,5 @@ type CLI struct {
 	HttpAddr    string
 	HttpsAddr   string
 	AdminSecret string
+	Build       *BuildFlags
 }

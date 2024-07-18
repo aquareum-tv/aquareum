@@ -2,11 +2,13 @@ package api
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
+	"io"
 	"net/http"
 
-	"aquareum.tv/aquareum/pkg/config"
+	"aquareum.tv/aquareum/js/app"
 	"aquareum.tv/aquareum/pkg/log"
-	"aquareum.tv/aquareum/pkg/model"
 )
 
 type Manifest struct {
@@ -27,7 +29,53 @@ type Asset struct {
 	URL           string `json:"url"`
 }
 
-func HandleAppUpdates(ctx context.Context, cli config.CLI, mod model.Model) http.HandlerFunc {
+type ExpoMetadata struct {
+	Version      int    `json:"version"`
+	Bundler      string `json:"bundler"`
+	FileMetadata struct {
+		IOS     ExpoMetadataPlatform `json:"ios"`
+		Android ExpoMetadataPlatform `json:"android"`
+	} `json:"fileMetadata"`
+}
+
+type ExpoMetadataPlatform struct {
+	Bundle string `json:"bundle"`
+	Assets []struct {
+		Path string `json:"path"`
+		Ext  string `json:"ext"`
+	} `json:"assets"`
+}
+
+// func init() {
+// 	err := InitUpdater()
+// 	if err != nil {
+// 		panic(err)
+// 	}
+// }
+
+func InitUpdater() error {
+	fs, err := app.Files()
+	if err != nil {
+		panic(err)
+	}
+	file, err := fs.Open("metadata.json")
+	if err != nil {
+		return err
+	}
+	bs, err := io.ReadAll(file)
+	if err != nil {
+		return err
+	}
+	metadata := ExpoMetadata{}
+	err = json.Unmarshal(bs, &metadata)
+	if err != nil {
+		return err
+	}
+	panic(fmt.Sprintf("%v", metadata))
+	return nil
+}
+
+func (a *AquareumAPI) HandleAppUpdates(ctx context.Context) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		log.Log(ctx, "got app-updates request", "method", req.Method, "headers", req.Header)
 		w.WriteHeader(501)

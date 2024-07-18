@@ -20,7 +20,7 @@ app: install
 
 .PHONY: node
 node:
-	go build -ldflags="-X 'main.Version=$(VERSION)'" -o $(OUT_DIR)/aquareum ./cmd/aquareum
+	go build -ldflags="-X 'main.Version=$(VERSION) main.BuildTime=$(shell date +%s)'" -o $(OUT_DIR)/aquareum ./cmd/aquareum
 
 .PHONY: test
 test:

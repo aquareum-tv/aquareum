@@ -18,12 +18,8 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-type BuildFlags struct {
-	Version string
-}
-
 // parse the CLI and fire up an aquareum node!
-func Start(build *BuildFlags) error {
+func Start(build *config.BuildFlags) error {
 	err := normalizeXDG()
 	if err != nil {
 		return err
@@ -44,7 +40,7 @@ func Start(build *BuildFlags) error {
 	dbFile = fmt.Sprintf("sqlite://%s", dbFile)
 
 	fs := flag.NewFlagSet("aquareum", flag.ExitOnError)
-	cli := config.CLI{}
+	cli := config.CLI{Build: build}
 	fs.StringVar(&cli.HttpAddr, "http-addr", ":8080", "Public HTTP address")
 	fs.StringVar(&cli.HttpsAddr, "https-addr", ":8443", "Public HTTPS address")
 	fs.BoolVar(&cli.Insecure, "insecure", false, "Run without HTTPS. not recomended, as WebRTC support requires HTTPS")
@@ -63,6 +59,10 @@ func Start(build *BuildFlags) error {
 	if err != nil {
 		return err
 	}
+	a, err := api.MakeAquareumAPI(&cli, mod)
+	if err != nil {
+		return err
+	}
 
 	group, ctx := errgroup.WithContext(context.Background())
 	ctx = log.WithLogValues(ctx, "version", build.Version)
@@ -73,14 +73,14 @@ func Start(build *BuildFlags) error {
 
 	if !cli.Insecure {
 		group.Go(func() error {
-			return api.ServeHTTPS(ctx, cli, mod)
+			return a.ServeHTTPS(ctx)
 		})
 		group.Go(func() error {
-			return api.ServeHTTPRedirect(ctx, cli, mod)
+			return a.ServeHTTPRedirect(ctx)
 		})
 	} else {
 		group.Go(func() error {
-			return api.ServeHTTP(ctx, cli, mod)
+			return a.ServeHTTP(ctx)
 		})
 	}
 
