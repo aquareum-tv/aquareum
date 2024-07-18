@@ -115,7 +115,7 @@ ci-upload-node:
 ci-upload-android:
 	$(MAKE) ci-upload-file upload_file=aquareum-$(VERSION)-android-release.apk \
 	&& $(MAKE) ci-upload-file upload_file=aquareum-$(VERSION)-android-debug.apk \
-	&& $(MAKE) ci-upload-file upload_file=aquareum-$(VERSION)-android-debug.aab \
+	&& $(MAKE) ci-upload-file upload_file=aquareum-$(VERSION)-android-release.aab \
 	&& $(MAKE) ci-upload-file upload_file=aquareum-$(VERSION)-android-debug.aab
 
 .PHONY: ci-upload-ios
