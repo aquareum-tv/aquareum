@@ -1,4 +1,5 @@
 import { ExternalLink } from "@tamagui/lucide-icons";
+import UpdatesDemo from "components/updates";
 import {
   Anchor,
   H1,
@@ -112,13 +113,14 @@ export default function TabOneScreen() {
       <View flexShrink={0} flexGrow={0}>
         <CenteredH2>Aquareum: The Video Layer for Everything</CenteredH2>
       </View>
-      <View>
+      {/* <View>
         <GetApps />
       </View>
       <View fg={3} flexBasis={0}>
         <WebviewIframe src="https://iame.li" />
       </View>
-      <View paddingBottom="$10"></View>
+      <View paddingBottom="$10"></View> */}
+      <UpdatesDemo />
     </YStack>
   );
 }
