@@ -21,12 +21,12 @@ import (
 )
 
 type AquareumAPI struct {
-	CLI *config.CLI
-	Mod model.Model
+	CLI   *config.CLI
+	Model model.Model
 }
 
 func MakeAquareumAPI(cli *config.CLI, mod model.Model) (*AquareumAPI, error) {
-	return &AquareumAPI{CLI: cli, Mod: mod}, nil
+	return &AquareumAPI{CLI: cli, Model: mod}, nil
 }
 
 type AppHostingFS struct {
@@ -113,7 +113,7 @@ func (a *AquareumAPI) HandleNotification(ctx context.Context) http.HandlerFunc {
 				w.WriteHeader(400)
 				return
 			}
-			err = a.Mod.CreateNotification(n.Token)
+			err = a.Model.CreateNotification(n.Token)
 			if err != nil {
 				log.Log(ctx, "error creating notification", "error", err)
 				w.WriteHeader(400)
@@ -138,7 +138,7 @@ func (a *AquareumAPI) HandleNotification(ctx context.Context) http.HandlerFunc {
 				w.WriteHeader(http.StatusForbidden)
 				return
 			}
-			nots, err := a.Mod.ListNotifications()
+			nots, err := a.Model.ListNotifications()
 			if err != nil {
 				log.Log(ctx, "error listing notifications", "error", err)
 				w.WriteHeader(500)

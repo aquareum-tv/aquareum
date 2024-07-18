@@ -53,7 +53,7 @@ func TestRedirectHandler(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			cli := &config.CLI{HttpAddr: tt.httpAddr, HttpsAddr: tt.httpsAddr}
 			mod := &model.DBModel{}
-			a := AquareumAPI{CLI: cli, Mod: mod}
+			a := AquareumAPI{CLI: cli, Model: mod}
 
 			handler, err := a.RedirectHandler(context.Background())
 			assert.NoError(t, err, "RedirectHandler should not return an error")
