@@ -21,12 +21,17 @@ import (
 )
 
 type AquareumAPI struct {
-	CLI   *config.CLI
-	Model model.Model
+	CLI     *config.CLI
+	Model   model.Model
+	Updater *Updater
 }
 
 func MakeAquareumAPI(cli *config.CLI, mod model.Model) (*AquareumAPI, error) {
-	return &AquareumAPI{CLI: cli, Model: mod}, nil
+	updater, err := PrepareUpdater(cli)
+	if err != nil {
+		return nil, err
+	}
+	return &AquareumAPI{CLI: cli, Model: mod, Updater: updater}, nil
 }
 
 type AppHostingFS struct {

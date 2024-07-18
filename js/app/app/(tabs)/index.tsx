@@ -111,7 +111,7 @@ export default function TabOneScreen() {
         </View>
       </YStack>
       <View flexShrink={0} flexGrow={0}>
-        <CenteredH2>Aquareum: The Video Layer for Everything</CenteredH2>
+        <CenteredH2>Aquareummmmmmmm: The Video Layer for Everything</CenteredH2>
       </View>
       {/* <View>
         <GetApps />
