@@ -16,10 +16,10 @@
   "author": "Aquareum",
   "license": "MIT",
   "devDependencies": {
-    "husky": "^9.0.11",
+    "husky": "^9.1.1",
     "lerna": "^8.1.6",
     "lint-staged": "^15.2.7",
-    "prettier": "^3.3.2"
+    "prettier": "^3.3.3"
   },
   "workspaces": [
     "js/*"
