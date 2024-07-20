@@ -36,6 +36,7 @@ type UpdateAsset struct {
 	ContentType   string `json:"contentType"`
 	FileExtension string `json:"fileExtension,omitempty"`
 	URL           string `json:"url"`
+	Path          string `json:"-"`
 }
 
 type ExpoMetadata struct {
@@ -85,6 +86,7 @@ func (u *Updater) GetManifest(platform string) (*UpdateManifest, error) {
 			Hash:          hash,
 			Key:           parts[len(parts)-1],
 			URL:           fmt.Sprintf("https://980b-24-19-207-220.ngrok-free.app/%s", ass.Path),
+			Path:          ass.Path,
 			ContentType:   typ,
 			FileExtension: ass.Ext,
 		})
@@ -122,6 +124,28 @@ func (u *Updater) GetManifestBytes(platform string) ([]byte, error) {
 		return nil, err
 	}
 	return bs, nil
+}
+
+// get MIME types of built-in update files
+func (u *Updater) GetMimes() (map[string]string, error) {
+	assets := []UpdateAsset{}
+	ios, err := u.GetManifest(IOS)
+	if err != nil {
+		return nil, err
+	}
+	assets = append(assets, ios.LaunchAsset)
+	assets = append(assets, ios.Assets...)
+	android, err := u.GetManifest(ANDROID)
+	if err != nil {
+		return nil, err
+	}
+	assets = append(assets, android.LaunchAsset)
+	assets = append(assets, android.Assets...)
+	m := map[string]string{}
+	for _, ass := range assets {
+		m[ass.Path] = ass.ContentType
+	}
+	return m, nil
 }
 
 func PrepareUpdater(cli *config.CLI) (*Updater, error) {
@@ -187,6 +211,6 @@ func hashFile(path string) (string, error) {
 
 	outbs := h.Sum(nil)
 
-	sEnc := base64.StdEncoding.EncodeToString(outbs)
+	sEnc := base64.URLEncoding.WithPadding(base64.NoPadding).EncodeToString(outbs)
 	return sEnc, nil
 }

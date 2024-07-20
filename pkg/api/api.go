@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
+	"mime"
 	"net"
 	"net/http"
 	"os"
@@ -24,6 +25,7 @@ type AquareumAPI struct {
 	CLI     *config.CLI
 	Model   model.Model
 	Updater *Updater
+	Mimes   map[string]string
 }
 
 func MakeAquareumAPI(cli *config.CLI, mod model.Model) (*AquareumAPI, error) {
@@ -31,11 +33,20 @@ func MakeAquareumAPI(cli *config.CLI, mod model.Model) (*AquareumAPI, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &AquareumAPI{CLI: cli, Model: mod, Updater: updater}, nil
+	a := &AquareumAPI{CLI: cli, Model: mod, Updater: updater}
+	a.Mimes, err = updater.GetMimes()
+	if err != nil {
+		return nil, err
+	}
+	return a, nil
 }
 
 type AppHostingFS struct {
 	http.FileSystem
+}
+
+func init() {
+	mime.AddExtensionType(".hbc", "application/javascript")
 }
 
 func (fs AppHostingFS) Open(name string) (http.File, error) {
@@ -62,10 +73,21 @@ func (a *AquareumAPI) Handler(ctx context.Context) (http.Handler, error) {
 	mux.Handle("/api/notification", a.HandleNotification(ctx))
 	mux.Handle("/app-updates", a.HandleAppUpdates(ctx))
 	mux.Handle("/api", a.HandleAPI404(ctx))
-	mux.Handle("/", http.FileServer(AppHostingFS{http.FS(files)}))
+	mux.HandleFunc("/", a.FileHandler(ctx, http.FileServer(AppHostingFS{http.FS(files)})))
 	handler := sloghttp.Recovery(mux)
 	handler = sloghttp.New(slog.Default())(handler)
 	return handler, nil
+}
+
+func (a *AquareumAPI) FileHandler(ctx context.Context, fs http.Handler) http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		noslash := req.URL.Path[1:]
+		ct, ok := a.Mimes[noslash]
+		if ok {
+			w.Header().Set("content-type", ct)
+		}
+		fs.ServeHTTP(w, req)
+	}
 }
 
 func (a *AquareumAPI) RedirectHandler(ctx context.Context) (http.Handler, error) {
