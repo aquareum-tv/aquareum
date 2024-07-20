@@ -61,7 +61,7 @@ type Updater struct {
 	CLI      *config.CLI
 }
 
-func (u *Updater) GetManifest(platform string) (*UpdateManifest, error) {
+func (u *Updater) GetManifest(platform, prefix string) (*UpdateManifest, error) {
 	var plat ExpoMetadataPlatform
 	if platform == IOS {
 		plat = u.Metadata.FileMetadata.IOS
@@ -85,8 +85,8 @@ func (u *Updater) GetManifest(platform string) (*UpdateManifest, error) {
 		assets = append(assets, UpdateAsset{
 			Hash:          hash,
 			Key:           parts[len(parts)-1],
-			URL:           fmt.Sprintf("https://980b-24-19-207-220.ngrok-free.app/%s", ass.Path),
 			Path:          ass.Path,
+			URL:           fmt.Sprintf("%s/%s", prefix, ass.Path),
 			ContentType:   typ,
 			FileExtension: ass.Ext,
 		})
@@ -104,7 +104,7 @@ func (u *Updater) GetManifest(platform string) (*UpdateManifest, error) {
 		LaunchAsset: UpdateAsset{
 			Hash:        hash,
 			Key:         dotParts[0],
-			URL:         fmt.Sprintf("https://980b-24-19-207-220.ngrok-free.app/%s", plat.Bundle),
+			URL:         fmt.Sprintf("%s/%s", prefix, plat.Bundle),
 			ContentType: "application/javascript",
 		},
 		Assets:   assets,
@@ -114,8 +114,8 @@ func (u *Updater) GetManifest(platform string) (*UpdateManifest, error) {
 	return &man, nil
 }
 
-func (u *Updater) GetManifestBytes(platform string) ([]byte, error) {
-	manifest, err := u.GetManifest(platform)
+func (u *Updater) GetManifestBytes(platform, prefix string) ([]byte, error) {
+	manifest, err := u.GetManifest(platform, prefix)
 	if err != nil {
 		return nil, err
 	}
@@ -129,13 +129,13 @@ func (u *Updater) GetManifestBytes(platform string) ([]byte, error) {
 // get MIME types of built-in update files
 func (u *Updater) GetMimes() (map[string]string, error) {
 	assets := []UpdateAsset{}
-	ios, err := u.GetManifest(IOS)
+	ios, err := u.GetManifest(IOS, "")
 	if err != nil {
 		return nil, err
 	}
 	assets = append(assets, ios.LaunchAsset)
 	assets = append(assets, ios.Assets...)
-	android, err := u.GetManifest(ANDROID)
+	android, err := u.GetManifest(ANDROID, "")
 	if err != nil {
 		return nil, err
 	}
@@ -171,6 +171,7 @@ func PrepareUpdater(cli *config.CLI) (*Updater, error) {
 
 func (a *AquareumAPI) HandleAppUpdates(ctx context.Context) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
+		prefix := fmt.Sprintf("http://%s", req.Host)
 		log.Log(ctx, "got app-updates request", "method", req.Method, "headers", req.Header)
 		plat := req.Header.Get("expo-platform")
 		if plat == "" {
@@ -178,7 +179,7 @@ func (a *AquareumAPI) HandleAppUpdates(ctx context.Context) http.HandlerFunc {
 			w.WriteHeader(400)
 			return
 		}
-		bs, err := a.Updater.GetManifestBytes(plat)
+		bs, err := a.Updater.GetManifestBytes(plat, prefix)
 		if err != nil {
 			log.Log(ctx, "app-updates request errored getting manfiest", "error", err)
 			w.WriteHeader(400)

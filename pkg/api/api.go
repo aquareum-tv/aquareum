@@ -72,6 +72,7 @@ func (a *AquareumAPI) Handler(ctx context.Context) (http.Handler, error) {
 	}
 	mux.Handle("/api/notification", a.HandleNotification(ctx))
 	mux.Handle("/app-updates", a.HandleAppUpdates(ctx))
+	mux.Handle("/api/manifest", a.HandleAppUpdates(ctx))
 	mux.Handle("/api", a.HandleAPI404(ctx))
 	mux.HandleFunc("/", a.FileHandler(ctx, http.FileServer(AppHostingFS{http.FS(files)})))
 	handler := sloghttp.Recovery(mux)

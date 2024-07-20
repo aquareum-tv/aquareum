@@ -53,6 +53,7 @@ export default function () {
       slug: name,
       version: pkg.version,
       runtimeVersion: pkg.version,
+      jsEngine: "jsc",
       orientation: "portrait",
       icon: "./assets/images/icon.png",
       scheme: "myapp",
@@ -132,6 +133,9 @@ export default function () {
             ios: {
               useFrameworks: "static",
             },
+            android: {
+              usesCleartextTraffic: true,
+            },
           },
         ],
         [
@@ -150,7 +154,7 @@ export default function () {
         url: `${process.env.EXPO_PUBLIC_AQUAREUM_URL}/app-updates`,
         enabled: true,
         checkAutomatically: "ON_LOAD",
-        fallbackToCacheTimeout: 0,
+        fallbackToCacheTimeout: 30000,
         // codeSigningCertificate: "./code-signing/certificate.pem",
         // codeSigningMetadata: {
         //   keyid: "main",

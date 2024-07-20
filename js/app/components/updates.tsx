@@ -13,19 +13,19 @@ export default function UpdatesDemo() {
     setDebugLogs((logs) => [...logs, text]);
   };
 
-  // useEffect(() => {
-  //   (async () => {
-  //     const logs = await Updates.readLogEntriesAsync();
-  //     for (const l of logs) {
-  //       log(JSON.stringify(l));
-  //     }
-  //   })();
-  // }, []);
+  useEffect(() => {
+    (async () => {
+      const logs = await Updates.readLogEntriesAsync();
+      for (const l of logs) {
+        log(JSON.stringify(l));
+      }
+    })();
+  }, []);
 
   useEffect(() => {
     if (isUpdatePending) {
       // Update has successfully downloaded; apply it now
-      Updates.reloadAsync();
+      // Updates.reloadAsync();
     }
   }, [isUpdatePending]);
 
@@ -63,6 +63,20 @@ export default function UpdatesDemo() {
           }}
         >
           <Text>Download and run update</Text>
+        </Button>
+      ) : null}
+      {isUpdatePending ? (
+        <Button
+          onPress={async () => {
+            try {
+              await Updates.reloadAsync();
+              log(`reloadAsync success`);
+            } catch (e) {
+              log(`reloadAsync error err=${e.message}`);
+            }
+          }}
+        >
+          <Text>Apply Update</Text>
         </Button>
       ) : null}
       <StatusBar style="auto" />
