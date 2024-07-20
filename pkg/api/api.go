@@ -13,6 +13,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/NYTimes/gziphandler"
 	sloghttp "github.com/samber/slog-http"
 
 	"aquareum.tv/aquareum/js/app"
@@ -229,6 +230,7 @@ func (a *AquareumAPI) ServeHTTPS(ctx context.Context) error {
 
 func (a *AquareumAPI) ServerWithShutdown(ctx context.Context, handler http.Handler, serve func(*http.Server) error) error {
 	ctx, cancel := context.WithCancel(ctx)
+	handler = gziphandler.GzipHandler(handler)
 	server := http.Server{Handler: handler}
 	var serveErr error
 	go func() {

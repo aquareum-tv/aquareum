@@ -3,8 +3,10 @@ module aquareum.tv/aquareum
 go 1.22.2
 
 require (
+	github.com/NYTimes/gziphandler v1.1.1
 	github.com/adrg/xdg v0.4.0
 	github.com/golang/glog v1.2.0
+	github.com/google/uuid v1.6.0
 	github.com/lmittmann/tint v1.0.4
 	github.com/orandin/slog-gorm v1.3.2
 	github.com/peterbourgon/ff/v3 v3.3.1
@@ -30,7 +32,6 @@ require (
 )
 
 require (
-	github.com/google/uuid v1.6.0 // indirect
 	go.opentelemetry.io/otel v1.19.0 // indirect
 	go.opentelemetry.io/otel/trace v1.19.0 // indirect
 )
