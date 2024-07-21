@@ -2,8 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"reflect"
 	"strconv"
 
 	"aquareum.tv/aquareum/pkg/config"
