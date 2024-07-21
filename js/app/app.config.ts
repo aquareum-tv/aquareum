@@ -155,11 +155,11 @@ export default function () {
         enabled: true,
         checkAutomatically: "ON_LOAD",
         fallbackToCacheTimeout: 30000,
-        // codeSigningCertificate: "./code-signing/certificate.pem",
-        // codeSigningMetadata: {
-        //   keyid: "main",
-        //   alg: "rsa-v1_5-sha256",
-        // },
+        codeSigningCertificate: "./code-signing/certs/certificate.pem",
+        codeSigningMetadata: {
+          keyid: "main",
+          alg: "rsa-v1_5-sha256",
+        },
       },
     },
   };

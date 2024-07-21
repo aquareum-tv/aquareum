@@ -17,7 +17,8 @@
     "prebuild": "EXPO_NO_GIT_STATUS=1 expo prebuild --clean && sed -i.bak 's/org.gradle.jvmargs=-Xmx2048m -XX:MaxMetaspaceSize=512m/org.gradle.jvmargs=-Xmx8192m -XX:MaxMetaspaceSize=2048m/' android/gradle.properties && echo '\nnetworkTimeout=100000' >> android/gradle.properties && yarn run find-node",
     "postinstall": "which pod && yarn run postinstall-ios || echo 'not a mac, not installing pods'",
     "postinstall-ios": "cd ios && pod install && yarn run find-node",
-    "find-node": "node -p '`NODE_BINARY=${process.argv[0]}`' > ios/.xcode.env.local"
+    "find-node": "node -p '`NODE_BINARY=${process.argv[0]}`' > ios/.xcode.env.local",
+    "code-signing-dev": "mkdir -p code-signing-dev/keys code-signing-dev/certs && expo-updates codesigning:generate --key-output-directory code-signing-dev/keys --certificate-output-directory code-signing-dev/certs --certificate-validity-duration-years 10 --certificate-common-name 'Aquareum'"
   },
   "jest": {
     "preset": "jest-expo"
