@@ -21,7 +21,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("Hello, %v with type %s!\n", i, reflect.TypeOf(i))
 	err = cmd.Start(&config.BuildFlags{
 		Version:   Version,
 		BuildTime: i,

@@ -12,7 +12,6 @@ import {
   H4,
 } from "tamagui";
 
-import "expo-asset";
 import { useEffect } from "react";
 import { useColorScheme } from "hooks/useColorScheme";
 import {

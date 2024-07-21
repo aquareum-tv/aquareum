@@ -45,10 +45,6 @@ type AppHostingFS struct {
 	http.FileSystem
 }
 
-// func init() {
-// 	mime.AddExtensionType(".hbc", "application/javascript")
-// }
-
 func (fs AppHostingFS) Open(name string) (http.File, error) {
 	file, err1 := fs.FileSystem.Open(name)
 	if err1 == nil {
@@ -87,7 +83,6 @@ func (a *AquareumAPI) FileHandler(ctx context.Context, fs http.Handler) http.Han
 		noslash := req.URL.Path[1:]
 		ct, ok := a.Mimes[noslash]
 		if ok {
-			log.Log(ctx, "SETTING CONTENT TYPE FOR", "url", noslash, "type", ct, "mimes", fmt.Sprintf("%v", a.Mimes))
 			w.Header().Set("content-type", ct)
 		}
 		fs.ServeHTTP(w, req)

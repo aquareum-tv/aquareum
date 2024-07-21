@@ -133,9 +133,10 @@ export default function () {
             ios: {
               useFrameworks: "static",
             },
-            android: {
-              usesCleartextTraffic: true,
-            },
+            // uncomment to test OTA updates to http://localhost:8080
+            // android: {
+            //   usesCleartextTraffic: true,
+            // },
           },
         ],
         [
