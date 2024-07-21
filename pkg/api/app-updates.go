@@ -16,7 +16,6 @@ import (
 	"aquareum.tv/aquareum/pkg/log"
 )
 
-const RUNTIME_VERSION = "0.0.2"
 const IOS = "ios"
 const ANDROID = "android"
 
@@ -62,7 +61,7 @@ type Updater struct {
 	CLI      *config.CLI
 }
 
-func (u *Updater) GetManifest(platform, prefix string) (*UpdateManifest, error) {
+func (u *Updater) GetManifest(platform, runtime, prefix string) (*UpdateManifest, error) {
 	var plat ExpoMetadataPlatform
 	if platform == IOS {
 		plat = u.Metadata.FileMetadata.IOS
@@ -101,22 +100,23 @@ func (u *Updater) GetManifest(platform, prefix string) (*UpdateManifest, error) 
 	man := UpdateManifest{
 		ID:             u.CLI.Build.UUID,
 		CreatedAt:      u.CLI.Build.BuildTimeStrExpo(),
-		RuntimeVersion: RUNTIME_VERSION,
+		RuntimeVersion: runtime,
 		LaunchAsset: UpdateAsset{
 			Hash:        hash,
 			Key:         dotParts[0],
+			Path:        plat.Bundle,
 			URL:         fmt.Sprintf("%s/%s", prefix, plat.Bundle),
 			ContentType: "application/javascript",
 		},
 		Assets:   assets,
 		Metadata: map[string]string{},
-		Extra:    u.Extra,
+		Extra:    map[string]any{},
 	}
 	return &man, nil
 }
 
-func (u *Updater) GetManifestBytes(platform, prefix string) ([]byte, error) {
-	manifest, err := u.GetManifest(platform, prefix)
+func (u *Updater) GetManifestBytes(platform, runtime, prefix string) ([]byte, error) {
+	manifest, err := u.GetManifest(platform, runtime, prefix)
 	if err != nil {
 		return nil, err
 	}
@@ -130,13 +130,13 @@ func (u *Updater) GetManifestBytes(platform, prefix string) ([]byte, error) {
 // get MIME types of built-in update files
 func (u *Updater) GetMimes() (map[string]string, error) {
 	assets := []UpdateAsset{}
-	ios, err := u.GetManifest(IOS, "")
+	ios, err := u.GetManifest(IOS, "", "")
 	if err != nil {
 		return nil, err
 	}
 	assets = append(assets, ios.LaunchAsset)
 	assets = append(assets, ios.Assets...)
-	android, err := u.GetManifest(ANDROID, "")
+	android, err := u.GetManifest(ANDROID, "", "")
 	if err != nil {
 		return nil, err
 	}
@@ -144,6 +144,9 @@ func (u *Updater) GetMimes() (map[string]string, error) {
 	assets = append(assets, android.Assets...)
 	m := map[string]string{}
 	for _, ass := range assets {
+		if ass.Path == "" {
+			return nil, fmt.Errorf("asset has no path! asset=%v", ass)
+		}
 		m[ass.Path] = ass.ContentType
 	}
 	return m, nil
@@ -195,7 +198,13 @@ func (a *AquareumAPI) HandleAppUpdates(ctx context.Context) http.HandlerFunc {
 			w.WriteHeader(400)
 			return
 		}
-		bs, err := a.Updater.GetManifestBytes(plat, prefix)
+		runtime := req.Header.Get("expo-runtime-version")
+		if runtime == "" {
+			log.Log(ctx, "app-updates request missing Expo-Runtime-Version")
+			w.WriteHeader(400)
+			return
+		}
+		bs, err := a.Updater.GetManifestBytes(plat, runtime, prefix)
 		if err != nil {
 			log.Log(ctx, "app-updates request errored getting manfiest", "error", err)
 			w.WriteHeader(400)

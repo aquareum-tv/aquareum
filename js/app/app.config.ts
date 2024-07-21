@@ -5,7 +5,7 @@ import {
   withEntitlementsPlist,
 } from "expo/config-plugins";
 
-export const withNotificationsIOS: ConfigPlugin = (config, {}) => {
+export const withNotificationsIOS: ConfigPlugin = (config) => {
   config = withEntitlementsPlist(config, (config) => {
     config.modResults["aps-environment"] = "production";
     return config;
@@ -52,7 +52,8 @@ export default function () {
       name: name,
       slug: name,
       version: pkg.version,
-      runtimeVersion: pkg.version,
+      // Only rev this to the current version when native dependencies change!
+      runtimeVersion: "0.0.4",
       orientation: "portrait",
       icon: "./assets/images/icon.png",
       scheme: "myapp",
@@ -150,7 +151,7 @@ export default function () {
         typedRoutes: true,
       },
       updates: {
-        url: `${process.env.EXPO_PUBLIC_AQUAREUM_URL}/app-updates`,
+        url: `${process.env.EXPO_PUBLIC_AQUAREUM_URL}/api/manifest`,
         enabled: true,
         checkAutomatically: "ON_LOAD",
         fallbackToCacheTimeout: 30000,

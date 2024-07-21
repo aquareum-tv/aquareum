@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"log/slog"
-	"mime"
 	"net"
 	"net/http"
 	"os"
@@ -46,9 +45,9 @@ type AppHostingFS struct {
 	http.FileSystem
 }
 
-func init() {
-	mime.AddExtensionType(".hbc", "application/javascript")
-}
+// func init() {
+// 	mime.AddExtensionType(".hbc", "application/javascript")
+// }
 
 func (fs AppHostingFS) Open(name string) (http.File, error) {
 	file, err1 := fs.FileSystem.Open(name)
@@ -72,7 +71,9 @@ func (a *AquareumAPI) Handler(ctx context.Context) (http.Handler, error) {
 		return nil, err
 	}
 	mux.Handle("/api/notification", a.HandleNotification(ctx))
+	// old clients
 	mux.Handle("/app-updates", a.HandleAppUpdates(ctx))
+	// new ones
 	mux.Handle("/api/manifest", a.HandleAppUpdates(ctx))
 	mux.Handle("/api", a.HandleAPI404(ctx))
 	mux.HandleFunc("/", a.FileHandler(ctx, http.FileServer(AppHostingFS{http.FS(files)})))
@@ -86,6 +87,7 @@ func (a *AquareumAPI) FileHandler(ctx context.Context, fs http.Handler) http.Han
 		noslash := req.URL.Path[1:]
 		ct, ok := a.Mimes[noslash]
 		if ok {
+			log.Log(ctx, "SETTING CONTENT TYPE FOR", "url", noslash, "type", ct, "mimes", fmt.Sprintf("%v", a.Mimes))
 			w.Header().Set("content-type", ct)
 		}
 		fs.ServeHTTP(w, req)
