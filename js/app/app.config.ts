@@ -152,11 +152,11 @@ export default function () {
         typedRoutes: true,
       },
       updates: {
-        url: `${process.env.EXPO_PUBLIC_AQUAREUM_URL}/api/manifest`,
+        url: `https://aquareum.tv/api/manifest`,
         enabled: true,
         checkAutomatically: "ON_LOAD",
         fallbackToCacheTimeout: 30000,
-        codeSigningCertificate: "./code-signing-dev/certs/certificate.pem",
+        codeSigningCertificate: "./code-signing/certs/certificate.pem",
         codeSigningMetadata: {
           keyid: "main",
           alg: "rsa-v1_5-sha256",
