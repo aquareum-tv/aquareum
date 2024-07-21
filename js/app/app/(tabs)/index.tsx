@@ -1,5 +1,4 @@
 import { ExternalLink } from "@tamagui/lucide-icons";
-import UpdatesDemo from "components/updates";
 import {
   Anchor,
   H1,
@@ -96,7 +95,7 @@ export default function TabOneScreen() {
         <View fg={1} flexBasis={0} onPress={handlePress}>
           {!debug && (
             <ImageBackground
-              source={require("assets/images/cube_small.png")}
+              source={require("assets/images/cube.png")}
               style={{ width: "100%", height: "100%" }}
               resizeMode="contain"
             ></ImageBackground>
@@ -109,17 +108,16 @@ export default function TabOneScreen() {
             ))}
         </View>
       </YStack>
-      {/* <View flexShrink={0} flexGrow={0}>
+      <View flexShrink={0} flexGrow={0}>
         <CenteredH2>Aquareum: The Video Layer for Everything</CenteredH2>
-      </View> */}
-      {/* <View>
+      </View>
+      <View>
         <GetApps />
       </View>
       <View fg={3} flexBasis={0}>
         <WebviewIframe src="https://iame.li" />
       </View>
-      <View paddingBottom="$10"></View> */}
-      <UpdatesDemo />
+      <View paddingBottom="$10"></View>
     </YStack>
   );
 }
