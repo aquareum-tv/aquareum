@@ -12,7 +12,7 @@ version:
 
 .PHONY: install
 install:
-	yarn install
+	yarn install --inline-builds
 
 .PHONY: app
 app: install

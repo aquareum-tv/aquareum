@@ -35,6 +35,7 @@ build-mac:
     - tart-installed
 
   script:
+    - git fetch --unshallow || echo 'already unshallow'
     - make ci-macos
 
   # variables:
