@@ -44,10 +44,6 @@ android: app .build/bundletool.jar
 	&& cd - \
 	&& mv ./js/app/android/app/build/outputs/bundle/release/app-release.aab ./bin/aquareum-$(VERSION)-android-release.aab \
 	&& mv ./js/app/android/app/build/outputs/bundle/debug/app-debug.aab ./bin/aquareum-$(VERSION)-android-debug.aab \
-	$(MAKE) android-package
-
-.PHONY: android-package
-android-package:
 	&& cd bin \
 	&& java -jar ../.build/bundletool.jar build-apks --ks ../my-release-key.keystore --bundle=aquareum-$(VERSION)-android-release.aab --output=aquareum-$(VERSION)-android-release.apks --mode=universal \
 	&& java -jar ../.build/bundletool.jar build-apks --ks ../my-release-key.keystore --bundle=aquareum-$(VERSION)-android-debug.aab --output=aquareum-$(VERSION)-android-debug.apks --mode=universal \
