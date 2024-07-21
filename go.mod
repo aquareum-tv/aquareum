@@ -5,6 +5,7 @@ go 1.22.2
 require (
 	github.com/NYTimes/gziphandler v1.1.1
 	github.com/adrg/xdg v0.4.0
+	github.com/dunglas/httpsfv v1.0.2
 	github.com/golang/glog v1.2.0
 	github.com/google/uuid v1.6.0
 	github.com/lmittmann/tint v1.0.4

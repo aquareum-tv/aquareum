@@ -1,6 +1,13 @@
 package config
 
-import "time"
+import (
+	"crypto/rsa"
+	"crypto/x509"
+	"encoding/pem"
+	"fmt"
+	"os"
+	"time"
+)
 
 type BuildFlags struct {
 	Version   string
@@ -19,12 +26,29 @@ func (b BuildFlags) BuildTimeStrExpo() string {
 }
 
 type CLI struct {
-	TLSCertPath string
-	TLSKeyPath  string
-	DBPath      string
-	Insecure    bool
-	HttpAddr    string
-	HttpsAddr   string
-	AdminSecret string
-	Build       *BuildFlags
+	TLSCertPath    string
+	TLSKeyPath     string
+	SigningKeyPath string
+	DBPath         string
+	Insecure       bool
+	HttpAddr       string
+	HttpsAddr      string
+	AdminSecret    string
+	Build          *BuildFlags
+}
+
+func (cli *CLI) ParseSigningKey() (*rsa.PrivateKey, error) {
+	bs, err := os.ReadFile(cli.SigningKeyPath)
+	if err != nil {
+		return nil, err
+	}
+	block, _ := pem.Decode(bs)
+	if block == nil {
+		return nil, fmt.Errorf("no RSA key found in signing key")
+	}
+	key, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+	if err != nil {
+		return nil, err
+	}
+	return key, nil
 }

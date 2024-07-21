@@ -2,6 +2,9 @@ package api
 
 import (
 	"context"
+	"crypto"
+	"crypto/rand"
+	"crypto/rsa"
 	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
@@ -14,6 +17,8 @@ import (
 	"aquareum.tv/aquareum/js/app"
 	"aquareum.tv/aquareum/pkg/config"
 	"aquareum.tv/aquareum/pkg/log"
+
+	"github.com/dunglas/httpsfv"
 )
 
 const IOS = "ios"
@@ -56,9 +61,10 @@ type ExpoMetadataPlatform struct {
 }
 
 type Updater struct {
-	Metadata ExpoMetadata
-	Extra    map[string]any
-	CLI      *config.CLI
+	Metadata   ExpoMetadata
+	Extra      map[string]any
+	CLI        *config.CLI
+	SigningKey *rsa.PrivateKey
 }
 
 func (u *Updater) GetManifest(platform, runtime, prefix string) (*UpdateManifest, error) {
@@ -115,16 +121,57 @@ func (u *Updater) GetManifest(platform, runtime, prefix string) (*UpdateManifest
 	return &man, nil
 }
 
-func (u *Updater) GetManifestBytes(platform, runtime, prefix string) ([]byte, error) {
+var DEFAULT_KEY = "main"
+
+// get keyid, with a default if there's not one
+func getKeyId(header string) string {
+	d, err := httpsfv.UnmarshalDictionary([]string{header})
+	if err != nil {
+		return DEFAULT_KEY
+	}
+	key, ok := d.Get("keyid")
+	if !ok {
+		return DEFAULT_KEY
+	}
+	keystr, ok := key.(httpsfv.Item).Value.(string)
+	if !ok {
+		return DEFAULT_KEY
+	}
+	return keystr
+}
+
+func (u *Updater) GetManifestBytes(platform, runtime, signing, prefix string) ([]byte, string, error) {
 	manifest, err := u.GetManifest(platform, runtime, prefix)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 	bs, err := json.Marshal(manifest)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
-	return bs, nil
+	var header string
+	if u.SigningKey != nil {
+		keyid := getKeyId(signing)
+		msgHash := sha256.New()
+		_, err = msgHash.Write(bs)
+		if err != nil {
+			return nil, "", fmt.Errorf("error getting sha256 hash of manifest: %w", err)
+		}
+		msgHashSum := msgHash.Sum(nil)
+		signature, err := rsa.SignPKCS1v15(rand.Reader, u.SigningKey, crypto.SHA256, msgHashSum)
+		if err != nil {
+			return nil, "", fmt.Errorf("error signing manifest: %w", err)
+		}
+		sigString := base64.StdEncoding.EncodeToString(signature)
+		dict := httpsfv.NewDictionary()
+		dict.Add("sig", httpsfv.NewItem(sigString))
+		dict.Add("keyid", httpsfv.NewItem(keyid))
+		header, err = httpsfv.Marshal(dict)
+		if err != nil {
+			return nil, "", fmt.Errorf("error marshalling dict: %w", err)
+		}
+	}
+	return bs, header, nil
 }
 
 // get MIME types of built-in update files
@@ -185,7 +232,15 @@ func PrepareUpdater(cli *config.CLI) (*Updater, error) {
 		return nil, err
 	}
 
-	return &Updater{CLI: cli, Metadata: metadata, Extra: extra}, nil
+	var privateKey *rsa.PrivateKey
+	if cli.SigningKeyPath != "" {
+		privateKey, err = cli.ParseSigningKey()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return &Updater{CLI: cli, Metadata: metadata, Extra: extra, SigningKey: privateKey}, nil
 }
 
 func (a *AquareumAPI) HandleAppUpdates(ctx context.Context) http.HandlerFunc {
@@ -204,11 +259,22 @@ func (a *AquareumAPI) HandleAppUpdates(ctx context.Context) http.HandlerFunc {
 			w.WriteHeader(400)
 			return
 		}
-		bs, err := a.Updater.GetManifestBytes(plat, runtime, prefix)
+		signing := req.Header.Get("expo-expect-signature")
+		if signing != "" {
+			if a.Updater.SigningKey == nil {
+				log.Log(ctx, "signing requested but we don't have a key", "expo-expect-signature", signing)
+				w.WriteHeader(501)
+				return
+			}
+		}
+		bs, header, err := a.Updater.GetManifestBytes(plat, runtime, signing, prefix)
 		if err != nil {
 			log.Log(ctx, "app-updates request errored getting manfiest", "error", err)
 			w.WriteHeader(400)
 			return
+		}
+		if signing != "" {
+			w.Header().Set("expo-signature", header)
 		}
 		w.Header().Set("content-type", "application/json")
 		w.Header().Set("expo-protocol-version", "1")
