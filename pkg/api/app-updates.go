@@ -27,7 +27,7 @@ type UpdateManifest struct {
 	LaunchAsset    UpdateAsset       `json:"launchAsset"`
 	Assets         []UpdateAsset     `json:"assets"`
 	Metadata       map[string]string `json:"metadata"`
-	Extra          map[string]string `json:"extra"`
+	Extra          map[string]any    `json:"extra"`
 }
 
 type UpdateAsset struct {
@@ -58,6 +58,7 @@ type ExpoMetadataPlatform struct {
 
 type Updater struct {
 	Metadata ExpoMetadata
+	Extra    map[string]any
 	CLI      *config.CLI
 }
 
@@ -109,7 +110,7 @@ func (u *Updater) GetManifest(platform, prefix string) (*UpdateManifest, error) 
 		},
 		Assets:   assets,
 		Metadata: map[string]string{},
-		Extra:    map[string]string{},
+		Extra:    u.Extra,
 	}
 	return &man, nil
 }
@@ -166,7 +167,22 @@ func PrepareUpdater(cli *config.CLI) (*Updater, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Updater{CLI: cli, Metadata: metadata}, nil
+
+	file2, err := fs.Open("expoConfig.json")
+	if err != nil {
+		return nil, err
+	}
+	bs2, err := io.ReadAll(file2)
+	if err != nil {
+		return nil, err
+	}
+	extra := map[string]any{}
+	err = json.Unmarshal(bs2, &extra)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Updater{CLI: cli, Metadata: metadata, Extra: extra}, nil
 }
 
 func (a *AquareumAPI) HandleAppUpdates(ctx context.Context) http.HandlerFunc {

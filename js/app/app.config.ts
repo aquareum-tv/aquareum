@@ -5,7 +5,7 @@ import {
   withEntitlementsPlist,
 } from "expo/config-plugins";
 
-export const withNotificationsIOS: ConfigPlugin<{}> = (config, {}) => {
+export const withNotificationsIOS: ConfigPlugin = (config, {}) => {
   config = withEntitlementsPlist(config, (config) => {
     config.modResults["aps-environment"] = "production";
     return config;
@@ -53,7 +53,6 @@ export default function () {
       slug: name,
       version: pkg.version,
       runtimeVersion: pkg.version,
-      jsEngine: "jsc",
       orientation: "portrait",
       icon: "./assets/images/icon.png",
       scheme: "myapp",
