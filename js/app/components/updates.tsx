@@ -5,6 +5,7 @@ import { Button, H2, H5, ScrollView, Text, View } from "tamagui";
 import Constants from "expo-constants";
 import { useToastController } from "@tamagui/toast";
 import pkg from "../package.json";
+import { Platform } from "react-native";
 
 export default function UpdatesDemo() {
   const version = pkg.version;
@@ -57,8 +58,8 @@ export default function UpdatesDemo() {
                 });
               }
             } catch (e) {
-              toast.show("Nope!", {
-                message: e.message,
+              toast.show("Update failed!", {
+                message: `You may need to update the app through the ${Platform.OS === "ios" ? "App" : "Play"} Store.`,
               });
             }
           }}

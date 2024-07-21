@@ -61,10 +61,11 @@ type ExpoMetadataPlatform struct {
 }
 
 type Updater struct {
-	Metadata   ExpoMetadata
-	Extra      map[string]any
-	CLI        *config.CLI
-	SigningKey *rsa.PrivateKey
+	Metadata       ExpoMetadata
+	Extra          map[string]any
+	CLI            *config.CLI
+	SigningKey     *rsa.PrivateKey
+	RuntimeVersion string
 }
 
 func (u *Updater) GetManifest(platform, runtime, prefix string) (*UpdateManifest, error) {
@@ -116,7 +117,7 @@ func (u *Updater) GetManifest(platform, runtime, prefix string) (*UpdateManifest
 		},
 		Assets:   assets,
 		Metadata: map[string]string{},
-		Extra:    map[string]any{},
+		Extra:    u.Extra,
 	}
 	return &man, nil
 }
@@ -141,6 +142,9 @@ func getKeyId(header string) string {
 }
 
 func (u *Updater) GetManifestBytes(platform, runtime, signing, prefix string) ([]byte, string, error) {
+	if runtime != u.RuntimeVersion {
+		return nil, "", fmt.Errorf("runtime version mismatch client=%s server=%s", runtime, u.RuntimeVersion)
+	}
 	manifest, err := u.GetManifest(platform, runtime, prefix)
 	if err != nil {
 		return nil, "", err
@@ -232,6 +236,15 @@ func PrepareUpdater(cli *config.CLI) (*Updater, error) {
 		return nil, err
 	}
 
+	rt, ok := extra["runtimeVersion"]
+	if !ok {
+		return nil, fmt.Errorf("expoConfig.json missing runtimeVersion")
+	}
+	runtimeVersion, ok := rt.(string)
+	if !ok {
+		return nil, fmt.Errorf("expoConfig.json has runtimeVersion that's not a string")
+	}
+
 	var privateKey *rsa.PrivateKey
 	if cli.SigningKeyPath != "" {
 		privateKey, err = cli.ParseSigningKey()
@@ -240,7 +253,13 @@ func PrepareUpdater(cli *config.CLI) (*Updater, error) {
 		}
 	}
 
-	return &Updater{CLI: cli, Metadata: metadata, Extra: extra, SigningKey: privateKey}, nil
+	return &Updater{
+		CLI:            cli,
+		Metadata:       metadata,
+		Extra:          extra,
+		SigningKey:     privateKey,
+		RuntimeVersion: runtimeVersion,
+	}, nil
 }
 
 func (a *AquareumAPI) HandleAppUpdates(ctx context.Context) http.HandlerFunc {
@@ -271,6 +290,7 @@ func (a *AquareumAPI) HandleAppUpdates(ctx context.Context) http.HandlerFunc {
 		if err != nil {
 			log.Log(ctx, "app-updates request errored getting manfiest", "error", err)
 			w.WriteHeader(400)
+			w.Write([]byte("fooooo"))
 			return
 		}
 		if signing != "" {
