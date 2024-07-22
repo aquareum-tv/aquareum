@@ -43,6 +43,12 @@ const withConsistentVersionNumber = (
   return config;
 };
 
+// turn a semver string into a always-increasing integer for google
+export const versionCode = (verStr: string) => {
+  const [major, minor, patch] = verStr.split(".").map((x) => parseInt(x));
+  return major * 1000 * 1000 + minor * 1000 + patch;
+};
+
 export default function () {
   const pkg = require("./package.json");
   const name = "Aquareum";
@@ -86,6 +92,7 @@ export default function () {
           "android.permission.SCHEDULE_EXACT_ALARM",
           "android.permission.POST_NOTIFICATIONS",
         ],
+        versionCode: versionCode(pkg.version),
       },
       web: {
         bundler: "metro",
