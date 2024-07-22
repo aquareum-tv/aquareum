@@ -38,5 +38,13 @@ build-mac:
     - git fetch --unshallow || echo 'already unshallow'
     - make ci-macos
 
-  # variables:
-  #   TART_EXECUTOR_HOST_DIR: "true"
+release:
+  stage: build
+  image: "$CI_REGISTRY_IMAGE:builder-$CI_COMMIT_SHA"
+  needs:
+    - build-mac
+    - build
+  rules:
+    - if: '$CI_COMMIT_TAG =~ /^v?\d+\.\d+\.\d+$/'
+  script:
+    - make ci-release

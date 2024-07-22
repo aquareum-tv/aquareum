@@ -10,3 +10,5 @@ bin
 !.yarn/versions
 .build
 .wrangler
+description.md
+lerna-debug.log
