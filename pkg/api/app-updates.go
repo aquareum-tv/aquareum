@@ -265,6 +265,9 @@ func PrepareUpdater(cli *config.CLI) (*Updater, error) {
 func (a *AquareumAPI) HandleAppUpdates(ctx context.Context) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		prefix := fmt.Sprintf("http://%s", req.Host)
+		if req.TLS != nil {
+			prefix = fmt.Sprintf("https://%s", req.Host)
+		}
 		log.Log(ctx, "got app-updates request", "method", req.Method, "headers", req.Header)
 		plat := req.Header.Get("expo-platform")
 		if plat == "" {
