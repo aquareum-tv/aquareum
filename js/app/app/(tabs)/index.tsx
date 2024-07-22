@@ -16,7 +16,6 @@ import {
   isWeb,
   Text,
 } from "tamagui";
-import cube from "./cube.b64";
 const CodeH3 = styled(H3, { fontFamily: "$mono" });
 const CenteredH1 = styled(H1, {
   fontWeight: "$2",
@@ -96,7 +95,7 @@ export default function TabOneScreen() {
         <View fg={1} flexBasis={0} onPress={handlePress}>
           {!debug && (
             <ImageBackground
-              source={{ uri: cube }}
+              source={require("assets/images/cube.png")}
               style={{ width: "100%", height: "100%" }}
               resizeMode="contain"
             ></ImageBackground>

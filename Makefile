@@ -12,7 +12,7 @@ version:
 
 .PHONY: install
 install:
-	yarn install
+	yarn install --inline-builds
 
 .PHONY: app
 app: install
@@ -20,7 +20,7 @@ app: install
 
 .PHONY: node
 node:
-	go build -ldflags="-X 'main.Version=$(VERSION)'" -o $(OUT_DIR)/aquareum ./cmd/aquareum
+	go build -ldflags="-X 'main.Version=$(VERSION)' -X 'main.BuildTime=$(shell date +%s)' -X 'main.UUID=$(shell go run ./pkg/config/uuid/uuid.go)'" -o $(OUT_DIR)/aquareum ./cmd/aquareum
 
 .PHONY: test
 test:
@@ -45,8 +45,8 @@ android: app .build/bundletool.jar
 	&& mv ./js/app/android/app/build/outputs/bundle/release/app-release.aab ./bin/aquareum-$(VERSION)-android-release.aab \
 	&& mv ./js/app/android/app/build/outputs/bundle/debug/app-debug.aab ./bin/aquareum-$(VERSION)-android-debug.aab \
 	&& cd bin \
-	&& java -jar ../.build/bundletool.jar build-apks --bundle=aquareum-$(VERSION)-android-release.aab --output=aquareum-$(VERSION)-android-release.apks --mode=universal \
-	&& java -jar ../.build/bundletool.jar build-apks --bundle=aquareum-$(VERSION)-android-debug.aab --output=aquareum-$(VERSION)-android-debug.apks --mode=universal \
+	&& java -jar ../.build/bundletool.jar build-apks --ks ../my-release-key.keystore --ks-key-alias alias_name --ks-pass pass:aquareum --bundle=aquareum-$(VERSION)-android-release.aab --output=aquareum-$(VERSION)-android-release.apks --mode=universal \
+	&& java -jar ../.build/bundletool.jar build-apks --ks ../my-release-key.keystore --ks-key-alias alias_name --ks-pass pass:aquareum --bundle=aquareum-$(VERSION)-android-debug.aab --output=aquareum-$(VERSION)-android-debug.apks --mode=universal \
 	&& unzip aquareum-$(VERSION)-android-release.apks && mv universal.apk aquareum-$(VERSION)-android-release.apk && rm toc.pb \
 	&& unzip aquareum-$(VERSION)-android-debug.apks && mv universal.apk aquareum-$(VERSION)-android-debug.apk && rm toc.pb
 
@@ -111,7 +111,7 @@ ci-upload-node:
 ci-upload-android:
 	$(MAKE) ci-upload-file upload_file=aquareum-$(VERSION)-android-release.apk \
 	&& $(MAKE) ci-upload-file upload_file=aquareum-$(VERSION)-android-debug.apk \
-	&& $(MAKE) ci-upload-file upload_file=aquareum-$(VERSION)-android-debug.aab \
+	&& $(MAKE) ci-upload-file upload_file=aquareum-$(VERSION)-android-release.aab \
 	&& $(MAKE) ci-upload-file upload_file=aquareum-$(VERSION)-android-debug.aab
 
 .PHONY: ci-upload-ios

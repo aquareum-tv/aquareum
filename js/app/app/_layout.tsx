@@ -24,6 +24,7 @@ import { SplashScreen, Stack } from "expo-router";
 import { Provider } from "./Provider";
 import "./updates";
 import { Helmet } from "react-native-helmet-async";
+import { Settings } from "@tamagui/lucide-icons";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -83,13 +84,33 @@ function RootLayoutNav() {
             options={{
               title: "",
               headerShown: true,
-              headerRight: () => (
+              headerRight: () => {
+                if (isWeb) {
+                  return <View />;
+                }
+                return (
+                  <Link href="/options" asChild>
+                    <Button icon={<Settings size="$2" />}></Button>
+                  </Link>
+                );
+              },
+              headerLeft: () => (
                 <Anchor href="https://explorer.livepeer.org/treasury/74518185892381909671177921640414850443801430499809418110611019961553289709442">
                   <View bg="rgb(189 110 134)" br="$5" padding="$2">
                     <H4 fontSize="$4">What's Aquareum?</H4>
                   </View>
                 </Anchor>
               ),
+            }}
+          />
+          <Stack.Screen
+            name="options"
+            options={{
+              title: "Options",
+              presentation: "modal",
+              animation: "slide_from_right",
+              gestureEnabled: true,
+              gestureDirection: "horizontal",
             }}
           />
         </Stack>

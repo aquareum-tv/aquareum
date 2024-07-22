@@ -5,7 +5,7 @@ import {
   withEntitlementsPlist,
 } from "expo/config-plugins";
 
-export const withNotificationsIOS: ConfigPlugin<{}> = (config, {}) => {
+export const withNotificationsIOS: ConfigPlugin = (config) => {
   config = withEntitlementsPlist(config, (config) => {
     config.modResults["aps-environment"] = "production";
     return config;
@@ -45,12 +45,15 @@ const withConsistentVersionNumber = (
 
 export default function () {
   const pkg = require("./package.json");
+  const name = "Aquareum";
+  const bundle = "tv.aquareum";
   return {
     expo: {
-      name: "Aquareum",
-      slug: "Aquareum",
+      name: name,
+      slug: name,
       version: pkg.version,
-      runtimeVersion: pkg.version,
+      // Only rev this to the current version when native dependencies change!
+      runtimeVersion: "0.0.5",
       orientation: "portrait",
       icon: "./assets/images/icon.png",
       scheme: "myapp",
@@ -63,7 +66,7 @@ export default function () {
       assetBundlePatterns: ["**/*"],
       ios: {
         supportsTablet: true,
-        bundleIdentifier: "tv.aquareum",
+        bundleIdentifier: bundle,
         googleServicesFile: "./GoogleService-Info.plist",
         entitlements: {
           "aps-environment": "production",
@@ -77,7 +80,7 @@ export default function () {
           foregroundImage: "./assets/images/adaptive-icon.png",
           backgroundColor: "#ffffff",
         },
-        package: "tv.aquareum",
+        package: bundle,
         googleServicesFile: "./google-services.json",
         permissions: [
           "android.permission.SCHEDULE_EXACT_ALARM",
@@ -130,6 +133,16 @@ export default function () {
             ios: {
               useFrameworks: "static",
             },
+            // uncomment to test OTA updates to http://localhost:8080
+            // android: {
+            //   usesCleartextTraffic: true,
+            // },
+          },
+        ],
+        [
+          "expo-asset",
+          {
+            assets: ["assets"],
           },
         ],
         [withNotificationsIOS, {}],
@@ -139,11 +152,11 @@ export default function () {
         typedRoutes: true,
       },
       updates: {
-        url: "https://aquareum.tv/app-updates",
+        url: `https://aquareum.tv/api/manifest`,
         enabled: true,
         checkAutomatically: "ON_LOAD",
-        fallbackToCacheTimeout: 0,
-        codeSigningCertificate: "./code-signing/certificate.pem",
+        fallbackToCacheTimeout: 30000,
+        codeSigningCertificate: "./code-signing/certs/certificate.pem",
         codeSigningMetadata: {
           keyid: "main",
           alg: "rsa-v1_5-sha256",

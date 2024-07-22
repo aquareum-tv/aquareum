@@ -18,12 +18,8 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-type BuildFlags struct {
-	Version string
-}
-
 // parse the CLI and fire up an aquareum node!
-func Start(build *BuildFlags) error {
+func Start(build *config.BuildFlags) error {
 	err := normalizeXDG()
 	if err != nil {
 		return err
@@ -44,12 +40,13 @@ func Start(build *BuildFlags) error {
 	dbFile = fmt.Sprintf("sqlite://%s", dbFile)
 
 	fs := flag.NewFlagSet("aquareum", flag.ExitOnError)
-	cli := config.CLI{}
+	cli := config.CLI{Build: build}
 	fs.StringVar(&cli.HttpAddr, "http-addr", ":8080", "Public HTTP address")
 	fs.StringVar(&cli.HttpsAddr, "https-addr", ":8443", "Public HTTPS address")
 	fs.BoolVar(&cli.Insecure, "insecure", false, "Run without HTTPS. not recomended, as WebRTC support requires HTTPS")
 	fs.StringVar(&cli.TLSCertPath, "tls-cert", tlsCertFile, "Path to TLS certificate")
 	fs.StringVar(&cli.TLSKeyPath, "tls-key", tlsKeyFile, "Path to TLS key")
+	fs.StringVar(&cli.SigningKeyPath, "signing-key", "", "Path to signing key for pushing OTA updates to the app")
 	fs.StringVar(&cli.DBPath, "db-path", dbFile, "path to sqlite database file")
 	fs.StringVar(&cli.AdminSecret, "admin-secret", "", "secret admin token (to be replaced soon)")
 
@@ -59,7 +56,17 @@ func Start(build *BuildFlags) error {
 		ff.WithEnvVarSplit(","),
 	)
 
+	log.Log(context.Background(),
+		"starting aquareum",
+		"version", build.Version,
+		"buildTime", build.BuildTimeStr(),
+		"uuid", build.UUID)
+
 	mod, err := model.MakeDB(cli.DBPath)
+	if err != nil {
+		return err
+	}
+	a, err := api.MakeAquareumAPI(&cli, mod)
 	if err != nil {
 		return err
 	}
@@ -73,14 +80,14 @@ func Start(build *BuildFlags) error {
 
 	if !cli.Insecure {
 		group.Go(func() error {
-			return api.ServeHTTPS(ctx, cli, mod)
+			return a.ServeHTTPS(ctx)
 		})
 		group.Go(func() error {
-			return api.ServeHTTPRedirect(ctx, cli, mod)
+			return a.ServeHTTPRedirect(ctx)
 		})
 	} else {
 		group.Go(func() error {
-			return api.ServeHTTP(ctx, cli, mod)
+			return a.ServeHTTP(ctx)
 		})
 	}
 
