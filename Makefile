@@ -5,6 +5,7 @@ $(shell mkdir -p $(OUT_DIR))
 default: app node
 
 VERSION?=$(shell ./util/version.sh)
+UUID?=$(shell go run ./pkg/config/uuid/uuid.go)
 
 .PHONY: version
 version:
@@ -20,7 +21,7 @@ app: install
 
 .PHONY: node
 node:
-	go build -ldflags="-X 'main.Version=$(VERSION)' -X 'main.BuildTime=$(shell date +%s)' -X 'main.UUID=$(shell go run ./pkg/config/uuid/uuid.go)'" -o $(OUT_DIR)/aquareum ./cmd/aquareum
+	go build -ldflags="-X 'main.Version=$(VERSION)' -X 'main.BuildTime=$(shell date +%s)' -X 'main.UUID=$(UUID)'" -o $(OUT_DIR)/aquareum ./cmd/aquareum
 
 .PHONY: test
 test:
