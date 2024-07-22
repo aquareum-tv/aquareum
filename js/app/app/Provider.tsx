@@ -17,7 +17,7 @@ export function Provider({
       {...rest}
     >
       <ToastProvider
-        swipeDirection="horizontal"
+        swipeDirection="vertical"
         duration={6000}
         native={
           [
@@ -28,7 +28,7 @@ export function Provider({
       >
         {children}
         <CurrentToast />
-        <ToastViewport top="$8" left={0} right={0} />
+        <ToastViewport name="default" top="$8" left={0} right={0} />
       </ToastProvider>
     </TamaguiProvider>
   );

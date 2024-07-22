@@ -17,6 +17,7 @@ export function CurrentToast() {
       theme="purple"
       br="$6"
       animation="quick"
+      zIndex={999999}
     >
       <YStack ai="center" p="$2" gap="$2">
         <Toast.Title fow="bold">{currentToast.title}</Toast.Title>
