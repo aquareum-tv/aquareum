@@ -21,7 +21,7 @@ app: install
 
 .PHONY: node
 node:
-	go build -ldflags="-X 'main.Version=$(VERSION)' -X 'main.BuildTime=$(shell date +%s)' -X 'main.UUID=$(UUID)'" -o $(OUT_DIR)/aquareum ./cmd/aquareum
+	meson setup build && meson compile -C build
 
 .PHONY: test
 test:
