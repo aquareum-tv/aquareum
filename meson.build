@@ -1,4 +1,4 @@
-project('mistserver', 'c')
+project('aquareum', 'c')
 
 prog_go = find_program('go')
 
