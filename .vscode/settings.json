@@ -1,0 +1,9 @@
+{
+  "workbench.colorCustomizations": {
+    "statusBar.background": "#83447f"
+  },
+  "files.associations": {
+    "mistserver.h": "c",
+    "aquareum.h": "c"
+  }
+}
