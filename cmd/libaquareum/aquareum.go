@@ -12,10 +12,6 @@ import (
 
 import "C"
 
-var Version = "unknown"
-var BuildTime = "0"
-var UUID = ""
-
 //export AquareumMain
 func AquareumMain() {
 	i, err := strconv.ParseInt(BuildTime, 10, 64)
