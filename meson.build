@@ -1,4 +1,4 @@
-project('aquareum', 'c')
+project('aquareum', 'c', 'cpp', default_options: ['cpp_std=c++98'])
 
 prog_go = find_program('go')
 
@@ -28,16 +28,9 @@ libaquareum = custom_target('libaquareum',
   build_always_stale: true,
 )
 
-# uuid = custom_target('uuid',
-#   input: ['pkg/config/uuid/uuid.go'],
-#   output: ['uuid'],
-#   command: [prog_go, 'build', '-o', '@OUTPUT0@', '@INPUT@']
-# )
+mistserver_proj = subproject('mistserver', default_options: {
+  'APPNAME': 'MistServer',
+})
+mistserver = mistserver_proj.get_variable('libmistserver_dep')
 
-# uuid_txt = custom_target('uuid_txt',
-#   output: ['uuid.txt'],
-#   command: [uuid, '-o', '@OUTPUT0@'],
-#   build_always_stale: true,
-# )
-
-executable('aquareum', ['cmd/aquareum/aquareum.c', libaquareum])
+executable('aquareum', ['cmd/aquareum/aquareum.c', libaquareum], dependencies: [mistserver])

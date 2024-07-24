@@ -21,7 +21,7 @@ app: install
 
 .PHONY: node
 node:
-	meson setup build && meson compile -C build
+	meson setup bin --default-library static && meson compile -C bin
 
 .PHONY: test
 test:
