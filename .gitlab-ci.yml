@@ -22,7 +22,7 @@ build:
   image: "$CI_REGISTRY_IMAGE:builder-$CI_COMMIT_SHA"
   script:
     - git fetch --unshallow || echo 'already unshallow'
-    - make ci
+    - make ci -j$(nproc)
 
 build-mac:
   stage: build
@@ -34,7 +34,7 @@ build-mac:
   script:
     - git fetch --unshallow || echo 'already unshallow'
     - brew install go && go version
-    - make ci-macos
+    - make ci-macos -j$(nproc)
 
 release:
   stage: build

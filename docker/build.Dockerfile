@@ -42,4 +42,4 @@ RUN mkdir -p ${ANDROID_HOME}/cmdline-tools && \
 
 FROM builder AS cached-builder
 WORKDIR /cached-build
-RUN git clone https://git.aquareum.tv/aquareum-tv/aquareum && cd aquareum && make all
+RUN git clone https://git.aquareum.tv/aquareum-tv/aquareum && cd aquareum && make all -j$(nproc)
