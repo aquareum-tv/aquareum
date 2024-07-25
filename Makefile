@@ -119,7 +119,7 @@ ci-upload-android: android
 	&& $(MAKE) ci-upload-file upload_file=aquareum-$(VERSION)-android-debug.aab
 
 .PHONY: ci-upload-ios
-ci-upload-ios:
+ci-upload-ios: ios
 	$(MAKE) ci-upload-file upload_file=aquareum-$(VERSION)-ios-release.xcarchive.tar.gz
 
 upload_file?=""
