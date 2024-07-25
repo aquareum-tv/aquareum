@@ -7,10 +7,6 @@ default: app node
 VERSION?=$(shell go run ./pkg/config/git/git.go -v)
 UUID?=$(shell go run ./pkg/config/uuid/uuid.go)
 
-.PHONY: version
-version:
-	@go run ./pkg/config/git/git.go -v
-
 .PHONY: install
 install:
 	yarn install --inline-builds
@@ -29,13 +25,13 @@ test:
 	go test ./pkg/... ./cmd/...
 
 .PHONY: all
-all: version install check app test node-all-platforms android
+all: install check app test node-all-platforms android
 
 .PHONY: ci
-ci: version install check app test node-all-platforms ci-upload-node android ci-upload-android
+ci: install check app test node-all-platforms ci-upload-node android ci-upload-android
 
 .PHONY: ci-macos
-ci-macos: version install check app ios ci-upload-ios
+ci-macos: install check app ios ci-upload-ios
 
 .PHONY: android
 android: app .build/bundletool.jar
