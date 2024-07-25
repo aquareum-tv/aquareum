@@ -1,5 +1,6 @@
 builder:
   stage: build
+  interruptible: true
   image:
     name: gcr.io/kaniko-project/executor:v1.14.0-debug
     entrypoint: [""]
@@ -15,6 +16,7 @@ builder:
 
 build:
   stage: build
+  interruptible: true
   needs:
     - builder
   image: "$CI_REGISTRY_IMAGE:builder-$CI_COMMIT_SHA"
@@ -24,6 +26,7 @@ build:
 
 build-mac:
   stage: build
+  interruptible: true
   image: ghcr.io/cirruslabs/macos-runner:sonoma
   tags:
     - tart-installed
@@ -35,6 +38,7 @@ build-mac:
 
 release:
   stage: build
+  interruptible: true
   image: "$CI_REGISTRY_IMAGE:builder-$CI_COMMIT_SHA"
   needs:
     - build-mac
