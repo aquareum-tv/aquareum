@@ -25,7 +25,7 @@ node:
 	mv ./build/aquareum ./bin/aquareum
 
 .PHONY: test
-test:
+test: app
 	go test ./pkg/... ./cmd/...
 
 .PHONY: all
@@ -75,7 +75,7 @@ ios: app
 	&& curl -L -o ./.build/bundletool.jar https://github.com/google/bundletool/releases/download/1.17.0/bundletool-all-1.17.0.jar
 
 .PHONY: node-all-platforms
-node-all-platforms:
+node-all-platforms: app
 	meson setup build
 	meson compile -C build archive
 	meson setup --cross-file util/linux-arm64-gnu.ini build-aarch64
@@ -103,7 +103,7 @@ docker-build-in-container:
 ci-upload: ci-upload-node ci-upload-android
 
 .PHONY: ci-upload-node
-ci-upload-node:
+ci-upload-node: node-all-platforms
 	for GOOS in linux; do \
 		for GOARCH in amd64 arm64; do \
 			export file=aquareum-$(VERSION)-$$GOOS-$$GOARCH.tar.gz \
@@ -112,7 +112,7 @@ ci-upload-node:
 	done;
 
 .PHONY: ci-upload-android
-ci-upload-android:
+ci-upload-android: android
 	$(MAKE) ci-upload-file upload_file=aquareum-$(VERSION)-android-release.apk \
 	&& $(MAKE) ci-upload-file upload_file=aquareum-$(VERSION)-android-debug.apk \
 	&& $(MAKE) ci-upload-file upload_file=aquareum-$(VERSION)-android-release.aab \
@@ -146,7 +146,7 @@ ci-release:
 		--assets-link '$(shell ./util/release-files.sh $(VERSION))'
 
 .PHONY: check
-check:
+check: install
 	yarn run check
 
 .PHONY: fix
