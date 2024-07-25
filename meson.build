@@ -70,5 +70,6 @@ archive = custom_target('archive',
   output: [archive_name],
   command: [prog_tar, '-czvf', '../bin/@OUTPUT0@', '@INPUT@'],
   install: true,
-  install_dir: './bin'
+  install_dir: './bin',
+  build_by_default: false,
 )

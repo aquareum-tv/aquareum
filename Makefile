@@ -76,9 +76,16 @@ ios: app
 
 .PHONY: node-all-platforms
 node-all-platforms:
+	meson setup build
+	meson compile -C build archive
 	meson setup --cross-file util/linux-arm64-gnu.ini build-aarch64
-	meson compile -C build-aarch64
-	$(MAKE) node
+	meson compile -C build-aarch64 archive
+
+# link your local version of mist for dev
+.PHONY: link-mist
+link-mist:
+	rm -rf subprojects/mistserver
+	ln -s $$(realpath ../mistserver) ./subprojects/mistserver
 
 .PHONY: docker-build
 docker-build: docker-build-builder docker-build-in-container
