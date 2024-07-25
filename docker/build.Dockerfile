@@ -1,4 +1,4 @@
-FROM ubuntu:22.04
+FROM ubuntu:22.04 AS builder
 
 ARG TARGETARCH
 ENV TARGETARCH $TARGETARCH
@@ -39,3 +39,7 @@ RUN mkdir -p ${ANDROID_HOME}/cmdline-tools && \
     mv ${ANDROID_HOME}/cmdline-tools/cmdline-tools ${ANDROID_HOME}/cmdline-tools/tools && \
     rm *tools*linux*.zip && \
     curl -L https://raw.githubusercontent.com/thyrlian/AndroidSDK/bfcbf0cdfd6bb1ef45579e6ddc4d3876264cbdd1/android-sdk/license_accepter.sh | bash
+
+FROM builder AS cached-builder
+WORKDIR /cached-build
+RUN git clone https://git.aquareum.tv/aquareum-tv/aquareum && cd aquareum && make all
