@@ -33,8 +33,14 @@ aquareum_go = custom_target('aquareum.go',
 )
 
 env = {}
-GOOS = meson.get_external_property('GOOS', '')
-GOARCH = meson.get_external_property('GOARCH', '')
+GOOS = meson.get_external_property('GOOS', host_machine.system())
+GOARCH = meson.get_external_property('GOARCH', host_machine.cpu())
+if GOARCH == 'x86_64'
+  GOARCH = 'amd64'
+endif
+if GOARCH == 'aarch64'
+  GOARCH = 'arm64'
+endif
 if meson.is_cross_build()
   env = {
     'GOOS': GOOS,
