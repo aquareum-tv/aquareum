@@ -10,11 +10,10 @@ import (
 	"aquareum.tv/aquareum/pkg/cmd"
 )
 
-var Version = "unknown"
-var BuildTime = "0"
-var UUID = ""
+import "C"
 
-func main() {
+//export AquareumMain
+func AquareumMain() {
 	i, err := strconv.ParseInt(BuildTime, 10, 64)
 	if err != nil {
 		panic(err)
@@ -27,4 +26,8 @@ func main() {
 	if err != nil {
 		log.Log(context.Background(), "exited uncleanly", "error", err)
 	}
+}
+
+func main() {
+	AquareumMain()
 }

@@ -1,0 +1,4 @@
+[wrap-git]
+url = https://git.aquareum.tv/aquareum-tv/mistserver.git
+revision = aquareum
+depth = 1

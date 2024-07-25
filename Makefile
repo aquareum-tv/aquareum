@@ -4,12 +4,12 @@ $(shell mkdir -p $(OUT_DIR))
 .PHONY: default
 default: app node
 
-VERSION?=$(shell ./util/version.sh)
+VERSION?=$(shell go run ./pkg/config/git/git.go -v)
 UUID?=$(shell go run ./pkg/config/uuid/uuid.go)
 
 .PHONY: version
 version:
-	@./util/version.sh
+	@go run ./pkg/config/git/git.go -v
 
 .PHONY: install
 install:
@@ -21,7 +21,8 @@ app: install
 
 .PHONY: node
 node:
-	go build -ldflags="-X 'main.Version=$(VERSION)' -X 'main.BuildTime=$(shell date +%s)' -X 'main.UUID=$(UUID)'" -o $(OUT_DIR)/aquareum ./cmd/aquareum
+	meson setup build --native=./util/linux-amd64-gnu.ini && meson compile -C build
+	mv ./build/aquareum ./bin/aquareum
 
 .PHONY: test
 test:
@@ -75,14 +76,16 @@ ios: app
 
 .PHONY: node-all-platforms
 node-all-platforms:
-	for GOOS in linux; do \
-		for GOARCH in amd64 arm64; do \
-			GOOS=$$GOOS GOARCH=$$GOARCH $(MAKE) node OUT_DIR=bin/$$GOOS-$$GOARCH \
-			&& cd bin/$$GOOS-$$GOARCH \
-			&& tar -czvf ../aquareum-$(VERSION)-$$GOOS-$$GOARCH.tar.gz ./aquareum \
-			&& cd -; \
-		done \
-	done
+	meson setup build
+	meson compile -C build archive
+	meson setup --cross-file util/linux-arm64-gnu.ini build-aarch64
+	meson compile -C build-aarch64 archive
+
+# link your local version of mist for dev
+.PHONY: link-mist
+link-mist:
+	rm -rf subprojects/mistserver
+	ln -s $$(realpath ../mistserver) ./subprojects/mistserver
 
 .PHONY: docker-build
 docker-build: docker-build-builder docker-build-in-container
