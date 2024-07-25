@@ -34,7 +34,7 @@ build-mac:
   script:
     - git fetch --unshallow || echo 'already unshallow'
     - brew install go && go version
-    - make ci-macos -j$(nproc)
+    - make ci-macos -j16
 
 release:
   stage: build
