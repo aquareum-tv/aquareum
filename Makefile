@@ -21,7 +21,8 @@ app: install
 
 .PHONY: node
 node:
-	meson setup bin --default-library static && meson compile -C bin
+	meson setup build --native=./util/linux-amd64-gnu.ini && meson compile -C build
+	mv ./build/aquareum ./bin/aquareum
 
 .PHONY: test
 test:
@@ -75,14 +76,9 @@ ios: app
 
 .PHONY: node-all-platforms
 node-all-platforms:
-	for GOOS in linux; do \
-		for GOARCH in amd64 arm64; do \
-			GOOS=$$GOOS GOARCH=$$GOARCH $(MAKE) node OUT_DIR=bin/$$GOOS-$$GOARCH \
-			&& cd bin/$$GOOS-$$GOARCH \
-			&& tar -czvf ../aquareum-$(VERSION)-$$GOOS-$$GOARCH.tar.gz ./aquareum \
-			&& cd -; \
-		done \
-	done
+	meson setup --cross-file util/linux-arm64-gnu.ini build-aarch64
+	meson compile -C build-aarch64
+	$(MAKE) node
 
 .PHONY: docker-build
 docker-build: docker-build-builder docker-build-in-container

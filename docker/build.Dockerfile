@@ -6,8 +6,14 @@ ENV TARGETARCH $TARGETARCH
 ENV GO_VERSION 1.22.4
 ENV NODE_VERSION 22.3.0
 
-RUN apt update && apt install -y build-essential curl git openjdk-17-jdk unzip jq
-RUN curl -L --fail https://go.dev/dl/go$GO_VERSION.linux-$TARGETARCH.tar.gz -o go.tar.gz \
+RUN  echo 'deb [arch=arm64] http://ports.ubuntu.com/ jammy main multiverse universe' >> /etc/apt/sources.list \
+  && echo 'deb [arch=arm64] http://ports.ubuntu.com/ jammy-security main multiverse universe' >> /etc/apt/sources.list \
+  && echo 'deb [arch=arm64] http://ports.ubuntu.com/ jammy-backports main multiverse universe' >> /etc/apt/sources.list \
+  && echo 'deb [arch=arm64] http://ports.ubuntu.com/ jammy-updates main multiverse universe' >> /etc/apt/sources.list \
+  && dpkg --add-architecture arm64 \
+  && bash -c "apt update || echo 'ignoring errors'" \
+  && apt install -y build-essential curl git openjdk-17-jdk unzip jq g++ g++-aarch64-linux-gnu qemu-aarch64-static libc6:arm64 libstdc++6:arm64 \
+  && curl -L --fail https://go.dev/dl/go$GO_VERSION.linux-$TARGETARCH.tar.gz -o go.tar.gz \
   && tar -C /usr/local -xf go.tar.gz \
   && rm go.tar.gz
 ENV PATH $PATH:/usr/local/go/bin:/root/go/bin

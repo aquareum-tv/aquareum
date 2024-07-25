@@ -30,6 +30,7 @@ var UUID = "%s"
 
 func makeGit() error {
 	output := flag.String("o", "", "file to output to")
+	version := flag.Bool("v", false, "just print version")
 
 	flag.Parse()
 	r, err := git.PlainOpenWithOptions(".", &git.PlainOpenOptions{DetectDotGit: true})
@@ -61,10 +62,17 @@ func makeGit() error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("%d %s %s", ts, u, desc)
 	if *output != "" {
-		out := fmt.Sprintf(tmpl, desc, ts, u)
-		os.WriteFile(*output, []byte(out), 0644)
+		if *version {
+			os.WriteFile(*output, []byte(desc), 0644)
+		} else {
+			out := fmt.Sprintf(tmpl, desc, ts, u)
+			os.WriteFile(*output, []byte(out), 0644)
+		}
+	} else if *version {
+		fmt.Print(desc)
+	} else {
+		fmt.Printf("%d %s %s", ts, u, desc)
 	}
 	return nil
 }
