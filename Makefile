@@ -4,7 +4,7 @@ $(shell mkdir -p $(OUT_DIR))
 .PHONY: default
 default: app node
 
-VERSION?=$(shell ./util/version.sh)
+VERSION?=$(shell go run ./pkg/config/git/git.go -v)
 UUID?=$(shell go run ./pkg/config/uuid/uuid.go)
 
 .PHONY: version
