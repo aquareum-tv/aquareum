@@ -67,8 +67,10 @@ build_cache_if_needed() {
 }
 
 if [ "$1" = "build" ]; then
-  build_cache_if_needed()
-fi
-if [ "$1" = "cache" ]; then
+  build_cache_if_needed
+elif [ "$1" = "cache" ]; then
   cache
+else
+  echo 'unknown option'
+  exit 1
 fi
