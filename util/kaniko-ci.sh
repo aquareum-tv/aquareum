@@ -19,7 +19,8 @@ cache() {
     --dockerfile "$CI_PROJECT_DIR/docker/build.Dockerfile" \
     --cache-repo "$CI_REGISTRY_IMAGE" \
     --use-new-run \
-    --target cached-builder
+    --target cached-builder \
+    --destination $CACHED_BUILD_IMAGE
 }
 
 build() {
@@ -44,6 +45,25 @@ build() {
     --no-push \
     --no-push-cache \
     --skip-unused-stages
+}
+
+MANIFEST_UNKNOWN="0"
+filter() {
+  while read line; do
+    echo "$line"
+    if echo $line | grep MANIFEST_UNKNOWN; then
+      MANIFEST_UNKNOWN="1"
+    fi
+  done
+}
+
+build-cache-if-needed() {
+  # lmao mad science https://unix.stackexchange.com/a/70675
+  set +e
+  ((((build; echo $? >&3) | filter >&4) 3>&1) | (read xs; exit $xs)) 4>&1
+  status=$?
+  set -e
+  echo "exit status=$status MANIFEST_UNKNOWN=$MANIFEST_UNKNOWN"
 }
 
 if [ "$1" = "build" ]; then
