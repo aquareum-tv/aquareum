@@ -42,6 +42,16 @@ RUN mkdir -p ${ANDROID_HOME}/cmdline-tools && \
 
 FROM builder AS cached-builder
 WORKDIR /cached-build
+RUN apt install -y ccache \
+  && mkdir /cache-bin \
+  && ln -s $(which ccache) /cache-bin/gcc \
+  && ln -s $(which ccache) /cache-bin/g++ \
+  && ln -s $(which ccache) /cache-bin/cc \
+  && ln -s $(which ccache) /cache-bin/c++ \
+  && ln -s $(which ccache) /cache-bin/clang \
+  && ln -s $(which ccache) /cache-bin/clang++
+ENV PATH /cache-bin:$PATH
+
 RUN git clone https://git.aquareum.tv/aquareum-tv/aquareum && cd aquareum && make all -j$(nproc) && cd .. && rm -rf aquareum
 
 FROM cached-builder AS ci-builder
@@ -67,4 +77,7 @@ ARG CI_REPOSITORY_URL
 ENV CI_REPOSITORY_URL $CI_REPOSITORY_URL
 
 ADD . .
-RUN make ci -j$(nproc)
+RUN which gcc \
+  && ccache --zero-stats \
+  && make ci -j$(nproc) \
+  && ccache -s
