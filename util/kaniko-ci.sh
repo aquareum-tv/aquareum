@@ -24,7 +24,6 @@ cache() {
 }
 
 build() {
-  hash=`dockerhash`
   /kaniko/executor \
     --build-arg CACHED_BUILD_IMAGE="$CACHED_BUILD_IMAGE" \
     --build-arg TARGETARCH=amd64 \
@@ -66,7 +65,8 @@ build_cache_if_needed() {
     exit $status
   fi
   echo "manifest unknown, building build cache"
-  exit 2
+  cache
+  build
 }
 
 if [ "$1" = "build" ]; then
