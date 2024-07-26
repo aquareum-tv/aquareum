@@ -44,13 +44,13 @@ build() {
     --use-new-run \
     --no-push \
     --no-push-cache \
-    --skip-unused-stages
+    --skip-unused-stages 2>&1
 }
 
 MANIFEST_UNKNOWN="0"
 filter() {
   while read line; do
-    echo "$line"
+    echo "line=$line"
     if echo $line | grep MANIFEST_UNKNOWN; then
       MANIFEST_UNKNOWN="1"
     fi
