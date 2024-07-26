@@ -20,7 +20,8 @@ cache() {
     --cache-repo "$CI_REGISTRY_IMAGE" \
     --use-new-run \
     --target cached-builder \
-    --destination $CACHED_BUILD_IMAGE
+    --destination $CACHED_BUILD_IMAGE \
+    --skip-unused-stages
 }
 
 build() {
