@@ -1,4 +1,4 @@
-builder:
+build:
   stage: build
   interruptible: true
   image:
@@ -13,16 +13,25 @@ builder:
       --context "${CI_PROJECT_DIR}"
       --dockerfile "${CI_PROJECT_DIR}/docker/build.Dockerfile"
       --destination "$FQ_IMAGE_NAME"
-
-build:
-  stage: build
-  interruptible: true
-  needs:
-    - builder
-  image: "$CI_REGISTRY_IMAGE:builder-$CI_COMMIT_SHA"
-  script:
-    - git fetch --unshallow || echo 'already unshallow'
-    - make ci -j$(nproc)
+      --use-new-run
+      --no-push
+      --target cached-builder
+    - /kaniko/executor
+      --build-arg TARGETARCH=amd64
+      --build-arg CI_API_V4_URL=$CI_API_V4_URL
+      --build-arg CI_COMMIT_BRANCH=$CI_COMMIT_BRANCH
+      --build-arg CI_COMMIT_SHA=$CI_COMMIT_SHA
+      --build-arg CI_COMMIT_TAG=$CI_COMMIT_TAG
+      --build-arg CI_JOB_TOKEN=$CI_JOB_TOKEN
+      --build-arg CI_PROJECT_DIR=$CI_PROJECT_DIR
+      --build-arg CI_PROJECT_ID=$CI_PROJECT_ID
+      --build-arg CI_REGISTRY_IMAGE=$CI_REGISTRY_IMAGE
+      --build-arg CI_REPOSITORY_URL=$CI_REPOSITORY_URL
+      --cache=false
+      --context "${CI_PROJECT_DIR}"
+      --dockerfile "${CI_PROJECT_DIR}/docker/build.Dockerfile"
+      --use-new-run
+      --no-push
 
 build-mac:
   stage: build
