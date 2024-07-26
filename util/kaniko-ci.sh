@@ -52,6 +52,7 @@ filter() {
   while read line; do
     echo "line=$line"
     if echo $line | grep MANIFEST_UNKNOWN; then
+      echo "GOT HERE!!!!!!!!!!!!"
       MANIFEST_UNKNOWN="1"
     fi
   done
