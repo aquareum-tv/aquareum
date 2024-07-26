@@ -66,4 +66,5 @@ ENV CI_REGISTRY_IMAGE $CI_REGISTRY_IMAGE
 ARG CI_REPOSITORY_URL
 ENV CI_REPOSITORY_URL $CI_REPOSITORY_URL
 
-RUN git clone $CI_REPOSITORY_URL && cd aquareum && make ci -j$(nproc)
+ADD . .
+RUN make ci -j$(nproc)
