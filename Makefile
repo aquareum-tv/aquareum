@@ -38,19 +38,13 @@ ci: version install check app test node-all-platforms ci-upload-node android ci-
 ci-macos: version install check app ios ci-upload-ios
 
 .PHONY: android
-android: app .build/bundletool.jar
+android: app
 	export NODE_ENV=production \
-	&& cd ./js/app/android \
-	&& ./gradlew :app:bundleRelease \
-	&& ./gradlew :app:bundleDebug \
+	&& cd ./packages/app/android \
+	&& ./gradlew build \
 	&& cd - \
-	&& mv ./js/app/android/app/build/outputs/bundle/release/app-release.aab ./bin/aquareum-$(VERSION)-android-release.aab \
-	&& mv ./js/app/android/app/build/outputs/bundle/debug/app-debug.aab ./bin/aquareum-$(VERSION)-android-debug.aab \
-	&& cd bin \
-	&& java -jar ../.build/bundletool.jar build-apks --ks ../my-release-key.keystore --ks-key-alias alias_name --ks-pass pass:aquareum --bundle=aquareum-$(VERSION)-android-release.aab --output=aquareum-$(VERSION)-android-release.apks --mode=universal \
-	&& java -jar ../.build/bundletool.jar build-apks --ks ../my-release-key.keystore --ks-key-alias alias_name --ks-pass pass:aquareum --bundle=aquareum-$(VERSION)-android-debug.aab --output=aquareum-$(VERSION)-android-debug.apks --mode=universal \
-	&& unzip aquareum-$(VERSION)-android-release.apks && mv universal.apk aquareum-$(VERSION)-android-release.apk && rm toc.pb \
-	&& unzip aquareum-$(VERSION)-android-debug.apks && mv universal.apk aquareum-$(VERSION)-android-debug.apk && rm toc.pb
+	&& mv ./packages/app/android/app/build/outputs/apk/release/app-release.apk ./bin/aquareum-$(VERSION)-android-release.apk \
+	&& mv ./packages/app/android/app/build/outputs/apk/debug/app-debug.apk ./bin/aquareum-$(VERSION)-android-debug.apk
 
 .PHONY: ios
 ios: app
@@ -67,12 +61,6 @@ ios: app
 		clean archive \
 	&& cd bin \
 	&& tar -czvf aquareum-$(VERSION)-ios-release.xcarchive.tar.gz aquareum-$(VERSION)-ios-release.xcarchive
-
-# xcodebuild -exportArchive -archivePath ./bin/aquareum-$(VERSION)-ios-release.xcarchive -exportOptionsPlist ./js/app/exportOptions.plist -exportPath ./bin/aquareum-$(VERSION)-ios-release.ipa
-
-.build/bundletool.jar:
-	mkdir -p .build \
-	&& curl -L -o ./.build/bundletool.jar https://github.com/google/bundletool/releases/download/1.17.0/bundletool-all-1.17.0.jar
 
 .PHONY: node-all-platforms
 node-all-platforms: app
