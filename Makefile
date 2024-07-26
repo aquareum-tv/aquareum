@@ -93,7 +93,7 @@ docker-build: docker-build-builder docker-build-in-container
 .PHONY: docker-build-builder
 docker-build-builder:
 	cd docker \
-	&& docker build --os=linux --arch=amd64 -f build.Dockerfile -t aqrm.io/aquareum-tv/aquareum:builder .
+	&& docker build --target=builder --os=linux --arch=amd64 -f build.Dockerfile -t aqrm.io/aquareum-tv/aquareum:builder .
 
 .PHONY: docker-build-builder
 docker-build-in-container:
@@ -119,7 +119,7 @@ ci-upload-android: android
 	&& $(MAKE) ci-upload-file upload_file=aquareum-$(VERSION)-android-debug.aab
 
 .PHONY: ci-upload-ios
-ci-upload-ios:
+ci-upload-ios: ios
 	$(MAKE) ci-upload-file upload_file=aquareum-$(VERSION)-ios-release.xcarchive.tar.gz
 
 upload_file?=""
