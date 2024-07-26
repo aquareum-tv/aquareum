@@ -57,7 +57,7 @@ filter() {
   done
 }
 
-build-cache-if-needed() {
+build_cache_if_needed() {
   # lmao mad science https://unix.stackexchange.com/a/70675
   set +e
   ((((build; echo $? >&3) | filter >&4) 3>&1) | (read xs; exit $xs)) 4>&1
@@ -67,7 +67,7 @@ build-cache-if-needed() {
 }
 
 if [ "$1" = "build" ]; then
-  build
+  build_cache_if_needed()
 elif [ "$1" = "cache" ]; then
   cache
 else
