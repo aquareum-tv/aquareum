@@ -4,15 +4,13 @@ build:
   image:
     name: gcr.io/kaniko-project/executor:v1.14.0-debug
     entrypoint: [""]
-  variables:
-    FQ_IMAGE_NAME: "$CI_REGISTRY_IMAGE:builder-$CI_COMMIT_SHA"
   script:
     - /kaniko/executor
       --build-arg TARGETARCH=amd64
       --cache=true
       --context "${CI_PROJECT_DIR}"
       --dockerfile "${CI_PROJECT_DIR}/docker/build.Dockerfile"
-      --cache-repo "$FQ_IMAGE_NAME"
+      --cache-repo "$CI_REGISTRY_IMAGE"
       --use-new-run
       --no-push
       --target cached-builder
@@ -28,7 +26,7 @@ build:
       --build-arg CI_REGISTRY_IMAGE=$CI_REGISTRY_IMAGE
       --build-arg CI_REPOSITORY_URL=$CI_REPOSITORY_URL
       --cache=true
-      --cache-repo "$FQ_IMAGE_NAME"
+      --cache-repo "$CI_REGISTRY_IMAGE"
       --context "${CI_PROJECT_DIR}"
       --dockerfile "${CI_PROJECT_DIR}/docker/build.Dockerfile"
       --use-new-run
