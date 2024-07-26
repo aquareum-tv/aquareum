@@ -12,7 +12,7 @@ build:
       --cache=true
       --context "${CI_PROJECT_DIR}"
       --dockerfile "${CI_PROJECT_DIR}/docker/build.Dockerfile"
-      --destination "$FQ_IMAGE_NAME"
+      --cache-repo "$FQ_IMAGE_NAME"
       --use-new-run
       --no-push
       --target cached-builder
@@ -27,11 +27,13 @@ build:
       --build-arg CI_PROJECT_ID=$CI_PROJECT_ID
       --build-arg CI_REGISTRY_IMAGE=$CI_REGISTRY_IMAGE
       --build-arg CI_REPOSITORY_URL=$CI_REPOSITORY_URL
-      --cache=false
+      --cache=true
+      --cache-repo "$FQ_IMAGE_NAME"
       --context "${CI_PROJECT_DIR}"
       --dockerfile "${CI_PROJECT_DIR}/docker/build.Dockerfile"
       --use-new-run
       --no-push
+      --no-push-cache
 
 build-mac:
   stage: build
