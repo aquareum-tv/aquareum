@@ -47,13 +47,11 @@ build() {
     --skip-unused-stages 2>&1
 }
 
-MANIFEST_UNKNOWN="0"
 filter() {
   while read line; do
-    echo "line=$line"
+    echo "$line"
     if echo $line | grep MANIFEST_UNKNOWN; then
-      echo "GOT HERE!!!!!!!!!!!!"
-      MANIFEST_UNKNOWN="1"
+      touch /manifest-unknown
     fi
   done
 }
@@ -64,7 +62,11 @@ build_cache_if_needed() {
   ((((build; echo $? >&3) | filter >&4) 3>&1) | (read xs; exit $xs)) 4>&1
   status=$?
   set -e
-  echo "exit status=$status MANIFEST_UNKNOWN=$MANIFEST_UNKNOWN"
+  if ! stat /manifest-unknown; then
+    exit $status
+  fi
+  echo "manifest unknown, building build cache"
+  exit 2
 }
 
 if [ "$1" = "build" ]; then
