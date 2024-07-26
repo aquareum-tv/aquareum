@@ -12,6 +12,9 @@ CACHED_BUILD_IMAGE="$CI_REGISTRY_IMAGE:buildcache-`dockerhash`"
 echo "CACHED_BUILD_IMAGE=$CACHED_BUILD_IMAGE"
 
 cache() {
+  echo '==================='
+  echo 'running cache build'
+  echo '==================='
   /kaniko/executor \
     --build-arg TARGETARCH=amd64 \
     --cache=true \
@@ -21,10 +24,14 @@ cache() {
     --use-new-run \
     --target cached-builder \
     --destination $CACHED_BUILD_IMAGE \
+    --single-snapshot \
     --skip-unused-stages
 }
 
 build() {
+  echo '==================='
+  echo 'running image build'
+  echo '==================='
   /kaniko/executor \
     --build-arg CACHED_BUILD_IMAGE="$CACHED_BUILD_IMAGE" \
     --build-arg TARGETARCH=amd64 \
@@ -37,13 +44,10 @@ build() {
     --build-arg CI_REPOSITORY_URL=$CI_REPOSITORY_URL \
     --build-arg CI_COMMIT_TAG=${CI_COMMIT_TAG:-} \
     --build-arg CI_COMMIT_BRANCH=${CI_COMMIT_BRANCH:-} \
-    --cache=true \
-    --cache-repo "$CI_REGISTRY_IMAGE" \
     --context "$CI_PROJECT_DIR" \
-    --dockerfile "$CI_PROJECT_DIR/docker/build.Dockerfile" \
+    --dockerfile "$CI_PROJECT_DIR/docker/ci.Dockerfile" \
     --use-new-run \
     --no-push \
-    --no-push-cache \
     --skip-unused-stages 2>&1
 }
 
