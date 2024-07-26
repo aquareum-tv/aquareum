@@ -5,7 +5,7 @@ set -eu
 dockerfile="$CI_PROJECT_DIR/docker/build.Dockerfile"
 
 dockerhash() {
-  cat $dockerfile | sha256sum | awk "{ print $1 }"
+  cat $dockerfile | sha256sum | awk '{ print $1 }'
 }
 
 CACHED_BUILD_IMAGE="$CI_REGISTRY_IMAGE:buildcache-`dockerhash`"
