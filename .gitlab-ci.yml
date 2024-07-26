@@ -5,33 +5,7 @@ build:
     name: gcr.io/kaniko-project/executor:v1.14.0-debug
     entrypoint: [""]
   script:
-    - /kaniko/executor
-      --build-arg TARGETARCH=amd64
-      --cache=true
-      --context "${CI_PROJECT_DIR}"
-      --dockerfile "${CI_PROJECT_DIR}/docker/build.Dockerfile"
-      --cache-repo "$CI_REGISTRY_IMAGE"
-      --use-new-run
-      --no-push
-      --target cached-builder
-    - /kaniko/executor
-      --build-arg TARGETARCH=amd64
-      --build-arg CI_API_V4_URL=$CI_API_V4_URL
-      --build-arg CI_COMMIT_BRANCH=$CI_COMMIT_BRANCH
-      --build-arg CI_COMMIT_SHA=$CI_COMMIT_SHA
-      --build-arg CI_COMMIT_TAG=$CI_COMMIT_TAG
-      --build-arg CI_JOB_TOKEN=$CI_JOB_TOKEN
-      --build-arg CI_PROJECT_DIR=$CI_PROJECT_DIR
-      --build-arg CI_PROJECT_ID=$CI_PROJECT_ID
-      --build-arg CI_REGISTRY_IMAGE=$CI_REGISTRY_IMAGE
-      --build-arg CI_REPOSITORY_URL=$CI_REPOSITORY_URL
-      --cache=true
-      --cache-repo "$CI_REGISTRY_IMAGE"
-      --context "${CI_PROJECT_DIR}"
-      --dockerfile "${CI_PROJECT_DIR}/docker/build.Dockerfile"
-      --use-new-run
-      --no-push
-      --no-push-cache
+    - ./util/kaniko-ci.sh build
 
 build-mac:
   stage: build

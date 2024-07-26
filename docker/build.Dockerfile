@@ -54,7 +54,9 @@ ENV PATH /cache-bin:$PATH
 
 RUN git clone https://git.aquareum.tv/aquareum-tv/aquareum && cd aquareum && make all -j$(nproc) && cd .. && rm -rf aquareum
 
-FROM cached-builder AS ci-builder
+ARG CACHED_BUILD_IMAGE=cached-builder
+ENV CACHED_BUILD_IMAGE $CACHED_BUILD_IMAGE
+FROM $CACHED_BUILD_IMAGE AS ci-builder
 WORKDIR /build
 
 ARG CI_API_V4_URL
