@@ -34,7 +34,12 @@ func RunMistServer(ctx context.Context, cli *config.CLI) error {
 	if err != nil {
 		return err
 	}
-	cmd := exec.Command(myself, "MistServer", "-c", f.Name())
+	cmd := exec.Command(myself,
+		"MistServer",
+		"-c", f.Name(),
+		"-i", "127.0.0.1",
+		"-p", fmt.Sprintf("%d", cli.MistAdminPort),
+	)
 	cmd.Env = []string{
 		"MIST_NO_PRETTY_LOGGING=true",
 	}

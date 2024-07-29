@@ -51,6 +51,9 @@ func Start(build *config.BuildFlags) error {
 	fs.StringVar(&cli.SigningKeyPath, "signing-key", "", "Path to signing key for pushing OTA updates to the app")
 	fs.StringVar(&cli.DBPath, "db-path", dbFile, "path to sqlite database file")
 	fs.StringVar(&cli.AdminSecret, "admin-secret", "", "secret admin token (to be replaced soon)")
+	fs.IntVar(&cli.MistAdminPort, "mist-admin-port", 14242, "MistServer admin port (internal use only)")
+	fs.IntVar(&cli.MistRTMPPort, "mist-rtmp-port", 11935, "MistServer RTMP port (internal use only)")
+	fs.IntVar(&cli.MistHTTPPort, "mist-http-port", 18080, "MistServer HTTP port (internal use only)")
 
 	ff.Parse(
 		fs, os.Args[1:],

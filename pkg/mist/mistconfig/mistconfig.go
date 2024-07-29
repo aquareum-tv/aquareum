@@ -51,12 +51,16 @@ func Generate(cli *config.CLI) ([]byte, error) {
 				{"connector": "MP3"},
 				{"connector": "MP4"},
 				{"connector": "OGG"},
-				{"connector": "RTMP"},
 				{"connector": "WAV"},
+				{
+					"connector": "RTMP",
+					"interface": "127.0.0.1",
+					"port":      cli.MistRTMPPort,
+				},
 				{
 					"connector": "HTTP",
 					"interface": "127.0.0.1",
-					"port":      8082,
+					"port":      cli.MistHTTPPort,
 				},
 				{
 					"connector":     "WebRTC",

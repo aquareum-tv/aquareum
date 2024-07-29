@@ -39,6 +39,9 @@ type CLI struct {
 	HttpInternalAddr string
 	AdminSecret      string
 	Build            *BuildFlags
+	MistAdminPort    int
+	MistRTMPPort     int
+	MistHTTPPort     int
 }
 
 func (cli *CLI) OwnInternalURL() string {
