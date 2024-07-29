@@ -52,7 +52,6 @@ func Generate(cli *config.CLI) ([]byte, error) {
 				{"connector": "MP4"},
 				{"connector": "OGG"},
 				{"connector": "RTMP"},
-				{"connector": "RTSP"},
 				{"connector": "WAV"},
 				{
 					"connector": "HTTP",
