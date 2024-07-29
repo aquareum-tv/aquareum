@@ -2,7 +2,7 @@
 
 ## The Video Layer for Everything
 
-You'll need Node, Yarn, and Go.
+You'll need Node, Yarn, Meson, Ninja, and Go.
 
 **Single-command build:**
 

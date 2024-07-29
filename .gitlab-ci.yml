@@ -24,6 +24,16 @@ build:
     - git fetch --unshallow || echo 'already unshallow'
     - make ci -j$(nproc)
 
+build-android:
+  stage: build
+  interruptible: true
+  needs:
+    - builder
+  image: "$CI_REGISTRY_IMAGE:builder-$CI_COMMIT_SHA"
+  script:
+    - git fetch --unshallow || echo 'already unshallow'
+    - make ci-android -j$(nproc)
+
 build-mac:
   stage: build
   interruptible: true
