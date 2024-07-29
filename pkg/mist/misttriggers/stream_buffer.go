@@ -10,8 +10,6 @@ import (
 	"github.com/golang/glog"
 )
 
-var hookClient *http.Client
-
 // This trigger is run whenever the live buffer state of a stream changes. It is
 // not ran for VoD streams. This trigger is stream-specific and non-blocking.
 //

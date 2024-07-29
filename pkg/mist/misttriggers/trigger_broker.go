@@ -72,17 +72,6 @@ type triggerBroker struct {
 	streamSourceFuncs  funcGroup[StreamSourcePayload]
 }
 
-var triggers = map[string]bool{
-	TRIGGER_PUSH_END:        false,
-	TRIGGER_PUSH_OUT_START:  true,
-	TRIGGER_PUSH_REWRITE:    true,
-	TRIGGER_STREAM_BUFFER:   false,
-	TRIGGER_LIVE_TRACK_LIST: false,
-	TRIGGER_USER_NEW:        true,
-	TRIGGER_USER_END:        false,
-	TRIGGER_STREAM_SOURCE:   true,
-}
-
 func (b *triggerBroker) OnStreamBuffer(cb func(context.Context, *StreamBufferPayload) error) {
 	b.streamBufferFuncs.RegisterNoResponse(cb)
 }
