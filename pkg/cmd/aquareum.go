@@ -9,6 +9,7 @@ import (
 	"syscall"
 
 	"aquareum.tv/aquareum/pkg/log"
+	"aquareum.tv/aquareum/pkg/proc"
 
 	"aquareum.tv/aquareum/pkg/api"
 	"aquareum.tv/aquareum/pkg/config"
@@ -90,6 +91,10 @@ func Start(build *config.BuildFlags) error {
 			return a.ServeHTTP(ctx)
 		})
 	}
+
+	group.Go(func() error {
+		return proc.RunMistServer(ctx)
+	})
 
 	return group.Wait()
 }
