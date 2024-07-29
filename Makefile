@@ -155,3 +155,8 @@ check: install
 .PHONY: fix
 fix:
 	yarn run fix
+
+.PHONY: docker-hash-precommit
+dockerfile-hash-precommit:
+	@bash -c 'printf "variables:\n  DOCKERFILE_HASH: `git hash-object docker/build.Dockerfile`" > .ci/dockerfile-hash.yaml' \
+	&& git add .ci/dockerfile-hash.yaml
