@@ -56,7 +56,7 @@ func RunMistServer(ctx context.Context) error {
 					if string(line) != "" {
 						level, procName, pid, path, streamName, msg, err := ParseMistLog(string(line))
 						if err != nil {
-							log.Log(ctx, "badly formatted mist log", "message", line)
+							log.Log(ctx, "badly formatted mist log", "message", string(line))
 						} else {
 							log.Log(ctx, msg,
 								"level", level,

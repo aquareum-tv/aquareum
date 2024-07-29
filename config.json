@@ -19,7 +19,6 @@
     "protocols": [
       { "connector": "AAC" },
       { "connector": "CMAF" },
-      { "connector": "DTSC" },
       { "connector": "EBML" },
       { "connector": "FLAC" },
       { "connector": "FLV" },
@@ -39,7 +38,14 @@
       { "connector": "OGG" },
       { "connector": "RTMP" },
       { "connector": "RTSP" },
-      { "connector": "WAV" }
+      { "connector": "WAV" },
+      {
+        "connector": "WebRTC",
+        "jitterlog": false,
+        "mergesessions": false,
+        "nackdisable": false,
+        "packetlog": false
+      }
     ],
     "serverid": null,
     "sessionInputMode": 15,
@@ -48,7 +54,15 @@
     "sessionUnspecifiedMode": 0,
     "sessionViewerMode": 14,
     "tknMode": 15,
-    "triggers": null,
+    "triggers": {
+      "USER_NEW": [
+        {
+          "handler": "http://127.0.0.1:9090/mist-trigger",
+          "streams": [],
+          "sync": true
+        }
+      ]
+    },
     "trustedproxy": []
   },
   "extwriters": null,

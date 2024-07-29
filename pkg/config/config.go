@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"os"
 	"time"
+
+	"golang.org/x/exp/rand"
 )
 
 type BuildFlags struct {
@@ -26,15 +28,16 @@ func (b BuildFlags) BuildTimeStrExpo() string {
 }
 
 type CLI struct {
-	TLSCertPath    string
-	TLSKeyPath     string
-	SigningKeyPath string
-	DBPath         string
-	Insecure       bool
-	HttpAddr       string
-	HttpsAddr      string
-	AdminSecret    string
-	Build          *BuildFlags
+	TLSCertPath      string
+	TLSKeyPath       string
+	SigningKeyPath   string
+	DBPath           string
+	Insecure         bool
+	HttpAddr         string
+	HttpsAddr        string
+	HttpInternalAddr string
+	AdminSecret      string
+	Build            *BuildFlags
 }
 
 func (cli *CLI) ParseSigningKey() (*rsa.PrivateKey, error) {
@@ -51,4 +54,14 @@ func (cli *CLI) ParseSigningKey() (*rsa.PrivateKey, error) {
 		return nil, err
 	}
 	return key, nil
+}
+
+func RandomTrailer(length int) string {
+	const charset = "abcdefghijklmnopqrstuvwxyz0123456789"
+
+	res := make([]byte, length)
+	for i := 0; i < length; i++ {
+		res[i] = charset[rand.Intn(len(charset))]
+	}
+	return string(res)
 }
