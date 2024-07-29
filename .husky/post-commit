@@ -1,0 +1,5 @@
+#!/bin/bash
+
+set -euo pipefail
+printf "variables:\n  DOCKERFILE_HASH: $(git hash-object docker/build.Dockerfile)" > .ci/dockerfile-hash.yaml'
+git add .ci/dockerfile-hash.yaml
