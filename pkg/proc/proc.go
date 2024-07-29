@@ -10,16 +10,31 @@ import (
 	"os/exec"
 	"strings"
 
+	"aquareum.tv/aquareum/pkg/config"
 	"aquareum.tv/aquareum/pkg/log"
+	"aquareum.tv/aquareum/pkg/mist/mistconfig"
 	"golang.org/x/sync/errgroup"
 )
 
-func RunMistServer(ctx context.Context) error {
+func RunMistServer(ctx context.Context, cli *config.CLI) error {
 	myself, err := os.Executable()
 	if err != nil {
 		return err
 	}
-	cmd := exec.Command(myself, "MistServer")
+	f, err := os.CreateTemp("", "mistconfig.json")
+	defer os.Remove(f.Name())
+	if err != nil {
+		return err
+	}
+	conf, err := mistconfig.Generate(cli)
+	if err != nil {
+		return err
+	}
+	err = os.WriteFile(f.Name(), conf, 0644)
+	if err != nil {
+		return err
+	}
+	cmd := exec.Command(myself, "MistServer", "-c", f.Name())
 	cmd.Env = []string{
 		"MIST_NO_PRETTY_LOGGING=true",
 	}

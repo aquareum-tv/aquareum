@@ -24,6 +24,17 @@ const (
 	TRIGGER_STREAM_SOURCE   = "STREAM_SOURCE"
 )
 
+var BlockingTriggers = map[string]bool{
+	TRIGGER_PUSH_END:        false,
+	TRIGGER_PUSH_OUT_START:  true,
+	TRIGGER_PUSH_REWRITE:    true,
+	TRIGGER_STREAM_BUFFER:   false,
+	TRIGGER_LIVE_TRACK_LIST: false,
+	TRIGGER_USER_NEW:        true,
+	TRIGGER_USER_END:        false,
+	TRIGGER_STREAM_SOURCE:   true,
+}
+
 type MistCallbackHandlersCollection struct {
 	cli    *config.CLI
 	broker TriggerBroker

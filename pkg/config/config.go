@@ -5,6 +5,7 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
+	"net"
 	"os"
 	"time"
 
@@ -38,6 +39,17 @@ type CLI struct {
 	HttpInternalAddr string
 	AdminSecret      string
 	Build            *BuildFlags
+}
+
+func (cli *CLI) OwnInternalURL() string {
+	//  No errors because we know it's valid from AddrFlag
+	host, port, _ := net.SplitHostPort(cli.HttpInternalAddr)
+	ip := net.ParseIP(host)
+	if ip.IsUnspecified() {
+		host = "127.0.0.1"
+	}
+	addr := net.JoinHostPort(host, port)
+	return fmt.Sprintf("http://%s", addr)
 }
 
 func (cli *CLI) ParseSigningKey() (*rsa.PrivateKey, error) {

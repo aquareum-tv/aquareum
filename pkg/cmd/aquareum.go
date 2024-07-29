@@ -98,7 +98,7 @@ func Start(build *config.BuildFlags) error {
 	})
 
 	group.Go(func() error {
-		return proc.RunMistServer(ctx)
+		return proc.RunMistServer(ctx, &cli)
 	})
 
 	return group.Wait()
