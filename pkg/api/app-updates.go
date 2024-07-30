@@ -210,7 +210,7 @@ func PrepareUpdater(cli *config.CLI) (*Updater, error) {
 	}
 	file, err := fs.Open("metadata.json")
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("couldn't read metadata.json, did you run `make app`? error=%w", err)
 	}
 	bs, err := io.ReadAll(file)
 	if err != nil {
@@ -293,7 +293,6 @@ func (a *AquareumAPI) HandleAppUpdates(ctx context.Context) http.HandlerFunc {
 		if err != nil {
 			log.Log(ctx, "app-updates request errored getting manfiest", "error", err)
 			w.WriteHeader(400)
-			w.Write([]byte("fooooo"))
 			return
 		}
 		if signing != "" {

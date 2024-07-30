@@ -95,10 +95,22 @@ func (v *VerboseLogger) log(ctx context.Context, message string, args ...any) {
 		return
 	}
 	meta, _ := ctx.Value(clogContextKey).(metadata)
+	hasCaller := false
+
 	allArgs := []any{}
 	allArgs = append(allArgs, args...)
 	allArgs = append(allArgs, meta.Flat()...)
-	allArgs = append(allArgs, "caller", caller(3))
+	for i := range args {
+		if i%2 == 0 {
+			continue
+		}
+		if args[i-1] == "caller" {
+			hasCaller = true
+		}
+	}
+	if !hasCaller {
+		allArgs = append(allArgs, "caller", caller(3))
+	}
 	slog.Info(message, allArgs...)
 }
 

@@ -5,8 +5,11 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
+	"net"
 	"os"
 	"time"
+
+	"golang.org/x/exp/rand"
 )
 
 type BuildFlags struct {
@@ -26,15 +29,30 @@ func (b BuildFlags) BuildTimeStrExpo() string {
 }
 
 type CLI struct {
-	TLSCertPath    string
-	TLSKeyPath     string
-	SigningKeyPath string
-	DBPath         string
-	Insecure       bool
-	HttpAddr       string
-	HttpsAddr      string
-	AdminSecret    string
-	Build          *BuildFlags
+	TLSCertPath      string
+	TLSKeyPath       string
+	SigningKeyPath   string
+	DBPath           string
+	Insecure         bool
+	HttpAddr         string
+	HttpsAddr        string
+	HttpInternalAddr string
+	AdminSecret      string
+	Build            *BuildFlags
+	MistAdminPort    int
+	MistRTMPPort     int
+	MistHTTPPort     int
+}
+
+func (cli *CLI) OwnInternalURL() string {
+	//  No errors because we know it's valid from AddrFlag
+	host, port, _ := net.SplitHostPort(cli.HttpInternalAddr)
+	ip := net.ParseIP(host)
+	if ip.IsUnspecified() {
+		host = "127.0.0.1"
+	}
+	addr := net.JoinHostPort(host, port)
+	return fmt.Sprintf("http://%s", addr)
 }
 
 func (cli *CLI) ParseSigningKey() (*rsa.PrivateKey, error) {
@@ -51,4 +69,14 @@ func (cli *CLI) ParseSigningKey() (*rsa.PrivateKey, error) {
 		return nil, err
 	}
 	return key, nil
+}
+
+func RandomTrailer(length int) string {
+	const charset = "abcdefghijklmnopqrstuvwxyz0123456789"
+
+	res := make([]byte, length)
+	for i := 0; i < length; i++ {
+		res[i] = charset[rand.Intn(len(charset))]
+	}
+	return string(res)
 }

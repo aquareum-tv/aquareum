@@ -9,13 +9,15 @@ require (
 	github.com/go-git/go-git/v5 v5.12.0
 	github.com/golang/glog v1.2.0
 	github.com/google/uuid v1.6.0
+	github.com/julienschmidt/httprouter v1.3.0
 	github.com/lmittmann/tint v1.0.4
 	github.com/orandin/slog-gorm v1.3.2
 	github.com/peterbourgon/ff/v3 v3.3.1
 	github.com/samber/slog-http v1.4.0
 	github.com/stretchr/testify v1.9.0
 	gitlab.com/gitlab-org/release-cli v0.18.0
-	golang.org/x/sync v0.6.0
+	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56
+	golang.org/x/sync v0.7.0
 	gorm.io/driver/sqlite v1.5.5
 )
 
@@ -23,7 +25,7 @@ require (
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/mattn/go-isatty v0.0.20
-	golang.org/x/sys v0.18.0 // indirect
+	golang.org/x/sys v0.22.0 // indirect
 	gorm.io/gorm v1.25.9
 )
 
@@ -64,10 +66,10 @@ require (
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
 	go.opentelemetry.io/otel v1.19.0 // indirect
 	go.opentelemetry.io/otel/trace v1.19.0 // indirect
-	golang.org/x/crypto v0.21.0 // indirect
-	golang.org/x/mod v0.12.0 // indirect
-	golang.org/x/net v0.22.0 // indirect
-	golang.org/x/tools v0.13.0 // indirect
+	golang.org/x/crypto v0.25.0 // indirect
+	golang.org/x/mod v0.19.0 // indirect
+	golang.org/x/net v0.27.0 // indirect
+	golang.org/x/tools v0.23.0 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )

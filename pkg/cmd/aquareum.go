@@ -9,6 +9,7 @@ import (
 	"syscall"
 
 	"aquareum.tv/aquareum/pkg/log"
+	"aquareum.tv/aquareum/pkg/proc"
 
 	"aquareum.tv/aquareum/pkg/api"
 	"aquareum.tv/aquareum/pkg/config"
@@ -42,6 +43,7 @@ func Start(build *config.BuildFlags) error {
 	fs := flag.NewFlagSet("aquareum", flag.ExitOnError)
 	cli := config.CLI{Build: build}
 	fs.StringVar(&cli.HttpAddr, "http-addr", ":8080", "Public HTTP address")
+	fs.StringVar(&cli.HttpInternalAddr, "http-internal-addr", "127.0.0.1:9090", "Private, admin-only HTTP address")
 	fs.StringVar(&cli.HttpsAddr, "https-addr", ":8443", "Public HTTPS address")
 	fs.BoolVar(&cli.Insecure, "insecure", false, "Run without HTTPS. not recomended, as WebRTC support requires HTTPS")
 	fs.StringVar(&cli.TLSCertPath, "tls-cert", tlsCertFile, "Path to TLS certificate")
@@ -49,6 +51,9 @@ func Start(build *config.BuildFlags) error {
 	fs.StringVar(&cli.SigningKeyPath, "signing-key", "", "Path to signing key for pushing OTA updates to the app")
 	fs.StringVar(&cli.DBPath, "db-path", dbFile, "path to sqlite database file")
 	fs.StringVar(&cli.AdminSecret, "admin-secret", "", "secret admin token (to be replaced soon)")
+	fs.IntVar(&cli.MistAdminPort, "mist-admin-port", 14242, "MistServer admin port (internal use only)")
+	fs.IntVar(&cli.MistRTMPPort, "mist-rtmp-port", 11935, "MistServer RTMP port (internal use only)")
+	fs.IntVar(&cli.MistHTTPPort, "mist-http-port", 18080, "MistServer HTTP port (internal use only)")
 
 	ff.Parse(
 		fs, os.Args[1:],
@@ -90,6 +95,14 @@ func Start(build *config.BuildFlags) error {
 			return a.ServeHTTP(ctx)
 		})
 	}
+
+	group.Go(func() error {
+		return a.ServeInternalHTTP(ctx)
+	})
+
+	group.Go(func() error {
+		return proc.RunMistServer(ctx, &cli)
+	})
 
 	return group.Wait()
 }
