@@ -1,0 +1,9 @@
+#!/bin/bash
+
+set -euo pipefail
+printf "variables:\n  DOCKERFILE_HASH: $(git hash-object docker/build.Dockerfile)" > .ci/dockerfile-hash.yaml
+git add .ci/dockerfile-hash.yaml
+if ! git diff-index --quiet --cached HEAD --; then
+  git commit --amend -C HEAD --no-verify
+  echo "postcommit hook automatically amended commit to include new dockerfile hash"
+fi
