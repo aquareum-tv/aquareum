@@ -1,6 +1,7 @@
 package eip712
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"math/big"
@@ -37,6 +38,7 @@ type EIP712Signer struct {
 	// AccountManager eth.AccountManager
 	Types      apitypes.Types
 	TypeToName map[reflect.Type]string
+	NameToType map[string]reflect.Type
 	KeyStore   *keystore.KeyStore
 	Account    *accounts.Account
 }
@@ -97,6 +99,7 @@ func MakeEIP712Signer(opts *EIP712SignerOptions) (*EIP712Signer, error) {
 	}
 	fields := reflect.VisibleFields(stype)
 	typeToName := map[reflect.Type]string{}
+	nameToType := map[string]reflect.Type{}
 	for _, field := range fields {
 		name := field.Name
 		eip712TypeName := fmt.Sprintf("%sData", name)
@@ -104,6 +107,7 @@ func MakeEIP712Signer(opts *EIP712SignerOptions) (*EIP712Signer, error) {
 			return nil, fmt.Errorf("field '%s' in provided schema is not a struct", name)
 		}
 		typeToName[field.Type] = name
+		nameToType[name] = field.Type
 		parentType := []apitypes.Type{
 			{
 				Name: "signer",
@@ -137,6 +141,7 @@ func MakeEIP712Signer(opts *EIP712SignerOptions) (*EIP712Signer, error) {
 		KeyStore:   keyStore,
 		Account:    account,
 		TypeToName: typeToName,
+		NameToType: nameToType,
 	}, nil
 }
 
@@ -172,11 +177,43 @@ type Domain struct {
 	Version string `json:"version"`
 }
 
-type AquareumMessage struct {
-	PrimaryType string         `json:"primaryType"`
-	Domain      Domain         `json:"domain"`
-	Message     map[string]any `json:"message"`
-	Signature   string         `json:"signature"`
+type SignedMessage interface {
+	Signer() string
+	Time() int64
+	Data() any
+}
+type AquareumEIP712 struct {
+	PrimaryType string                `json:"primaryType"`
+	Domain      Domain                `json:"domain"`
+	Message     AquareumEIP712Message `json:"message"`
+	Signature   string                `json:"signature"`
+}
+
+type AquareumEIP712Message struct {
+	MsgSigner string `json:"signer"`
+	MsgTime   int64  `json:"time"`
+	MsgData   any    `json:"data"`
+}
+
+// return a Map representation suitable for passing to the geth functions
+func (msg AquareumEIP712Message) Map() map[string]any {
+	m := map[string]any{}
+	m["signer"] = msg.MsgSigner
+	m["time"] = new(big.Int).SetInt64(msg.MsgTime)
+	m["data"] = msg.MsgData
+	return m
+}
+
+func (msg *AquareumEIP712Message) Signer() string {
+	return msg.MsgSigner
+}
+
+func (msg *AquareumEIP712Message) Time() int64 {
+	return msg.MsgTime
+}
+
+func (msg *AquareumEIP712Message) Data() any {
+	return msg.MsgData
 }
 
 // convert to a TypedDataDomain suitable for signing by eth tooling
@@ -195,19 +232,20 @@ func (signer *EIP712Signer) Sign(something any) ([]byte, error) {
 		return nil, fmt.Errorf("unknown type provided to Sign, expected one of [%s]", allTypes)
 	}
 
-	msg := map[string]any{}
 	innerMessage, err := ActionToMap(something)
 	if err != nil {
 		return nil, err
 	}
-	msg["data"] = innerMessage
-	msg["signer"] = signer.Account.Address.String()
-	msg["time"] = new(big.Int).SetInt64(time.Now().UnixMilli())
+	msg := AquareumEIP712Message{
+		MsgData:   innerMessage,
+		MsgSigner: signer.Account.Address.String(),
+		MsgTime:   time.Now().UnixMilli(),
+	}
 	typedData := apitypes.TypedData{
 		Types:       signer.Types,
 		PrimaryType: name,
 		Domain:      AquareumDomain.TypedDataDomain(),
-		Message:     msg,
+		Message:     msg.Map(),
 	}
 	domainSeparator, err := typedData.HashStruct("EIP712Domain", typedData.Domain.Map())
 	if err != nil {
@@ -234,7 +272,7 @@ func (signer *EIP712Signer) Sign(something any) ([]byte, error) {
 	// golint wants string(b) but that gives /x1234 encoded output
 	sigHex := hexutil.Bytes(sig).String()
 
-	finalMessage := AquareumMessage{
+	finalMessage := AquareumEIP712{
 		PrimaryType: name,
 		Domain:      AquareumDomain,
 		Message:     msg,
@@ -264,186 +302,57 @@ func ActionToMap(a any) (map[string]any, error) {
 	return newMap, nil
 }
 
-// func (signer *EIP712Signer) Verify(bs []byte, ptr *any) error {
-// 	var unverified AquareumMessage
-// 	err := json.Unmarshal(bs, unverified)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	sig, err := hexutil.Decode(unverified.Signature)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	sig[64] -= 27
-// 	typedData := apitypes.TypedData{
-// 		Types:       signer.Types,
-// 		Domain:      AquareumDomain.TypedDataDomain(),
-// 		PrimaryType: unverified.PrimaryType,
-// 		Message:     unverified.Message,
-// 	}
-// 	hash, _, err := apitypes.TypedDataAndHash(typedData)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	rpk, err := crypto.SigToPub(hash, sig)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	addr := crypto.PubkeyToAddress(*rpk)
-// 	actionGenerator, ok := schema.Actions[unverified.PrimaryType]
-// 	if !ok {
-// 		return nil, fmt.Errorf("unknown action domain: %s", unverified.Domain)
-// 	}
-// 	action := actionGenerator()
-// 	err = LoadMap(action, unverified.Message)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	addrString := fmt.Sprintf("%s", addr)
-// 	if addrString != action.SignerAddress() {
-// 		return nil, fmt.Errorf("incorrect signer for action! signer=%s action.signer=%s", addrString, action.SignerAddress())
-// 	}
-// 	return &SignedEvent{
-// 		Domain:    schema.Domain,
-// 		Signature: unverified.Signature,
-// 		Address:   addr,
-// 		Action:    action,
-// 	}, nil
-// }
-
-// func (am *EIP712Signer) SignTypedData(typedData apitypes.TypedData) ([]byte, error) {
-// 	domainSeparator, err := typedData.HashStruct("EIP712Domain", typedData.Domain.Map())
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	typedDataHash, err := typedData.HashStruct(typedData.PrimaryType, typedData.Message)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	rawData := []byte(fmt.Sprintf("\x19\x01%s%s", string(domainSeparator), string(typedDataHash)))
-// 	sighash := crypto.Keccak256(rawData)
-
-// 	return am.signHash(sighash)
-// }
-
-// func NewEIP712Signer(opts *EIP712SignerOptions) (Signer, error) {
-// 	// We don't use this parameter so let's use one that doesn't exist
-// 	id := new(big.Int).SetInt64(int64(9999999999))
-// 	am, err := eth.NewAccountManager(ethcommon.HexToAddress(opts.EthAccountAddr), opts.EthKeystorePath, id, opts.EthKeystorePassword)
-// 	if err != nil {
-// 		return nil, fmt.Errorf("error initalizing eth.AccountManager: %w", err)
-// 	}
-// 	err = am.Unlock(opts.EthKeystorePassword)
-// 	if err != nil {
-// 		return nil, fmt.Errorf("error unlcoking eth.AccountManager: %w", err)
-// 	}
-// 	return &EIP712Signer{
-// 		PrimarySchema:  opts.PrimarySchema,
-// 		Schemas:        opts.Schemas,
-// 		AccountManager: am,
-// 	}, nil
-// }
-
-// func (s *EIP712Signer) Sign(action Action) (*SignedEvent, error) {
-// 	actionMap, err := ActionToMap(action)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	addrStr := fmt.Sprintf("%s", s.AccountManager.Account().Address)
-// 	if actionMap["signer"] != addrStr {
-// 		return nil, fmt.Errorf("address mismatch signing action, signer.address=%s, action.singer=%s", addrStr, actionMap["signer"])
-// 	}
-// 	actionMap["signer"] = addrStr
-// 	typedData := apitypes.TypedData{
-// 		Types:       s.PrimarySchema.Types,
-// 		Domain:      s.PrimarySchema.Domain.TypedDataDomain(),
-// 		PrimaryType: action.Type(),
-// 		Message:     actionMap,
-// 	}
-// 	_, err = typedData.HashStruct("EIP712Domain", typedData.Domain.Map())
-// 	if err != nil {
-// 		return nil, fmt.Errorf("error signing EIP712Domain: %w", err)
-// 	}
-// 	_, err = typedData.HashStruct(typedData.PrimaryType, typedData.Message)
-// 	if err != nil {
-// 		return nil, fmt.Errorf("error signing struct: %w", err)
-// 	}
-
-// 	b, err := s.AccountManager.SignTypedData(typedData)
-// 	if err != nil {
-// 		return nil, fmt.Errorf("error signing typed data: %w", err)
-// 	}
-// 	// golint wants string(b) but that gives /x1234 encoded output
-// 	sig := fmt.Sprintf("%s", hexutil.Bytes(b)) //nolint:gosimple
-// 	return &SignedEvent{
-// 		Domain:    s.PrimarySchema.Domain,
-// 		Signature: sig,
-// 		Address:   s.AccountManager.Account().Address,
-// 		Action:    action,
-// 	}, nil
-// }
-
-// // given an unverified event from an untrusted source, verify its signature
-// func (s *EIP712Signer) Verify(unverified UnverifiedEvent) (*SignedEvent, error) {
-// 	// find the correct schema for this action
-// 	var schema *Schema
-// 	for _, s := range s.Schemas {
-// 		eq, err := s.Domain.Equal(&unverified.Domain)
-// 		if eq && err == nil {
-// 			schema = s
-// 			break
-// 		}
-// 	}
-// 	if schema == nil {
-// 		return nil, fmt.Errorf("unknown event domain: %s", unverified.Domain)
-// 	}
-// 	sig, err := hexutil.Decode(unverified.Signature)
-// 	sig[64] -= 27
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	typedData := apitypes.TypedData{
-// 		Types:       schema.Types,
-// 		Domain:      schema.Domain.TypedDataDomain(),
-// 		PrimaryType: unverified.PrimaryType,
-// 		Message:     unverified.Message,
-// 	}
-// 	hash, _, err := apitypes.TypedDataAndHash(typedData)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	rpk, err := crypto.SigToPub(hash, sig)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	addr := crypto.PubkeyToAddress(*rpk)
-// 	actionGenerator, ok := schema.Actions[unverified.PrimaryType]
-// 	if !ok {
-// 		return nil, fmt.Errorf("unknown action domain: %s", unverified.Domain)
-// 	}
-// 	action := actionGenerator()
-// 	err = LoadMap(action, unverified.Message)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	addrString := fmt.Sprintf("%s", addr)
-// 	if addrString != action.SignerAddress() {
-// 		return nil, fmt.Errorf("incorrect signer for action! signer=%s action.signer=%s", addrString, action.SignerAddress())
-// 	}
-// 	return &SignedEvent{
-// 		Domain:    schema.Domain,
-// 		Signature: unverified.Signature,
-// 		Address:   addr,
-// 		Action:    action,
-// 	}, nil
-// }
-
-// var Schema = events.Schema{
-// 	Types:  Types,
-// 	Domain: Domain,
-// 	Actions: map[string]func() events.Action{
-// 		"ChannelDefinition": func() events.Action {
-// 			return &ChannelDefinition{}
-// 		},
-// 	},
-// }
+func (signer *EIP712Signer) Verify(bs []byte) (SignedMessage, error) {
+	var unverified AquareumEIP712
+	err := json.Unmarshal(bs, &unverified)
+	if err != nil {
+		return nil, fmt.Errorf("error on json.Unmarshal: %w", err)
+	}
+	sig, err := hexutil.Decode(unverified.Signature)
+	if err != nil {
+		return nil, fmt.Errorf("error on hexutil.Decode: %w", err)
+	}
+	sig[64] -= 27
+	typedData := apitypes.TypedData{
+		Types:       signer.Types,
+		Domain:      AquareumDomain.TypedDataDomain(),
+		PrimaryType: unverified.PrimaryType,
+		Message:     unverified.Message.Map(),
+	}
+	hash, _, err := apitypes.TypedDataAndHash(typedData)
+	if err != nil {
+		return nil, fmt.Errorf("error on apitypes.TypedDataAndHash: %w", err)
+	}
+	rpk, err := crypto.SigToPub(hash, sig)
+	if err != nil {
+		return nil, fmt.Errorf("error on crypto.SigToPub: %w", err)
+	}
+	addr := crypto.PubkeyToAddress(*rpk)
+	messageSignerAddr, err := hexutil.Decode(unverified.Message.Signer())
+	if err != nil {
+		return nil, fmt.Errorf("error on hexutil.Decode: %w", err)
+	}
+	if !bytes.Equal(messageSignerAddr, addr.Bytes()) {
+		return nil, fmt.Errorf("message signature does not match signer on message")
+	}
+	typ, ok := signer.NameToType[unverified.PrimaryType]
+	if !ok {
+		return nil, fmt.Errorf("go type not found for message type %s", unverified.PrimaryType)
+	}
+	dataBs, err := json.Marshal(unverified.Message.Data())
+	if err != nil {
+		return nil, err
+	}
+	something := reflect.New(typ).Interface()
+	err = json.Unmarshal(dataBs, something)
+	if err != nil {
+		return nil, err
+	}
+	// new object that has the correct type hidden within!
+	signed := AquareumEIP712Message{
+		MsgSigner: unverified.Message.Signer(),
+		MsgTime:   unverified.Message.Time(),
+		MsgData:   something,
+	}
+	return &signed, nil
+}

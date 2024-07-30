@@ -2,6 +2,7 @@ package eip712
 
 import (
 	"testing"
+	"time"
 
 	v0 "aquareum.tv/aquareum/pkg/schema/v0"
 	"github.com/stretchr/testify/require"
@@ -18,6 +19,16 @@ func makeSigner(t *testing.T) *EIP712Signer {
 	return signer
 }
 
+func TestEIP712Map(t *testing.T) {
+	msg := AquareumEIP712Message{
+		MsgData:   map[string]string{"foo": "bar"},
+		MsgSigner: "0x295481766f43bb048aec5d71f3bf76fdacea78f2",
+		MsgTime:   time.Now().UnixMilli(),
+	}
+	m := msg.Map()
+	require.Equal(t, m["signer"], msg.MsgSigner)
+}
+
 func TestCreateSigner(t *testing.T) {
 	makeSigner(t)
 }
@@ -28,9 +39,8 @@ func TestSignGoLive(t *testing.T) {
 		Streamer: "@aquareum.tv",
 		Title:    "Let's gooooooo!",
 	}
-	blob, err := signer.Sign(goLive)
+	_, err := signer.Sign(goLive)
 	require.NoError(t, err)
-	panic(string(blob))
 }
 
 var testCase = `{
@@ -45,5 +55,14 @@ var testCase = `{
 }`
 
 func TestVerifyGoLive(t *testing.T) {
-
+	var goLive *v0.GoLive
+	signer := makeSigner(t)
+	signed, err := signer.Verify([]byte(testCase))
+	require.NoError(t, err)
+	require.Equal(t, signed.Signer(), "0x295481766F43bb048Aec5D71f3Bf76FDaCEA78f2")
+	require.Equal(t, signed.Time(), int64(1722373018292))
+	goLive, ok := signed.Data().(*v0.GoLive)
+	require.True(t, ok)
+	require.Equal(t, goLive.Streamer, "@aquareum.tv")
+	require.Equal(t, goLive.Title, "Let's gooooooo!")
 }
