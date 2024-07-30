@@ -1,6 +1,7 @@
 package eip712
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -9,11 +10,13 @@ import (
 )
 
 func makeSigner(t *testing.T) *EIP712Signer {
-	signer, err := MakeEIP712Signer(&EIP712SignerOptions{
+	schema, err := v0.MakeV0Schema()
+	require.NoError(t, err)
+	signer, err := MakeEIP712Signer(context.Background(), &EIP712SignerOptions{
 		EthKeystorePassword: "aquareumaquareum",
 		EthKeystorePath:     ".",
 		EthAccountAddr:      "0x295481766f43bb048aec5d71f3bf76fdacea78f2",
-		Schema:              v0.Schema{},
+		Schema:              schema,
 	})
 	require.NoError(t, err)
 	return signer
