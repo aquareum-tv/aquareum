@@ -119,9 +119,6 @@ export default function TabOneScreen({ setShowTabs }) {
       <View fg={3} flexBasis={0}>
         <WebviewIframe src="https://iame.li" />
       </View>
-      <Link href="/admin">
-        <Text>Secret Admin Button</Text>
-      </Link>
       <View paddingBottom="$10"></View>
     </YStack>
   );
