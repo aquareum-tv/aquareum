@@ -52,3 +52,7 @@ func WriteHTTPNotFound(w http.ResponseWriter, msg string, err error) APIError {
 func WriteHTTPInternalServerError(w http.ResponseWriter, msg string, err error) APIError {
 	return writeHttpError(w, msg, http.StatusInternalServerError, err)
 }
+
+func WriteHTTPNotImplemented(w http.ResponseWriter, msg string, err error) APIError {
+	return writeHttpError(w, msg, http.StatusNotImplemented, err)
+}

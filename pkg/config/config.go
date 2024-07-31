@@ -29,20 +29,21 @@ func (b BuildFlags) BuildTimeStrExpo() string {
 }
 
 type CLI struct {
-	TLSCertPath      string
-	TLSKeyPath       string
-	SigningKeyPath   string
-	DBPath           string
-	Insecure         bool
-	HttpAddr         string
-	HttpsAddr        string
-	HttpInternalAddr string
-	GitLabURL        string
-	AdminAccount     string
-	Build            *BuildFlags
-	MistAdminPort    int
-	MistRTMPPort     int
-	MistHTTPPort     int
+	TLSCertPath            string
+	TLSKeyPath             string
+	SigningKeyPath         string
+	DBPath                 string
+	Insecure               bool
+	HttpAddr               string
+	HttpsAddr              string
+	HttpInternalAddr       string
+	GitLabURL              string
+	FirebaseServiceAccount string
+	AdminAccount           string
+	Build                  *BuildFlags
+	MistAdminPort          int
+	MistRTMPPort           int
+	MistHTTPPort           int
 }
 
 func (cli *CLI) OwnInternalURL() string {

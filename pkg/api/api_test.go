@@ -79,7 +79,16 @@ func TestRedirectHandler(t *testing.T) {
 	}
 }
 
+type MockFirebase struct {
+}
+
+func (m *MockFirebase) Blast(ctx context.Context, nots []model.Notification, golive *v0.GoLive) error {
+	return nil
+}
+
 func TestGoLiveHandler(t *testing.T) {
+	mod, err := model.MakeDB("sqlite://:memory:")
+	require.NoError(t, err)
 	eip712test.WithTestSigner(func(signer *eip712.EIP712Signer) {
 		tests := []struct {
 			adminAccount string
@@ -99,9 +108,8 @@ func TestGoLiveHandler(t *testing.T) {
 		}
 		for _, tt := range tests {
 			t.Run(tt.name, func(t *testing.T) {
-				cli := &config.CLI{AdminAccount: tt.adminAccount}
-				mod := &model.DBModel{}
-				a := AquareumAPI{CLI: cli, Model: mod, Signer: signer}
+				cli := &config.CLI{AdminAccount: tt.adminAccount, FirebaseServiceAccount: "foo"}
+				a := AquareumAPI{CLI: cli, Model: mod, Signer: signer, FirebaseNotifier: &MockFirebase{}}
 				handler := a.HandleGoLive(context.Background())
 
 				goLive := v0.GoLive{

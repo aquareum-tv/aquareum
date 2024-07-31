@@ -23,22 +23,25 @@ import (
 	apierrors "aquareum.tv/aquareum/pkg/errors"
 	"aquareum.tv/aquareum/pkg/log"
 	"aquareum.tv/aquareum/pkg/model"
+	"aquareum.tv/aquareum/pkg/notifications"
+	v0 "aquareum.tv/aquareum/pkg/schema/v0"
 )
 
 type AquareumAPI struct {
-	CLI     *config.CLI
-	Model   model.Model
-	Updater *Updater
-	Signer  *eip712.EIP712Signer
-	Mimes   map[string]string
+	CLI              *config.CLI
+	Model            model.Model
+	Updater          *Updater
+	Signer           *eip712.EIP712Signer
+	Mimes            map[string]string
+	FirebaseNotifier notifications.FirebaseNotifier
 }
 
-func MakeAquareumAPI(cli *config.CLI, mod model.Model, signer *eip712.EIP712Signer) (*AquareumAPI, error) {
+func MakeAquareumAPI(cli *config.CLI, mod model.Model, signer *eip712.EIP712Signer, noter notifications.FirebaseNotifier) (*AquareumAPI, error) {
 	updater, err := PrepareUpdater(cli)
 	if err != nil {
 		return nil, err
 	}
-	a := &AquareumAPI{CLI: cli, Model: mod, Updater: updater, Signer: signer}
+	a := &AquareumAPI{CLI: cli, Model: mod, Updater: updater, Signer: signer, FirebaseNotifier: noter}
 	a.Mimes, err = updater.GetMimes()
 	if err != nil {
 		return nil, err
@@ -150,12 +153,32 @@ func (a *AquareumAPI) HandleGoLive(ctx context.Context) http.HandlerFunc {
 			apierrors.WriteHTTPBadRequest(w, "could not verify signature on payload", err)
 			return
 		}
+		golive, ok := signed.Data().(*v0.GoLive)
+		if !ok {
+			log.Log(ctx, "got signed payload but it wasn't a golive")
+			apierrors.WriteHTTPBadRequest(w, "not a golive", nil)
+			return
+		}
 		if signed.Signer() != a.CLI.AdminAccount {
 			log.Log(ctx, "wrong user tried to golive", "signer", signed.Signer(), "admin", a.CLI.AdminAccount)
-			apierrors.WriteHTTPForbidden(w, "admins only for now", fmt.Errorf("admins only for now"))
+			apierrors.WriteHTTPForbidden(w, "admins only for now", nil)
 			return
 		}
 		log.Log(ctx, "got signed & verified payload", "payload", signed)
+		if a.FirebaseNotifier == nil {
+			apierrors.WriteHTTPNotImplemented(w, "no firebase token, can't notify", nil)
+			return
+		}
+		nots, err := a.Model.ListNotifications()
+		if err != nil {
+			apierrors.WriteHTTPInternalServerError(w, "couldn't list notifications", err)
+			return
+		}
+		err = a.FirebaseNotifier.Blast(ctx, nots, golive)
+		if err != nil {
+			apierrors.WriteHTTPInternalServerError(w, "couldn't blast", err)
+			return
+		}
 		w.WriteHeader(204)
 	}
 }
