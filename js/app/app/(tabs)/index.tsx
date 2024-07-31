@@ -46,6 +46,7 @@ import { ImageBackground } from "react-native";
 import * as env from "constants/env";
 import { useState } from "react";
 import GetApps from "components/get-apps";
+import { Link } from "expo-router";
 
 const WebviewIframe = ({ src }) => {
   if (isWeb) {
@@ -70,7 +71,7 @@ const WebviewIframe = ({ src }) => {
 
 const TAP_COUNT = 5;
 const TAP_WINDOW = 5000;
-export default function TabOneScreen() {
+export default function TabOneScreen({ setShowTabs }) {
   // const isLive = Date.now() >= 1721149200000;
   const [debug, setDebug] = useState(false);
   const [presses, setPresses] = useState<number[]>([]);
@@ -85,6 +86,7 @@ export default function TabOneScreen() {
     ) {
       setPresses([]);
       setDebug(!debug);
+      setShowTabs(!debug);
     } else {
       setPresses(newTaps);
     }
@@ -117,6 +119,9 @@ export default function TabOneScreen() {
       <View fg={3} flexBasis={0}>
         <WebviewIframe src="https://iame.li" />
       </View>
+      <Link href="/admin">
+        <Text>Secret Admin Button</Text>
+      </Link>
       <View paddingBottom="$10"></View>
     </YStack>
   );

@@ -24,12 +24,14 @@
     "preset": "jest-expo"
   },
   "dependencies": {
+    "@rainbow-me/rainbowkit": "2",
     "@react-native-firebase/app": "^20.3.0",
     "@react-native-firebase/messaging": "^20.3.0",
     "@react-navigation/native": "^6.1.17",
     "@tamagui/config": "^1.102.3",
     "@tamagui/lucide-icons": "^1.102.3",
     "@tamagui/toast": "^1.102.3",
+    "@tanstack/react-query": "^5.51.16",
     "babel-preset-expo": "^11.0.12",
     "burnt": "^0.12.2",
     "chrono-node": "^2.7.6",
@@ -54,7 +56,9 @@
     "react-native-svg": "15.4.0",
     "react-native-web": "^0.19.12",
     "react-native-webview": "13.10.5",
-    "tamagui": "^1.102.3"
+    "tamagui": "^1.102.3",
+    "viem": "2.x",
+    "wagmi": "2"
   },
   "devDependencies": {
     "@babel/core": "^7.24.9",
