@@ -4,6 +4,7 @@ import { useSignTypedData, useAccount } from "wagmi";
 import schema from "generated/eip712-schema.json";
 import { useState } from "react";
 import { useToastController } from "@tamagui/toast";
+import { EXPO_PUBLIC_AQUAREUM_URL } from "constants/env";
 
 export default function AdminPage() {
   const { signTypedDataAsync } = useSignTypedData();
@@ -32,16 +33,33 @@ export default function AdminPage() {
             onPress={async () => {
               try {
                 setLoading(true);
-                const res = await signTypedDataAsync({
+                const message = {
+                  signer: account.address,
+                  time: Date.now(),
+                  data: { streamer, title },
+                };
+                const signature = await signTypedDataAsync({
                   types: schema.types,
                   domain: schema.domain,
                   primaryType: "GoLive",
-                  message: {
-                    signer: account.address,
-                    time: Date.now(),
-                    data: { streamer, title },
-                  },
+                  message: message,
                 });
+                const res = await fetch(
+                  `${EXPO_PUBLIC_AQUAREUM_URL}/api/golive`,
+                  {
+                    method: "POST",
+                    body: JSON.stringify({
+                      primaryType: "GoLive",
+                      domain: schema.domain,
+                      message: message,
+                      signature: signature,
+                    }),
+                  },
+                );
+                if (!res.ok) {
+                  const text = await res.text();
+                  throw new Error(`http ${res.status} ${text}`);
+                }
                 toast.show("GoLive Succeeded", {
                   message: "Let's goooooo!",
                 });

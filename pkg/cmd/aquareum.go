@@ -9,8 +9,10 @@ import (
 	"runtime"
 	"syscall"
 
+	"aquareum.tv/aquareum/pkg/crypto/signers/eip712"
 	"aquareum.tv/aquareum/pkg/log"
 	"aquareum.tv/aquareum/pkg/proc"
+	v0 "aquareum.tv/aquareum/pkg/schema/v0"
 
 	"aquareum.tv/aquareum/pkg/api"
 	"aquareum.tv/aquareum/pkg/config"
@@ -74,11 +76,22 @@ func Start(build *config.BuildFlags) error {
 	if *version {
 		return nil
 	}
+
+	schema, err := v0.MakeV0Schema()
+	if err != nil {
+		return err
+	}
+	signer, err := eip712.MakeEIP712Signer(context.Background(), &eip712.EIP712SignerOptions{
+		Schema: schema,
+	})
+	if err != nil {
+		return err
+	}
 	mod, err := model.MakeDB(cli.DBPath)
 	if err != nil {
 		return err
 	}
-	a, err := api.MakeAquareumAPI(&cli, mod)
+	a, err := api.MakeAquareumAPI(&cli, mod, signer)
 	if err != nil {
 		return err
 	}

@@ -14,6 +14,7 @@ require (
 	github.com/lmittmann/tint v1.0.4
 	github.com/orandin/slog-gorm v1.3.2
 	github.com/peterbourgon/ff/v3 v3.3.1
+	github.com/rs/cors v1.7.0
 	github.com/samber/slog-http v1.4.0
 	github.com/stretchr/testify v1.9.0
 	gitlab.com/gitlab-org/release-cli v0.18.0

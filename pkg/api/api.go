@@ -14,10 +14,13 @@ import (
 
 	"github.com/NYTimes/gziphandler"
 	"github.com/julienschmidt/httprouter"
+	"github.com/rs/cors"
 	sloghttp "github.com/samber/slog-http"
 
 	"aquareum.tv/aquareum/js/app"
 	"aquareum.tv/aquareum/pkg/config"
+	"aquareum.tv/aquareum/pkg/crypto/signers/eip712"
+	apierrors "aquareum.tv/aquareum/pkg/errors"
 	"aquareum.tv/aquareum/pkg/log"
 	"aquareum.tv/aquareum/pkg/model"
 )
@@ -26,15 +29,16 @@ type AquareumAPI struct {
 	CLI     *config.CLI
 	Model   model.Model
 	Updater *Updater
+	Signer  *eip712.EIP712Signer
 	Mimes   map[string]string
 }
 
-func MakeAquareumAPI(cli *config.CLI, mod model.Model) (*AquareumAPI, error) {
+func MakeAquareumAPI(cli *config.CLI, mod model.Model, signer *eip712.EIP712Signer) (*AquareumAPI, error) {
 	updater, err := PrepareUpdater(cli)
 	if err != nil {
 		return nil, err
 	}
-	a := &AquareumAPI{CLI: cli, Model: mod, Updater: updater}
+	a := &AquareumAPI{CLI: cli, Model: mod, Updater: updater, Signer: signer}
 	a.Mimes, err = updater.GetMimes()
 	if err != nil {
 		return nil, err
@@ -70,6 +74,7 @@ func (a *AquareumAPI) Handler(ctx context.Context) (http.Handler, error) {
 	apiRouter := httprouter.New()
 	apiRouter.HandlerFunc("GET", "/api/notification", a.HandleNotification(ctx))
 	apiRouter.HandlerFunc("POST", "/api/notification", a.HandleNotification(ctx))
+	apiRouter.HandlerFunc("POST", "/api/golive", a.HandleGoLive(ctx))
 	// old clients
 	router.HandlerFunc("GET", "/app-updates", a.HandleAppUpdates(ctx))
 	// new ones
@@ -83,7 +88,9 @@ func (a *AquareumAPI) Handler(ctx context.Context) (http.Handler, error) {
 	router.Handler("GET", "/dl/*params", a.AppDownloadHandler(ctx))
 	router.NotFound = a.FileHandler(ctx, http.FileServer(AppHostingFS{http.FS(files)}))
 	handler := sloghttp.Recovery(router)
+	handler = cors.Default().Handler(handler)
 	handler = sloghttp.New(slog.Default())(handler)
+
 	return handler, nil
 }
 
@@ -129,6 +136,22 @@ type NotificationPayload struct {
 func (a *AquareumAPI) HandleAPI404(ctx context.Context) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(404)
+	}
+}
+
+func (a *AquareumAPI) HandleGoLive(ctx context.Context) http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		payload, err := io.ReadAll(req.Body)
+		if err != nil {
+			apierrors.WriteHTTPBadRequest(w, "error reading body", err)
+			return
+		}
+		signed, err := a.Signer.Verify(payload)
+		if err != nil {
+			apierrors.WriteHTTPBadRequest(w, "could not verify signature on payload", err)
+		}
+		log.Log(ctx, "got signed & verified payload", "payload", signed)
+		w.WriteHeader(204)
 	}
 }
 
