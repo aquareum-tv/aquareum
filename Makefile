@@ -27,13 +27,18 @@ install:
 	yarn install --inline-builds
 
 .PHONY: app
-app: install
+app: schema install
 	yarn run build
 
 .PHONY: node
-node:
+node: schema
 	meson setup build --native=./util/linux-amd64-gnu.ini && meson compile -C build
 	mv ./build/aquareum ./bin/aquareum
+
+.PHONY: schema
+schema:
+	mkdir -p js/app/generated \
+	&& go run pkg/crypto/signers/eip712/export-schema/export-schema.go > js/app/generated/eip712-schema.json
 
 .PHONY: test
 test: app

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 
 	v0 "aquareum.tv/aquareum/pkg/schema/v0"
@@ -24,11 +23,7 @@ func Main() error {
 	if err != nil {
 		return err
 	}
-	out := map[string]any{
-		"domain": eipSchema.Domain,
-		"types":  eipSchema.Types,
-	}
-	bs, err := json.MarshalIndent(out, "", "  ")
+	bs, err := eipSchema.JSON()
 	if err != nil {
 		return err
 	}

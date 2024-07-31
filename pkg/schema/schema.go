@@ -1,6 +1,7 @@
 package schema
 
 import (
+	"encoding/json"
 	"fmt"
 	"reflect"
 
@@ -97,6 +98,18 @@ func (schema *SchemaStruct) EIP712() (*EIP712SchemaStruct, error) {
 		TypeToName: typeToName,
 		NameToType: nameToType,
 	}, nil
+}
+
+func (eip *EIP712SchemaStruct) JSON() ([]byte, error) {
+	out := map[string]any{
+		"domain": eip.Domain,
+		"types":  eip.Types,
+	}
+	bs, err := json.MarshalIndent(out, "", "  ")
+	if err != nil {
+		return []byte{}, err
+	}
+	return bs, nil
 }
 
 // turns a go type into an eip712 type

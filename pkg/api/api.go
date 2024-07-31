@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/NYTimes/gziphandler"
+	"github.com/julienschmidt/httprouter"
 	sloghttp "github.com/samber/slog-http"
 
 	"aquareum.tv/aquareum/js/app"
@@ -61,20 +62,27 @@ func (fs AppHostingFS) Open(name string) (http.File, error) {
 }
 
 func (a *AquareumAPI) Handler(ctx context.Context) (http.Handler, error) {
-	mux := http.NewServeMux()
 	files, err := app.Files()
 	if err != nil {
 		return nil, err
 	}
-	mux.Handle("/dl/", a.AppDownloadHandler(ctx))
-	mux.Handle("/api/notification", a.HandleNotification(ctx))
+	router := httprouter.New()
+	apiRouter := httprouter.New()
+	apiRouter.HandlerFunc("GET", "/api/notification", a.HandleNotification(ctx))
+	apiRouter.HandlerFunc("POST", "/api/notification", a.HandleNotification(ctx))
 	// old clients
-	mux.Handle("/app-updates", a.HandleAppUpdates(ctx))
+	router.HandlerFunc("GET", "/app-updates", a.HandleAppUpdates(ctx))
 	// new ones
-	mux.Handle("/api/manifest", a.HandleAppUpdates(ctx))
-	mux.Handle("/api", a.HandleAPI404(ctx))
-	mux.HandleFunc("/", a.FileHandler(ctx, http.FileServer(AppHostingFS{http.FS(files)})))
-	handler := sloghttp.Recovery(mux)
+	apiRouter.HandlerFunc("GET", "/api/manifest", a.HandleAppUpdates(ctx))
+	apiRouter.NotFound = a.HandleAPI404(ctx)
+	router.Handler("GET", "/api/*resource", apiRouter)
+	router.Handler("POST", "/api/*resource", apiRouter)
+	router.Handler("PUT", "/api/*resource", apiRouter)
+	router.Handler("PATCH", "/api/*resource", apiRouter)
+	router.Handler("DELETE", "/api/*resource", apiRouter)
+	router.Handler("GET", "/dl/*params", a.AppDownloadHandler(ctx))
+	router.NotFound = a.FileHandler(ctx, http.FileServer(AppHostingFS{http.FS(files)}))
+	handler := sloghttp.Recovery(router)
 	handler = sloghttp.New(slog.Default())(handler)
 	return handler, nil
 }

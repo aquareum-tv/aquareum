@@ -21,6 +21,14 @@ export default function TabLayout() {
           headerShown: false,
         }}
       />
+      <Tabs.Screen
+        name="admin"
+        options={{
+          title: "Admin",
+          tabBarIcon: ({ color }) => <Atom color={color} />,
+          headerShown: false,
+        }}
+      />
     </Tabs>
   );
 }
