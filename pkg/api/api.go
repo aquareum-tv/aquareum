@@ -72,7 +72,6 @@ func (a *AquareumAPI) Handler(ctx context.Context) (http.Handler, error) {
 	}
 	router := httprouter.New()
 	apiRouter := httprouter.New()
-	apiRouter.HandlerFunc("GET", "/api/notification", a.HandleNotification(ctx))
 	apiRouter.HandlerFunc("POST", "/api/notification", a.HandleNotification(ctx))
 	apiRouter.HandlerFunc("POST", "/api/golive", a.HandleGoLive(ctx))
 	// old clients
@@ -149,6 +148,12 @@ func (a *AquareumAPI) HandleGoLive(ctx context.Context) http.HandlerFunc {
 		signed, err := a.Signer.Verify(payload)
 		if err != nil {
 			apierrors.WriteHTTPBadRequest(w, "could not verify signature on payload", err)
+			return
+		}
+		if signed.Signer() != a.CLI.AdminAccount {
+			log.Log(ctx, "wrong user tried to golive", "signer", signed.Signer(), "admin", a.CLI.AdminAccount)
+			apierrors.WriteHTTPForbidden(w, "admins only for now", fmt.Errorf("admins only for now"))
+			return
 		}
 		log.Log(ctx, "got signed & verified payload", "payload", signed)
 		w.WriteHeader(204)
@@ -157,63 +162,27 @@ func (a *AquareumAPI) HandleGoLive(ctx context.Context) http.HandlerFunc {
 
 func (a *AquareumAPI) HandleNotification(ctx context.Context) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		if req.Method == "POST" {
-			payload, err := io.ReadAll(req.Body)
-			if err != nil {
-				log.Log(ctx, "error reading notification create", "error", err)
-				w.WriteHeader(400)
-				return
-			}
-			n := NotificationPayload{}
-			err = json.Unmarshal(payload, &n)
-			if err != nil {
-				log.Log(ctx, "error unmarshalling notification create", "error", err)
-				w.WriteHeader(400)
-				return
-			}
-			err = a.Model.CreateNotification(n.Token)
-			if err != nil {
-				log.Log(ctx, "error creating notification", "error", err)
-				w.WriteHeader(400)
-				return
-			}
-			log.Log(ctx, "successfully created notification", "token", n.Token)
-			w.WriteHeader(200)
-		} else if req.Method == "GET" {
-			// disallow unless we have an admin token
-			if a.CLI.AdminSecret == "" {
-				w.WriteHeader(http.StatusNotImplemented)
-				return
-			}
-			log.Log(ctx, a.CLI.AdminSecret)
-			auth := req.Header.Get("Authorization")
-			if auth == "" {
-				w.WriteHeader(http.StatusUnauthorized)
-				return
-			}
-			expected := fmt.Sprintf("Bearer %s", a.CLI.AdminSecret)
-			if auth != expected {
-				w.WriteHeader(http.StatusForbidden)
-				return
-			}
-			nots, err := a.Model.ListNotifications()
-			if err != nil {
-				log.Log(ctx, "error listing notifications", "error", err)
-				w.WriteHeader(500)
-				return
-			}
-			bs, err := json.Marshal(nots)
-			if err != nil {
-				log.Log(ctx, "error marshalling notifications", "error", err)
-				w.WriteHeader(500)
-				return
-			}
-			w.WriteHeader(200)
-			w.Write(bs)
-		} else {
-			w.WriteHeader(http.StatusMethodNotAllowed)
+		payload, err := io.ReadAll(req.Body)
+		if err != nil {
+			log.Log(ctx, "error reading notification create", "error", err)
+			w.WriteHeader(400)
 			return
 		}
+		n := NotificationPayload{}
+		err = json.Unmarshal(payload, &n)
+		if err != nil {
+			log.Log(ctx, "error unmarshalling notification create", "error", err)
+			w.WriteHeader(400)
+			return
+		}
+		err = a.Model.CreateNotification(n.Token)
+		if err != nil {
+			log.Log(ctx, "error creating notification", "error", err)
+			w.WriteHeader(400)
+			return
+		}
+		log.Log(ctx, "successfully created notification", "token", n.Token)
+		w.WriteHeader(200)
 	}
 }
 

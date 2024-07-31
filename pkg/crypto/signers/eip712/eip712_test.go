@@ -1,29 +1,18 @@
-package eip712
+package eip712_test
 
 import (
-	"context"
+	"strings"
 	"testing"
 	"time"
 
+	"aquareum.tv/aquareum/pkg/crypto/signers/eip712"
+	"aquareum.tv/aquareum/pkg/crypto/signers/eip712/eip712test"
 	v0 "aquareum.tv/aquareum/pkg/schema/v0"
 	"github.com/stretchr/testify/require"
 )
 
-func makeSigner(t *testing.T) *EIP712Signer {
-	schema, err := v0.MakeV0Schema()
-	require.NoError(t, err)
-	signer, err := MakeEIP712Signer(context.Background(), &EIP712SignerOptions{
-		EthKeystorePassword: "aquareumaquareum",
-		EthKeystorePath:     ".",
-		EthAccountAddr:      "0x295481766f43bb048aec5d71f3bf76fdacea78f2",
-		Schema:              schema,
-	})
-	require.NoError(t, err)
-	return signer
-}
-
 func TestEIP712Map(t *testing.T) {
-	msg := AquareumEIP712Message{
+	msg := eip712.AquareumEIP712Message{
 		MsgData:   map[string]string{"foo": "bar"},
 		MsgSigner: "0x295481766f43bb048aec5d71f3bf76fdacea78f2",
 		MsgTime:   time.Now().UnixMilli(),
@@ -33,17 +22,22 @@ func TestEIP712Map(t *testing.T) {
 }
 
 func TestCreateSigner(t *testing.T) {
-	makeSigner(t)
+	ran := false
+	eip712test.WithTestSigner(func(signer *eip712.EIP712Signer) {
+		ran = true
+	})
+	require.True(t, ran)
 }
 
 func TestSignGoLive(t *testing.T) {
-	signer := makeSigner(t)
-	goLive := v0.GoLive{
-		Streamer: "@aquareum.tv",
-		Title:    "Let's gooooooo!",
-	}
-	_, err := signer.Sign(goLive)
-	require.NoError(t, err)
+	eip712test.WithTestSigner(func(signer *eip712.EIP712Signer) {
+		goLive := v0.GoLive{
+			Streamer: "@aquareum.tv",
+			Title:    "Let's gooooooo!",
+		}
+		_, err := signer.Sign(goLive)
+		require.NoError(t, err)
+	})
 }
 
 var testCase = `{
@@ -58,14 +52,22 @@ var testCase = `{
 }`
 
 func TestVerifyGoLive(t *testing.T) {
-	var goLive *v0.GoLive
-	signer := makeSigner(t)
-	signed, err := signer.Verify([]byte(testCase))
-	require.NoError(t, err)
-	require.Equal(t, signed.Signer(), "0x295481766F43bb048Aec5D71f3Bf76FDaCEA78f2")
-	require.Equal(t, signed.Time(), int64(1722373018292))
-	goLive, ok := signed.Data().(*v0.GoLive)
-	require.True(t, ok)
-	require.Equal(t, goLive.Streamer, "@aquareum.tv")
-	require.Equal(t, goLive.Title, "Let's gooooooo!")
+	eip712test.WithTestSigner(func(signer *eip712.EIP712Signer) {
+		signed, err := signer.Verify([]byte(testCase))
+		require.NoError(t, err)
+		require.Equal(t, signed.Signer(), "0x295481766F43bb048Aec5D71f3Bf76FDaCEA78f2")
+		require.Equal(t, signed.Time(), int64(1722373018292))
+		goLive, ok := signed.Data().(*v0.GoLive)
+		require.True(t, ok)
+		require.Equal(t, goLive.Streamer, "@aquareum.tv")
+		require.Equal(t, goLive.Title, "Let's gooooooo!")
+	})
+}
+
+func TestFailingGoLive(t *testing.T) {
+	eip712test.WithTestSigner(func(signer *eip712.EIP712Signer) {
+		failingTestCase := strings.Replace(testCase, "@aquareum.tv", "@evilstreamer.evil", 1)
+		_, err := signer.Verify([]byte(failingTestCase))
+		require.Error(t, err)
+	})
 }
