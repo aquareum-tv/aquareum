@@ -20,7 +20,6 @@ import (
 	"aquareum.tv/aquareum/pkg/model"
 	"github.com/adrg/xdg"
 	"github.com/peterbourgon/ff/v3"
-	"golang.org/x/sync/errgroup"
 )
 
 // parse the CLI and fire up an aquareum node!
@@ -104,7 +103,7 @@ func Start(build *config.BuildFlags) error {
 		return err
 	}
 
-	group, ctx := errgroup.WithContext(context.Background())
+	group, ctx := TimeoutGroupWithContext(context.Background())
 	ctx = log.WithLogValues(ctx, "version", build.Version)
 
 	group.Go(func() error {

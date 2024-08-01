@@ -34,7 +34,7 @@ func RunMistServer(ctx context.Context, cli *config.CLI) error {
 	if err != nil {
 		return err
 	}
-	cmd := exec.Command(myself,
+	cmd := exec.CommandContext(ctx, myself,
 		"MistServer",
 		"-c", f.Name(),
 		"-i", "127.0.0.1",
@@ -51,7 +51,7 @@ func RunMistServer(ctx context.Context, cli *config.CLI) error {
 	if err != nil {
 		panic(err)
 	}
-	group, _ := errgroup.WithContext(ctx)
+	group, ctx := errgroup.WithContext(ctx)
 	output := fmt.Println
 	for i, pipe := range []io.ReadCloser{stdout, stderr} {
 		func(i int, pipe io.ReadCloser) {
