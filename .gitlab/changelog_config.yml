@@ -13,5 +13,5 @@ template: |
 
   {% end %}
   {% else %}
-  No changes.
+  Changelog script didn't work. Very sad.
   {% end %}
