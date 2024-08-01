@@ -1,5 +1,5 @@
 
-FROM ubuntu:24.04
+FROM ubuntu:24.04@sha256:010f94447a26deb0dcdbbeb08d7dfcd87b64c40b4f25d0cf4d582949b735039d
 ARG AQUAREUM_URL
 RUN apt update && apt install -y curl
 ENV AQUAREUM_URL $AQUAREUM_URL

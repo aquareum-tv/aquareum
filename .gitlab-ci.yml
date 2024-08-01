@@ -55,7 +55,7 @@ build-docker-arm64:
   #   - job: build
   #     artifacts: true
   image:
-    name: gcr.io/kaniko-project/executor@sha256:ab3929075d3b53d9959c15e8ddc212c1d7165ee02eb8b3abfb684256bce53551
+    name: gcr.io/kaniko-project/executor:v1.14.0-debug
     entrypoint: [""]
   script:
     - /kaniko/executor
