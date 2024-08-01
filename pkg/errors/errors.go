@@ -33,6 +33,10 @@ func WriteHTTPUnauthorized(w http.ResponseWriter, msg string, err error) APIErro
 	return writeHttpError(w, msg, http.StatusUnauthorized, err)
 }
 
+func WriteHTTPForbidden(w http.ResponseWriter, msg string, err error) APIError {
+	return writeHttpError(w, msg, http.StatusForbidden, err)
+}
+
 func WriteHTTPBadRequest(w http.ResponseWriter, msg string, err error) APIError {
 	return writeHttpError(w, msg, http.StatusBadRequest, err)
 }
@@ -47,4 +51,8 @@ func WriteHTTPNotFound(w http.ResponseWriter, msg string, err error) APIError {
 
 func WriteHTTPInternalServerError(w http.ResponseWriter, msg string, err error) APIError {
 	return writeHttpError(w, msg, http.StatusInternalServerError, err)
+}
+
+func WriteHTTPNotImplemented(w http.ResponseWriter, msg string, err error) APIError {
+	return writeHttpError(w, msg, http.StatusNotImplemented, err)
 }

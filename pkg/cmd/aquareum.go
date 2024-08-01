@@ -9,8 +9,11 @@ import (
 	"runtime"
 	"syscall"
 
+	"aquareum.tv/aquareum/pkg/crypto/signers/eip712"
 	"aquareum.tv/aquareum/pkg/log"
+	"aquareum.tv/aquareum/pkg/notifications"
 	"aquareum.tv/aquareum/pkg/proc"
+	v0 "aquareum.tv/aquareum/pkg/schema/v0"
 
 	"aquareum.tv/aquareum/pkg/api"
 	"aquareum.tv/aquareum/pkg/config"
@@ -51,7 +54,8 @@ func Start(build *config.BuildFlags) error {
 	fs.StringVar(&cli.TLSKeyPath, "tls-key", tlsKeyFile, "Path to TLS key")
 	fs.StringVar(&cli.SigningKeyPath, "signing-key", "", "Path to signing key for pushing OTA updates to the app")
 	fs.StringVar(&cli.DBPath, "db-path", dbFile, "path to sqlite database file")
-	fs.StringVar(&cli.AdminSecret, "admin-secret", "", "secret admin token (to be replaced soon)")
+	fs.StringVar(&cli.AdminAccount, "admin-account", "", "ethereum account that administrates this aquareum node")
+	fs.StringVar(&cli.FirebaseServiceAccount, "firebase-service-account", "", "JSON string of a firebase service account key")
 	fs.IntVar(&cli.MistAdminPort, "mist-admin-port", 14242, "MistServer admin port (internal use only)")
 	fs.IntVar(&cli.MistRTMPPort, "mist-rtmp-port", 11935, "MistServer RTMP port (internal use only)")
 	fs.IntVar(&cli.MistHTTPPort, "mist-http-port", 18080, "MistServer HTTP port (internal use only)")
@@ -61,7 +65,6 @@ func Start(build *config.BuildFlags) error {
 	ff.Parse(
 		fs, os.Args[1:],
 		ff.WithEnvVarPrefix("AQ"),
-		ff.WithEnvVarSplit(","),
 	)
 
 	log.Log(context.Background(),
@@ -74,11 +77,29 @@ func Start(build *config.BuildFlags) error {
 	if *version {
 		return nil
 	}
+
+	schema, err := v0.MakeV0Schema()
+	if err != nil {
+		return err
+	}
+	signer, err := eip712.MakeEIP712Signer(context.Background(), &eip712.EIP712SignerOptions{
+		Schema: schema,
+	})
+	if err != nil {
+		return err
+	}
 	mod, err := model.MakeDB(cli.DBPath)
 	if err != nil {
 		return err
 	}
-	a, err := api.MakeAquareumAPI(&cli, mod)
+	var noter notifications.FirebaseNotifier
+	if cli.FirebaseServiceAccount != "" {
+		noter, err = notifications.MakeFirebaseNotifier(context.Background(), cli.FirebaseServiceAccount)
+		if err != nil {
+			return err
+		}
+	}
+	a, err := api.MakeAquareumAPI(&cli, mod, signer, noter)
 	if err != nil {
 		return err
 	}

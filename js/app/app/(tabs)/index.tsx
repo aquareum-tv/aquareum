@@ -46,6 +46,7 @@ import { ImageBackground } from "react-native";
 import * as env from "constants/env";
 import { useState } from "react";
 import GetApps from "components/get-apps";
+import { Link } from "expo-router";
 
 const WebviewIframe = ({ src }) => {
   if (isWeb) {

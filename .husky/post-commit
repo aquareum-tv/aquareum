@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -euo pipefail
+set -eu
 printf "variables:\n  DOCKERFILE_HASH: $(git hash-object docker/build.Dockerfile)" > .ci/dockerfile-hash.yaml
 git add .ci/dockerfile-hash.yaml
 if ! git diff-index --quiet --cached HEAD --; then

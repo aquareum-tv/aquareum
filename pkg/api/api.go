@@ -13,27 +13,35 @@ import (
 	"time"
 
 	"github.com/NYTimes/gziphandler"
+	"github.com/julienschmidt/httprouter"
+	"github.com/rs/cors"
 	sloghttp "github.com/samber/slog-http"
 
 	"aquareum.tv/aquareum/js/app"
 	"aquareum.tv/aquareum/pkg/config"
+	"aquareum.tv/aquareum/pkg/crypto/signers/eip712"
+	apierrors "aquareum.tv/aquareum/pkg/errors"
 	"aquareum.tv/aquareum/pkg/log"
 	"aquareum.tv/aquareum/pkg/model"
+	"aquareum.tv/aquareum/pkg/notifications"
+	v0 "aquareum.tv/aquareum/pkg/schema/v0"
 )
 
 type AquareumAPI struct {
-	CLI     *config.CLI
-	Model   model.Model
-	Updater *Updater
-	Mimes   map[string]string
+	CLI              *config.CLI
+	Model            model.Model
+	Updater          *Updater
+	Signer           *eip712.EIP712Signer
+	Mimes            map[string]string
+	FirebaseNotifier notifications.FirebaseNotifier
 }
 
-func MakeAquareumAPI(cli *config.CLI, mod model.Model) (*AquareumAPI, error) {
+func MakeAquareumAPI(cli *config.CLI, mod model.Model, signer *eip712.EIP712Signer, noter notifications.FirebaseNotifier) (*AquareumAPI, error) {
 	updater, err := PrepareUpdater(cli)
 	if err != nil {
 		return nil, err
 	}
-	a := &AquareumAPI{CLI: cli, Model: mod, Updater: updater}
+	a := &AquareumAPI{CLI: cli, Model: mod, Updater: updater, Signer: signer, FirebaseNotifier: noter}
 	a.Mimes, err = updater.GetMimes()
 	if err != nil {
 		return nil, err
@@ -61,21 +69,30 @@ func (fs AppHostingFS) Open(name string) (http.File, error) {
 }
 
 func (a *AquareumAPI) Handler(ctx context.Context) (http.Handler, error) {
-	mux := http.NewServeMux()
 	files, err := app.Files()
 	if err != nil {
 		return nil, err
 	}
-	mux.Handle("/dl/", a.AppDownloadHandler(ctx))
-	mux.Handle("/api/notification", a.HandleNotification(ctx))
+	router := httprouter.New()
+	apiRouter := httprouter.New()
+	apiRouter.HandlerFunc("POST", "/api/notification", a.HandleNotification(ctx))
+	apiRouter.HandlerFunc("POST", "/api/golive", a.HandleGoLive(ctx))
 	// old clients
-	mux.Handle("/app-updates", a.HandleAppUpdates(ctx))
+	router.HandlerFunc("GET", "/app-updates", a.HandleAppUpdates(ctx))
 	// new ones
-	mux.Handle("/api/manifest", a.HandleAppUpdates(ctx))
-	mux.Handle("/api", a.HandleAPI404(ctx))
-	mux.HandleFunc("/", a.FileHandler(ctx, http.FileServer(AppHostingFS{http.FS(files)})))
-	handler := sloghttp.Recovery(mux)
+	apiRouter.HandlerFunc("GET", "/api/manifest", a.HandleAppUpdates(ctx))
+	apiRouter.NotFound = a.HandleAPI404(ctx)
+	router.Handler("GET", "/api/*resource", apiRouter)
+	router.Handler("POST", "/api/*resource", apiRouter)
+	router.Handler("PUT", "/api/*resource", apiRouter)
+	router.Handler("PATCH", "/api/*resource", apiRouter)
+	router.Handler("DELETE", "/api/*resource", apiRouter)
+	router.Handler("GET", "/dl/*params", a.AppDownloadHandler(ctx))
+	router.NotFound = a.FileHandler(ctx, http.FileServer(AppHostingFS{http.FS(files)}))
+	handler := sloghttp.Recovery(router)
+	handler = cors.Default().Handler(handler)
 	handler = sloghttp.New(slog.Default())(handler)
+
 	return handler, nil
 }
 
@@ -124,65 +141,71 @@ func (a *AquareumAPI) HandleAPI404(ctx context.Context) http.HandlerFunc {
 	}
 }
 
-func (a *AquareumAPI) HandleNotification(ctx context.Context) http.HandlerFunc {
+func (a *AquareumAPI) HandleGoLive(ctx context.Context) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		if req.Method == "POST" {
-			payload, err := io.ReadAll(req.Body)
-			if err != nil {
-				log.Log(ctx, "error reading notification create", "error", err)
-				w.WriteHeader(400)
-				return
-			}
-			n := NotificationPayload{}
-			err = json.Unmarshal(payload, &n)
-			if err != nil {
-				log.Log(ctx, "error unmarshalling notification create", "error", err)
-				w.WriteHeader(400)
-				return
-			}
-			err = a.Model.CreateNotification(n.Token)
-			if err != nil {
-				log.Log(ctx, "error creating notification", "error", err)
-				w.WriteHeader(400)
-				return
-			}
-			log.Log(ctx, "successfully created notification", "token", n.Token)
-			w.WriteHeader(200)
-		} else if req.Method == "GET" {
-			// disallow unless we have an admin token
-			if a.CLI.AdminSecret == "" {
-				w.WriteHeader(http.StatusNotImplemented)
-				return
-			}
-			log.Log(ctx, a.CLI.AdminSecret)
-			auth := req.Header.Get("Authorization")
-			if auth == "" {
-				w.WriteHeader(http.StatusUnauthorized)
-				return
-			}
-			expected := fmt.Sprintf("Bearer %s", a.CLI.AdminSecret)
-			if auth != expected {
-				w.WriteHeader(http.StatusForbidden)
-				return
-			}
-			nots, err := a.Model.ListNotifications()
-			if err != nil {
-				log.Log(ctx, "error listing notifications", "error", err)
-				w.WriteHeader(500)
-				return
-			}
-			bs, err := json.Marshal(nots)
-			if err != nil {
-				log.Log(ctx, "error marshalling notifications", "error", err)
-				w.WriteHeader(500)
-				return
-			}
-			w.WriteHeader(200)
-			w.Write(bs)
-		} else {
-			w.WriteHeader(http.StatusMethodNotAllowed)
+		payload, err := io.ReadAll(req.Body)
+		if err != nil {
+			apierrors.WriteHTTPBadRequest(w, "error reading body", err)
 			return
 		}
+		signed, err := a.Signer.Verify(payload)
+		if err != nil {
+			apierrors.WriteHTTPBadRequest(w, "could not verify signature on payload", err)
+			return
+		}
+		golive, ok := signed.Data().(*v0.GoLive)
+		if !ok {
+			log.Log(ctx, "got signed payload but it wasn't a golive")
+			apierrors.WriteHTTPBadRequest(w, "not a golive", nil)
+			return
+		}
+		if signed.Signer() != a.CLI.AdminAccount {
+			log.Log(ctx, "wrong user tried to golive", "signer", signed.Signer(), "admin", a.CLI.AdminAccount)
+			apierrors.WriteHTTPForbidden(w, "admins only for now", nil)
+			return
+		}
+		log.Log(ctx, "got signed & verified payload", "payload", signed)
+		if a.FirebaseNotifier == nil {
+			apierrors.WriteHTTPNotImplemented(w, "no firebase token, can't notify", nil)
+			return
+		}
+		nots, err := a.Model.ListNotifications()
+		if err != nil {
+			apierrors.WriteHTTPInternalServerError(w, "couldn't list notifications", err)
+			return
+		}
+		err = a.FirebaseNotifier.Blast(ctx, nots, golive)
+		if err != nil {
+			apierrors.WriteHTTPInternalServerError(w, "couldn't blast", err)
+			return
+		}
+		w.WriteHeader(204)
+	}
+}
+
+func (a *AquareumAPI) HandleNotification(ctx context.Context) http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		payload, err := io.ReadAll(req.Body)
+		if err != nil {
+			log.Log(ctx, "error reading notification create", "error", err)
+			w.WriteHeader(400)
+			return
+		}
+		n := NotificationPayload{}
+		err = json.Unmarshal(payload, &n)
+		if err != nil {
+			log.Log(ctx, "error unmarshalling notification create", "error", err)
+			w.WriteHeader(400)
+			return
+		}
+		err = a.Model.CreateNotification(n.Token)
+		if err != nil {
+			log.Log(ctx, "error creating notification", "error", err)
+			w.WriteHeader(400)
+			return
+		}
+		log.Log(ctx, "successfully created notification", "token", n.Token)
+		w.WriteHeader(200)
 	}
 }
 

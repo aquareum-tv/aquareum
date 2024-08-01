@@ -3,6 +3,7 @@ import { TamaguiProvider, type TamaguiProviderProps } from "tamagui";
 import { ToastProvider, ToastViewport } from "@tamagui/toast";
 import { CurrentToast } from "./CurrentToast";
 import { config } from "../tamagui.config";
+import NativeProvider from "components/providers";
 
 export function Provider({
   children,
@@ -26,7 +27,7 @@ export function Provider({
           ]
         }
       >
-        {children}
+        <NativeProvider>{children}</NativeProvider>
         <CurrentToast />
         <ToastViewport name="default" top="$8" left={0} right={0} />
       </ToastProvider>
