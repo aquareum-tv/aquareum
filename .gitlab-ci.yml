@@ -44,6 +44,7 @@ build-docker:
       --context "${CI_PROJECT_DIR}"
       --dockerfile "${CI_PROJECT_DIR}/docker/release.Dockerfile"
       --destination "$CI_REGISTRY_IMAGE:$AQUAREUM_BRANCH-amd64"
+      --destination "$CI_REGISTRY_IMAGE:$AQUAREUM_VERSION-amd64"
 
 build-android:
   stage: build
