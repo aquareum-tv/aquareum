@@ -66,6 +66,7 @@ func (a *AquareumAPI) Handler(ctx context.Context) (http.Handler, error) {
 	if err != nil {
 		return nil, err
 	}
+	mux.Handle("/dl/", a.AppDownloadHandler(ctx))
 	mux.Handle("/api/notification", a.HandleNotification(ctx))
 	// old clients
 	mux.Handle("/app-updates", a.HandleAppUpdates(ctx))
