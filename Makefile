@@ -6,7 +6,7 @@ default: app node
 
 VERSION?=$(shell go run ./pkg/config/git/git.go -v)
 UUID?=$(shell go run ./pkg/config/uuid/uuid.go)
-BRANCH?=$(shell ./util/branch.sh)
+BRANCH?=$(shell go run ./pkg/config/git/git.go --branch)
 
 .PHONY: version
 version:
@@ -134,7 +134,7 @@ ci-upload-file:
 		--fail-with-body \
 		--header "JOB-TOKEN: $$CI_JOB_TOKEN" \
 		--upload-file bin/$(upload_file) \
-		"$$CI_API_V4_URL/projects/$$CI_PROJECT_ID/packages/generic/$(shell ./util/branch.sh)/$(VERSION)/$(upload_file)";
+		"$$CI_API_V4_URL/projects/$$CI_PROJECT_ID/packages/generic/$(BRANCH)/$(VERSION)/$(upload_file)";
 
 .PHONY: release
 release:
