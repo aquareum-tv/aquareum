@@ -47,6 +47,8 @@ include: ".ci/dockerfile-hash.yaml"
 #       --destination "$CI_REGISTRY_IMAGE:$AQUAREUM_VERSION-amd64"
 
 build-docker-arm64:
+  vars:
+    CI_DEBUG_TRACE: "true"
   stage: build
   interruptible: true
   # needs:
