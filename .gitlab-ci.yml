@@ -40,11 +40,12 @@ build-docker-amd64:
   script:
     - /kaniko/executor
       --build-arg TARGETARCH=amd64
-      --build-arg AQUAREUM_URL=$AQUAREUM_URL_AMD64
+      --build-arg AQUAREUM_URL=https://git.aquareum.tv/api/v4/projects/1/packages/generic/eli-docker-release/v0.0.9-859885aa/aquareum-v0.0.9-859885aa-linux-amd64.tar.gz
       --context "${CI_PROJECT_DIR}"
       --dockerfile "${CI_PROJECT_DIR}/docker/release.Dockerfile"
       --destination "$CI_REGISTRY_IMAGE:$AQUAREUM_BRANCH-amd64"
       --destination "$CI_REGISTRY_IMAGE:$AQUAREUM_VERSION-amd64"
+      # --build-arg AQUAREUM_URL=$AQUAREUM_URL_AMD64
 
 build-docker-arm64:
   stage: build
@@ -58,27 +59,24 @@ build-docker-arm64:
   script:
     - /kaniko/executor
       --build-arg TARGETARCH=arm64
-      --build-arg AQUAREUM_URL=$AQUAREUM_URL_ARM64
+      --build-arg AQUAREUM_URL=https://git.aquareum.tv/api/v4/projects/1/packages/generic/eli-docker-release/v0.0.9-859885aa/aquareum-v0.0.9-859885aa-linux-arm64.tar.gz
       --context "${CI_PROJECT_DIR}"
       --dockerfile "${CI_PROJECT_DIR}/docker/release.Dockerfile"
       --destination "$CI_REGISTRY_IMAGE:$AQUAREUM_BRANCH-arm64"
       --destination "$CI_REGISTRY_IMAGE:$AQUAREUM_VERSION-arm64"
+      # --build-arg AQUAREUM_URL=$AQUAREUM_URL_ARM64
 
 build-docker-manifest:
+  stage: build
   image:
-    name: curlimages/curl:latest
-    entrypoint: [""]
+    name: mplatform/manifest-tool
   needs:
     - job: build-docker-arm64
     - job: build-docker-amd64
     - job: build
       artifacts: true
-  before_script:
-    - curl -s -L https://github.com/estesp/manifest-tool/releases/download/v2.0.8/binaries-manifest-tool-2.0.8.tar.gz | tar xvz
-    - mv manifest-tool-linux-amd64 manifest-tool
-    - chmod +x manifest-tool
   script:
-    - ./manifest-tool --username "${CI_REGISTRY_USER}" --password "${CI_REGISTRY_PASSWORD}" push from-args
+    - manifest-tool --username "${CI_REGISTRY_USER}" --password "${CI_REGISTRY_PASSWORD}" push from-args
       --platforms linux/amd64,linux/arm64
       --template $CI_REGISTRY_IMAGE:$AQUAREUM_VERSION-ARCH
       --tags $AQUAREUM_BRANCH
