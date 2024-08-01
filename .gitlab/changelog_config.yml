@@ -1,0 +1,22 @@
+---
+categories:
+  feature: Features
+  bug: Bug fixes
+  added: New stuff
+
+template: |
+  {% if categories %}
+  {% each categories %}
+  ### {{ title }} ({% if single_change %}1 change{% else %}{{ count }} changes{% end %})
+
+  {% each entries %}
+  - [{{ title }}]({{ commit.web_url }})\
+  by {{ author.reference }}\
+  {% if merge_request %} ([merge request]({{ merge_request.web_url }})){% end %}
+
+  {% end %}
+
+  {% end %}
+  {% else %}
+  Changelog script didn't work. Very sad.
+  {% end %}
