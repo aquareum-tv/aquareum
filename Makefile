@@ -8,6 +8,15 @@ VERSION?=$(shell go run ./pkg/config/git/git.go -v)
 UUID?=$(shell go run ./pkg/config/uuid/uuid.go)
 BRANCH?=$(shell go run ./pkg/config/git/git.go --branch)
 
+BUILDOS ?= $(shell uname -s | tr '[:upper:]' '[:lower:]')
+BUILDARCH ?= $(shell uname -m | tr '[:upper:]' '[:lower:]')
+ifeq ($(BUILDARCH),aarch64)
+		BUILDARCH=arm64
+endif
+ifeq ($(BUILDARCH),x86_64)
+		BUILDARCH=amd64
+endif
+
 .PHONY: version
 version:
 	@go run ./pkg/config/git/git.go -v \
@@ -103,6 +112,15 @@ docker-build-builder:
 .PHONY: docker-build-builder
 docker-build-in-container:
 	docker run -v $$(pwd):$$(pwd) -w $$(pwd) --rm -it aqrm.io/aquareum-tv/aquareum:builder make
+
+.PHONY: docker-release
+docker-release:
+	cd docker \
+	&& docker build -f release.Dockerfile \
+	  --build-arg TARGETARCH=$(BUILDARCH) \
+	  --build-arg AQUAREUM_URL=https://git.aquareum.tv/aquareum-tv/aquareum/-/package_files/773/download \
+		-t aqrm.io/aquareum-tv/aquareum \
+		.
 
 .PHONY: ci-upload 
 ci-upload: ci-upload-node ci-upload-android

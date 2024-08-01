@@ -63,6 +63,7 @@ build-docker-arm64:
       --dockerfile "${CI_PROJECT_DIR}/docker/release.Dockerfile"
       --destination "$CI_REGISTRY_IMAGE:$AQUAREUM_BRANCH-arm64"
       --destination "$CI_REGISTRY_IMAGE:$AQUAREUM_VERSION-arm64"
+      --customPlatform=linux/arm64
 
 build-docker-manifest:
   stage: build
