@@ -80,7 +80,9 @@ func (u *Updater) GetManifest(platform, runtime, prefix string) (*UpdateManifest
 	assets := []UpdateAsset{}
 	for _, ass := range plat.Assets {
 		ext := fmt.Sprintf(".%s", ass.Ext)
+		loadEmbeddedMimes()
 		typ := mime.TypeByExtension(ext)
+
 		if typ == "" {
 			return nil, fmt.Errorf("unknown content-type for file extention %s", ext)
 		}
