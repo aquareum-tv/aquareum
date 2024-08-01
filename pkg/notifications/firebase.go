@@ -27,7 +27,6 @@ type GoogleCredential struct {
 
 func MakeFirebaseNotifier(ctx context.Context, serviceAccountJSON string) (FirebaseNotifier, error) {
 	var cred GoogleCredential
-	fmt.Println(serviceAccountJSON)
 	err := json.Unmarshal([]byte(serviceAccountJSON), &cred)
 	if err != nil {
 		return nil, fmt.Errorf("error trying to discover project_id: %w", err)
