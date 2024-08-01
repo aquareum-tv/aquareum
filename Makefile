@@ -6,10 +6,12 @@ default: app node
 
 VERSION?=$(shell go run ./pkg/config/git/git.go -v)
 UUID?=$(shell go run ./pkg/config/uuid/uuid.go)
+BRANCH?=$(shell ./util/branch.sh)
 
 .PHONY: version
 version:
-	@go run ./pkg/config/git/git.go -v
+	@go run ./pkg/config/git/git.go -v \
+	&& go run ./pkg/config/git/git.go --env -o .ci/build.env
 
 .PHONY: install
 install:
