@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"strings"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
@@ -31,6 +32,8 @@ var UUID = "%s"
 func makeGit() error {
 	output := flag.String("o", "", "file to output to")
 	version := flag.Bool("v", false, "just print version")
+	env := flag.Bool("env", false, "print a bunch of useful environment variables")
+	doBranch := flag.Bool("branch", false, "print branch")
 
 	flag.Parse()
 	r, err := git.PlainOpenWithOptions(".", &git.PlainOpenOptions{DetectDotGit: true})
@@ -62,19 +65,60 @@ func makeGit() error {
 	if err != nil {
 		return err
 	}
-	if *output != "" {
-		if *version {
-			os.WriteFile(*output, []byte(desc), 0644)
-		} else {
-			out := fmt.Sprintf(tmpl, desc, ts, u)
-			os.WriteFile(*output, []byte(out), 0644)
+	var out string
+	if *version {
+		out = desc
+	} else if *doBranch {
+		out = branch()
+	} else if *env {
+		CI_API_V4_URL := os.Getenv("CI_API_V4_URL")
+		CI_PROJECT_ID := os.Getenv("CI_PROJECT_ID")
+		AQUAREUM_BRANCH := branch()
+		outMap := map[string]string{}
+		outMap["AQUAREUM_BRANCH"] = AQUAREUM_BRANCH
+		outMap["AQUAREUM_VERSION"] = desc
+		outMap["AQUAREUM_BRANCH"] = AQUAREUM_BRANCH
+		// https://git.aquareum.tv/api/v4/projects/1/packages/generic/$(BRANCH)/aquareum-v0.0.9-8650d0fa-linux-arm64.tar.gz
+		for _, arch := range []string{"amd64", "arm64"} {
+			k := fmt.Sprintf("AQUAREUM_URL_%s", strings.ToUpper(arch))
+			v := fmt.Sprintf("%s/projects/%s/packages/generic/%s/%s/aquareum-%s-linux-%s.tar.gz", CI_API_V4_URL, CI_PROJECT_ID, AQUAREUM_BRANCH, desc, desc, arch)
+			outMap[k] = v
 		}
-	} else if *version {
-		fmt.Print(desc)
+		for k, v := range outMap {
+			out = out + fmt.Sprintf("%s=%s\n", k, v)
+		}
 	} else {
-		fmt.Printf("%d %s %s", ts, u, desc)
+		out = fmt.Sprintf(tmpl, desc, ts, u)
 	}
+
+	if *output != "" {
+		os.WriteFile(*output, []byte(out), 0644)
+	} else {
+		fmt.Print(out)
+	}
+	// 	if *version {
+	// 	} else {
+	// 		out := fmt.Sprintf(tmpl, desc, ts, u)
+	// 		os.WriteFile(*output, []byte(out), 0644)
+	// 	}
+	// } else if *version {
+	// 	fmt.Print(desc)
+	// } else {
+	// 	fmt.Printf("%d %s %s", ts, u, desc)
+	// }
 	return nil
+}
+
+func branch() string {
+	CI_COMMIT_TAG := os.Getenv("CI_COMMIT_TAG")
+	CI_COMMIT_BRANCH := os.Getenv("CI_COMMIT_BRANCH")
+	if CI_COMMIT_TAG != "" {
+		return "latest"
+	} else if CI_COMMIT_BRANCH != "" {
+		return strings.Replace(CI_COMMIT_BRANCH, "/", "-", -1)
+	} else {
+		panic("CI_COMMIT_TAG and CI_COMMIT_BRANCH undefined, can't get branch")
+	}
 }
 
 // Git struct wrapps Repository class from go-git to add a tag map used to perform queries when describing.

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"runtime"
 	"syscall"
 
 	"aquareum.tv/aquareum/pkg/log"
@@ -54,6 +55,7 @@ func Start(build *config.BuildFlags) error {
 	fs.IntVar(&cli.MistAdminPort, "mist-admin-port", 14242, "MistServer admin port (internal use only)")
 	fs.IntVar(&cli.MistRTMPPort, "mist-rtmp-port", 11935, "MistServer RTMP port (internal use only)")
 	fs.IntVar(&cli.MistHTTPPort, "mist-http-port", 18080, "MistServer HTTP port (internal use only)")
+	version := fs.Bool("version", false, "print version and exit")
 
 	ff.Parse(
 		fs, os.Args[1:],
@@ -62,11 +64,15 @@ func Start(build *config.BuildFlags) error {
 	)
 
 	log.Log(context.Background(),
-		"starting aquareum",
+		"aquareum",
 		"version", build.Version,
 		"buildTime", build.BuildTimeStr(),
-		"uuid", build.UUID)
-
+		"uuid", build.UUID,
+		"runtime.GOOS", runtime.GOOS,
+		"runtime.GOARCH", runtime.GOARCH)
+	if *version {
+		return nil
+	}
 	mod, err := model.MakeDB(cli.DBPath)
 	if err != nil {
 		return err

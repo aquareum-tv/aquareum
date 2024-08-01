@@ -9,7 +9,7 @@
  */
 
 const re = new RegExp(
-  `^aquareum-(v[0-9]\.[0-9]\.[0-9])-([0-9a-f]+)-([0-9a-z]+)-([0-9a-z]+)\.(.+)$`,
+  `^aquareum-(v[0-9]\.[0-9]\.[0-9])(-[0-9a-f]+)?-([0-9a-z]+)-([0-9a-z]+)\.(.+)$`,
 );
 const inputRe = new RegExp(`^aquareum-([0-9a-z]+)-([0-9a-z]+)\.(.+)$`);
 
@@ -55,6 +55,7 @@ export default {
     const fileReq = await fetch(fileUrl);
     const files = await fileReq.json();
     let foundFile;
+    let outUrl;
     for (const f of files) {
       const pieces = re.exec(f.file_name);
       if (!pieces) {
@@ -69,6 +70,8 @@ export default {
         ext === inputExt
       ) {
         foundFile = f;
+        const fullVer = `${ver}${hash ?? ""}`;
+        outUrl = `${CI_API_V4_URL}/projects/${PROJECT_ID}/packages/generic/${branch}/${fullVer}/${f.file_name}`;
         break;
       }
     }
@@ -77,7 +80,9 @@ export default {
         `could not find a file for platform=${inputPlatform} arch=${inputArch} ext=${inputExt})`,
       );
     }
-    const outUrl = `${DOWNLOAD_BASE_URL}/${foundFile.id}/download`;
+    // const outUrl = `${DOWNLOAD_BASE_URL}/${foundFile.id}/download`;
+    // "%s/projects/%s/packages/generic/%s/%s/aquareum-%s-linux-%s.tar.gz"
+    // const outUrl
     return Response.redirect(outUrl, 302);
   },
 };

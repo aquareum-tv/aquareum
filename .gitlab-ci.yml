@@ -24,6 +24,67 @@ build:
   script:
     - git fetch --unshallow || echo 'already unshallow'
     - make ci -j$(nproc)
+  artifacts:
+    reports:
+      dotenv: .ci/build.env
+
+build-docker-amd64:
+  stage: build
+  interruptible: true
+  needs:
+    - job: build
+      artifacts: true
+  image:
+    name: gcr.io/kaniko-project/executor:v1.14.0-debug
+    entrypoint: [""]
+  script:
+    - /kaniko/executor
+      --build-arg TARGETARCH=amd64
+      --build-arg AQUAREUM_URL=$AQUAREUM_URL_AMD64
+      --context "${CI_PROJECT_DIR}"
+      --dockerfile "${CI_PROJECT_DIR}/docker/release.Dockerfile"
+      --destination "$CI_REGISTRY_IMAGE:$AQUAREUM_BRANCH-amd64"
+      --destination "$CI_REGISTRY_IMAGE:$AQUAREUM_VERSION-amd64"
+
+build-docker-arm64:
+  stage: build
+  interruptible: true
+  needs:
+    - job: build
+      artifacts: true
+  image:
+    name: gcr.io/kaniko-project/executor:v1.14.0-debug
+    entrypoint: [""]
+  script:
+    - /kaniko/executor
+      --build-arg TARGETARCH=arm64
+      --build-arg AQUAREUM_URL=$AQUAREUM_URL_ARM64
+      --context "${CI_PROJECT_DIR}"
+      --dockerfile "${CI_PROJECT_DIR}/docker/release.Dockerfile"
+      --destination "$CI_REGISTRY_IMAGE:$AQUAREUM_BRANCH-arm64"
+      --destination "$CI_REGISTRY_IMAGE:$AQUAREUM_VERSION-arm64"
+      --customPlatform=linux/arm64
+
+build-docker-manifest:
+  stage: build
+  image:
+    name: curlimages/curl:latest
+    entrypoint: [""]
+  needs:
+    - job: build-docker-arm64
+    - job: build-docker-amd64
+    - job: build
+      artifacts: true
+  before_script:
+    - curl -s -L https://github.com/estesp/manifest-tool/releases/download/v2.1.7/binaries-manifest-tool-2.1.7.tar.gz | tar xvz
+    - mv manifest-tool-linux-amd64 ./manifest-tool
+    - chmod +x ./manifest-tool
+  script:
+    - ./manifest-tool --username "${CI_REGISTRY_USER}" --password "${CI_REGISTRY_PASSWORD}" push from-args
+      --platforms linux/amd64,linux/arm64
+      --template $CI_REGISTRY_IMAGE:$AQUAREUM_VERSION-ARCH
+      --tags $AQUAREUM_BRANCH
+      --target $CI_REGISTRY_IMAGE:$AQUAREUM_VERSION
 
 build-android:
   stage: build
@@ -52,6 +113,9 @@ release:
   needs:
     - build-mac
     - build-android
+    - build-docker-amd64
+    - build-docker-arm64
+    - build-docker-manifest
     - build
   rules:
     - if: '$CI_COMMIT_TAG =~ /^v?\d+\.\d+\.\d+$/'
