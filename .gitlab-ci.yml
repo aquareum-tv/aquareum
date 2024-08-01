@@ -57,6 +57,8 @@ build-docker-arm64:
   image:
     name: gcr.io/kaniko-project/executor@sha256:6fcac15aa570456d7f89be1145e44d16f453fd420d6d8a2738fab3b19513fd39
     entrypoint: [""]
+  before_script:
+    - echo sup
   script:
     - /kaniko/executor
       --build-arg TARGETARCH=arm64
