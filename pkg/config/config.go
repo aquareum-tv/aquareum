@@ -38,6 +38,7 @@ type CLI struct {
 	HttpsAddr        string
 	HttpInternalAddr string
 	AdminSecret      string
+	GitLabURL        string
 	Build            *BuildFlags
 	MistAdminPort    int
 	MistRTMPPort     int
