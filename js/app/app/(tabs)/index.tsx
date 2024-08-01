@@ -71,7 +71,7 @@ const WebviewIframe = ({ src }) => {
 
 const TAP_COUNT = 5;
 const TAP_WINDOW = 5000;
-export default function TabOneScreen({ setShowTabs }) {
+export default function TabOneScreen() {
   // const isLive = Date.now() >= 1721149200000;
   const [debug, setDebug] = useState(false);
   const [presses, setPresses] = useState<number[]>([]);
@@ -86,7 +86,6 @@ export default function TabOneScreen({ setShowTabs }) {
     ) {
       setPresses([]);
       setDebug(!debug);
-      setShowTabs(!debug);
     } else {
       setPresses(newTaps);
     }
