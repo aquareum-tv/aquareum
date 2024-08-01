@@ -1,83 +1,80 @@
 include: ".ci/dockerfile-hash.yaml"
 
-# builder:
-#   stage: build
-#   interruptible: true
-#   image:
-#     name: gcr.io/kaniko-project/executor:v1.14.0-debug
-#     entrypoint: [""]
-#   variables:
-#     FQ_IMAGE_NAME: "$CI_REGISTRY_IMAGE:builder-$DOCKERFILE_HASH"
-#   script:
-#     - /kaniko/executor
-#       --build-arg TARGETARCH=amd64
-#       --build-arg DOCKERFILE_HASH=$DOCKERFILE_HASH
-#       --cache=true
-#       --context "${CI_PROJECT_DIR}"
-#       --dockerfile "${CI_PROJECT_DIR}/docker/build.Dockerfile"
-#       --destination "$FQ_IMAGE_NAME"
+builder:
+  stage: build
+  interruptible: true
+  image:
+    name: gcr.io/kaniko-project/executor:v1.14.0-debug
+    entrypoint: [""]
+  variables:
+    FQ_IMAGE_NAME: "$CI_REGISTRY_IMAGE:builder-$DOCKERFILE_HASH"
+  script:
+    - /kaniko/executor
+      --build-arg TARGETARCH=amd64
+      --build-arg DOCKERFILE_HASH=$DOCKERFILE_HASH
+      --cache=true
+      --context "${CI_PROJECT_DIR}"
+      --dockerfile "${CI_PROJECT_DIR}/docker/build.Dockerfile"
+      --destination "$FQ_IMAGE_NAME"
 
-# build:
-#   stage: build
-#   interruptible: true
-#   image: "$CI_REGISTRY_IMAGE:builder-$DOCKERFILE_HASH"
-#   script:
-#     - git fetch --unshallow || echo 'already unshallow'
-#     - make ci -j$(nproc)
-#   artifacts:
-#     reports:
-#       dotenv: .ci/build.env
+build:
+  stage: build
+  interruptible: true
+  image: "$CI_REGISTRY_IMAGE:builder-$DOCKERFILE_HASH"
+  script:
+    - git fetch --unshallow || echo 'already unshallow'
+    - make ci -j$(nproc)
+  artifacts:
+    reports:
+      dotenv: .ci/build.env
 
-# build-docker-amd64:
-#   stage: build
-#   interruptible: true
-#   needs:
-#     - job: build
-#       artifacts: true
-#   image:
-#     name: gcr.io/kaniko-project/executor:v1.14.0-debug
-#     entrypoint: [""]
-#   script:
-#     - /kaniko/executor
-#       --build-arg TARGETARCH=amd64
-#       --build-arg AQUAREUM_URL=$AQUAREUM_URL_AMD64
-#       --context "${CI_PROJECT_DIR}"
-#       --dockerfile "${CI_PROJECT_DIR}/docker/release.Dockerfile"
-#       --destination "$CI_REGISTRY_IMAGE:$AQUAREUM_BRANCH-amd64"
-#       --destination "$CI_REGISTRY_IMAGE:$AQUAREUM_VERSION-amd64"
+build-docker-amd64:
+  stage: build
+  interruptible: true
+  needs:
+    - job: build
+      artifacts: true
+  image:
+    name: gcr.io/kaniko-project/executor:v1.14.0-debug
+    entrypoint: [""]
+  script:
+    - /kaniko/executor
+      --build-arg TARGETARCH=amd64
+      --build-arg AQUAREUM_URL=$AQUAREUM_URL_AMD64
+      --context "${CI_PROJECT_DIR}"
+      --dockerfile "${CI_PROJECT_DIR}/docker/release.Dockerfile"
+      --destination "$CI_REGISTRY_IMAGE:$AQUAREUM_BRANCH-amd64"
+      --destination "$CI_REGISTRY_IMAGE:$AQUAREUM_VERSION-amd64"
 
-# build-docker-arm64:
-#   stage: build
-#   interruptible: true
-#   needs:
-#     - job: build
-#       artifacts: true
-#   image:
-#     name: gcr.io/kaniko-project/executor:v1.14.0-debug
-#     entrypoint: [""]
-#   script:
-#     - /kaniko/executor
-#       --build-arg TARGETARCH=arm64
-#       --build-arg AQUAREUM_URL=$AQUAREUM_URL_ARM64
-#       --context "${CI_PROJECT_DIR}"
-#       --dockerfile "${CI_PROJECT_DIR}/docker/release.Dockerfile"
-#       --destination "$CI_REGISTRY_IMAGE:$AQUAREUM_BRANCH-arm64"
-#       --destination "$CI_REGISTRY_IMAGE:$AQUAREUM_VERSION-arm64"
-#       --customPlatform=linux/arm64
+build-docker-arm64:
+  stage: build
+  interruptible: true
+  needs:
+    - job: build
+      artifacts: true
+  image:
+    name: gcr.io/kaniko-project/executor:v1.14.0-debug
+    entrypoint: [""]
+  script:
+    - /kaniko/executor
+      --build-arg TARGETARCH=arm64
+      --build-arg AQUAREUM_URL=$AQUAREUM_URL_ARM64
+      --context "${CI_PROJECT_DIR}"
+      --dockerfile "${CI_PROJECT_DIR}/docker/release.Dockerfile"
+      --destination "$CI_REGISTRY_IMAGE:$AQUAREUM_BRANCH-arm64"
+      --destination "$CI_REGISTRY_IMAGE:$AQUAREUM_VERSION-arm64"
+      --customPlatform=linux/arm64
 
 build-docker-manifest:
   stage: build
-  variables:
-    AQUAREUM_VERSION: v0.0.9-0f58741b
-    AQUAREUM_BRANCH: eli-docker-release
   image:
     name: curlimages/curl:latest
     entrypoint: [""]
-  # needs:
-  #   - job: build-docker-arm64
-  #   - job: build-docker-amd64
-  #   - job: build
-  #     artifacts: true
+  needs:
+    - job: build-docker-arm64
+    - job: build-docker-amd64
+    - job: build
+      artifacts: true
   before_script:
     - curl -s -L https://github.com/estesp/manifest-tool/releases/download/v2.1.7/binaries-manifest-tool-2.1.7.tar.gz | tar xvz
     - mv manifest-tool-linux-amd64 ./manifest-tool
