@@ -28,7 +28,7 @@ build:
     reports:
       dotenv: .ci/build.env
 
-build-docker:
+build-docker-amd64:
   stage: build
   interruptible: true
   needs:
@@ -45,6 +45,24 @@ build-docker:
       --dockerfile "${CI_PROJECT_DIR}/docker/release.Dockerfile"
       --destination "$CI_REGISTRY_IMAGE:$AQUAREUM_BRANCH-amd64"
       --destination "$CI_REGISTRY_IMAGE:$AQUAREUM_VERSION-amd64"
+
+build-docker-arm64:
+  stage: build
+  interruptible: true
+  needs:
+    - job: build
+      artifacts: true
+  image:
+    name: gcr.io/kaniko-project/executor@sha256:6fcac15aa570456d7f89be1145e44d16f453fd420d6d8a2738fab3b19513fd39
+    entrypoint: [""]
+  script:
+    - /kaniko/executor
+      --build-arg TARGETARCH=arm64
+      --build-arg AQUAREUM_URL=$AQUAREUM_URL_ARM64
+      --context "${CI_PROJECT_DIR}"
+      --dockerfile "${CI_PROJECT_DIR}/docker/release.Dockerfile"
+      --destination "$CI_REGISTRY_IMAGE:$AQUAREUM_BRANCH-arm64"
+      --destination "$CI_REGISTRY_IMAGE:$AQUAREUM_VERSION-arm64"
 
 build-android:
   stage: build
@@ -73,7 +91,8 @@ release:
   needs:
     - build-mac
     - build-android
-    - build-docker
+    - build-docker-amd64
+    - build-docker-arm64
     - build
   rules:
     - if: '$CI_COMMIT_TAG =~ /^v?\d+\.\d+\.\d+$/'
