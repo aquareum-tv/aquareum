@@ -80,10 +80,10 @@ build-docker-manifest:
   #     artifacts: true
   before_script:
     - curl -s -L https://github.com/estesp/manifest-tool/releases/download/v2.1.7/binaries-manifest-tool-2.1.7.tar.gz | tar xvz
-    - mv manifest-tool-linux-amd64 /usr/bin/manifest-tool
-    - chmod +x /usr/bin/manifest-tool
+    - mv manifest-tool-linux-amd64 ./manifest-tool
+    - chmod +x ./manifest-tool
   script:
-    - manifest-tool --username "${CI_REGISTRY_USER}" --password "${CI_REGISTRY_PASSWORD}" push from-args
+    - ./manifest-tool --username "${CI_REGISTRY_USER}" --password "${CI_REGISTRY_PASSWORD}" push from-args
       --platforms linux/amd64,linux/arm64
       --template $CI_REGISTRY_IMAGE:$AQUAREUM_VERSION-ARCH
       --tags $AQUAREUM_BRANCH
