@@ -100,8 +100,8 @@ node-all-platforms: app
 	meson setup --cross-file util/linux-arm64-gnu.ini build-aarch64
 	meson compile -C build-aarch64 archive
 
-.PHONY: macos-all-arch
-macos-node-all-platforms: app
+.PHONY: node-all-platforms-macos
+node-all-platforms-macos: app
 	meson setup build
 	meson compile -C build archive
 	meson setup --cross-file util/linux-arm64-gnu.ini build-aarch64
