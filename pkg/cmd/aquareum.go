@@ -1,12 +1,15 @@
 package cmd
 
 import (
+	"bufio"
 	"context"
 	"flag"
 	"fmt"
+	"net/http"
 	"os"
 	"os/signal"
 	"runtime"
+	"strings"
 	"syscall"
 
 	"aquareum.tv/aquareum/pkg/crypto/signers/eip712"
@@ -24,6 +27,32 @@ import (
 
 // parse the CLI and fire up an aquareum node!
 func Start(build *config.BuildFlags) error {
+	if os.Args[1] == "slurp-file" {
+		fs := flag.NewFlagSet("aquareum-slurp-file", flag.ExitOnError)
+		inurl := fs.String("url", "", "Base URL to send slurped files to")
+		fname := fs.String("file", "", "Name of this file we're uploading")
+		ff.Parse(
+			fs, os.Args[2:],
+			ff.WithEnvVarPrefix("AQ"),
+		)
+		*fname = strings.TrimPrefix(*fname, config.AQUAREUM_SCHEME_PREFIX)
+		fmt.Printf("file slurpin args=%s\n", strings.Join(os.Args, ", "))
+
+		fullURL := fmt.Sprintf("%s/segment/%s", *inurl, *fname)
+
+		reader := bufio.NewReader(os.Stdin)
+		req, err := http.NewRequest("POST", fullURL, reader)
+		if err != nil {
+			panic(err)
+		}
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Printf("http %s\n", resp.Status)
+		os.Exit(0)
+	}
 	err := normalizeXDG()
 	if err != nil {
 		return err

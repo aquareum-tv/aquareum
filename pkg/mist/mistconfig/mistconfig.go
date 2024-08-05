@@ -4,12 +4,17 @@ import (
 	"crypto/md5"
 	"encoding/json"
 	"fmt"
+	"os"
 
 	"aquareum.tv/aquareum/pkg/config"
 	"aquareum.tv/aquareum/pkg/mist/misttriggers"
 )
 
 func Generate(cli *config.CLI) ([]byte, error) {
+	exec, err := os.Executable()
+	if err != nil {
+		return nil, fmt.Errorf("couldn't find my path for extwriter purposes: %w", err)
+	}
 	triggers := map[string][]map[string]any{}
 	for name, blocking := range misttriggers.BlockingTriggers {
 		triggers[name] = []map[string]any{{
@@ -25,6 +30,10 @@ func Generate(cli *config.CLI) ([]byte, error) {
 				"password": md5.Sum([]byte("aquareum")),
 			},
 		},
+		"autopushes": [][]any{{
+			"stream+",
+			fmt.Sprintf("%s$wildcard/$uuid/source/$segmentCounter.ts?m3u8=../output.m3u8&split=1&video=source&audio=AAC&append=1&waittrackcount=2&recstart=-1", config.AQUAREUM_SCHEME_PREFIX),
+		}},
 		"bandwidth": map[string]any{
 			"exceptions": []string{
 				"::1",
@@ -32,6 +41,13 @@ func Generate(cli *config.CLI) ([]byte, error) {
 				"10.0.0.0/8",
 				"192.168.0.0/16",
 				"172.16.0.0/12",
+			},
+		},
+		"extwriters": [][]any{
+			{
+				"aquareum",
+				fmt.Sprintf("%s slurp-file --url=%s --file", exec, cli.OwnInternalURL()),
+				[]string{"aquareum"},
 			},
 		},
 		"config": map[string]any{

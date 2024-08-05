@@ -46,6 +46,8 @@ type CLI struct {
 	MistHTTPPort           int
 }
 
+var AQUAREUM_SCHEME_PREFIX = "aquareum://"
+
 func (cli *CLI) OwnInternalURL() string {
 	//  No errors because we know it's valid from AddrFlag
 	host, port, _ := net.SplitHostPort(cli.HttpInternalAddr)
