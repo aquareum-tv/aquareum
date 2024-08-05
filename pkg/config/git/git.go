@@ -34,9 +34,6 @@ var UUID = "%s"
 func gitlabURL() string {
 	CI_API_V4_URL := os.Getenv("CI_API_V4_URL")
 	CI_PROJECT_ID := os.Getenv("CI_PROJECT_ID")
-	if CI_API_V4_URL == "" || CI_PROJECT_ID == "" {
-		panic("missing CI_PROJECT_ID or CI_API_V4_URL")
-	}
 	return fmt.Sprintf("%s/projects/%s", CI_API_V4_URL, CI_PROJECT_ID)
 }
 
@@ -112,7 +109,6 @@ func makeGit() error {
 		outMap["AQUAREUM_BRANCH"] = AQUAREUM_BRANCH
 		outMap["AQUAREUM_VERSION"] = desc
 		outMap["AQUAREUM_BRANCH"] = AQUAREUM_BRANCH
-		// https://git.aquareum.tv/api/v4/projects/1/packages/generic/$(BRANCH)/aquareum-v0.0.9-8650d0fa-linux-arm64.tar.gz
 		for _, arch := range []string{"amd64", "arm64"} {
 			k := fmt.Sprintf("AQUAREUM_URL_%s", strings.ToUpper(arch))
 			v := fmt.Sprintf("%s/packages/generic/%s/%s/aquareum-%s-linux-%s.tar.gz", gitlabURL(), AQUAREUM_BRANCH, desc, desc, arch)
