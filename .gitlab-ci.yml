@@ -103,7 +103,7 @@ build-mac:
 
   script:
     - git fetch --unshallow || echo 'already unshallow'
-    - brew install go && go version
+    - brew install meson ninja go && go version
     - make ci-macos -j16
 
 release:

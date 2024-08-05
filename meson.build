@@ -52,7 +52,7 @@ endif
 libaquareum = custom_target('libaquareum',
   input: [aquareum_go, flags],
   output: ['aquareum.a', 'aquareum.h'],
-  command: [prog_go, 'build', '-o', '@OUTPUT0@', '-buildmode', 'c-archive', '@INPUT@'],
+  command: [prog_go, 'build', '-o', '@OUTPUT0@', '-buildmode', 'c-archive', '-tags', 'netgo', '@INPUT@'],
   build_always_stale: true,
   env: env
 )
@@ -62,10 +62,14 @@ mistserver_proj = subproject('mistserver', default_options: {
 })
 mistserver = mistserver_proj.get_variable('libmistserver_dep')
 
+aquareum_deps = []
+if host_machine.system() == 'darwin'
+  aquareum_deps += [dependency('appleframeworks', modules : ['CoreFoundation', 'Security'])]
+endif
 aquareum = executable(
   'aquareum',
   ['cmd/aquareum/aquareum.c', libaquareum],
-  dependencies: [mistserver]
+  dependencies: [mistserver, aquareum_deps]
 )
 
 prog_tar = find_program('tar')

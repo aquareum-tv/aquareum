@@ -51,7 +51,7 @@ all: version install check app test node-all-platforms android
 ci: version install check app test node-all-platforms ci-upload-node
 
 .PHONY: ci-macos
-ci-macos: version install check app ios ci-upload-ios
+ci-macos: version install check app node-all-platforms-macos ci-upload-node-macos ios ci-upload-ios
 
 .PHONY: ci-macos
 ci-android: version install check android ci-upload-android
@@ -100,6 +100,13 @@ node-all-platforms: app
 	meson setup --cross-file util/linux-arm64-gnu.ini build-aarch64
 	meson compile -C build-aarch64 archive
 
+.PHONY: node-all-platforms-macos
+node-all-platforms-macos: app
+	meson setup build
+	meson compile -C build archive
+	meson setup --cross-file util/darwin-amd64-apple.ini build-amd64
+	meson compile -C build-amd64 archive
+
 # link your local version of mist for dev
 .PHONY: link-mist
 link-mist:
@@ -133,6 +140,15 @@ ci-upload: ci-upload-node ci-upload-android
 .PHONY: ci-upload-node
 ci-upload-node: node-all-platforms
 	for GOOS in linux; do \
+		for GOARCH in amd64 arm64; do \
+			export file=aquareum-$(VERSION)-$$GOOS-$$GOARCH.tar.gz \
+			&& $(MAKE) ci-upload-file upload_file=$$file; \
+		done \
+	done;
+
+.PHONY: ci-upload-node-macos
+ci-upload-node-macos: node-all-platforms-macos
+	for GOOS in darwin; do \
 		for GOARCH in amd64 arm64; do \
 			export file=aquareum-$(VERSION)-$$GOOS-$$GOARCH.tar.gz \
 			&& $(MAKE) ci-upload-file upload_file=$$file; \
