@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	re      = regexp.MustCompile(`^aquareum-(v[0-9]\.[0-9]\.[0-9])(-[0-9a-f]+)?-([0-9a-z]+)-([0-9a-z]+)\.(.+)$`)
+	re      = regexp.MustCompile(`^aquareum-(v[0-9]+\.[0-9]+\.[0-9]+)(-[0-9a-f]+)?-([0-9a-z]+)-([0-9a-z]+)\.(.+)$`)
 	inputRe = regexp.MustCompile(`^aquareum-([0-9a-z]+)-([0-9a-z]+)\.(.+)$`)
 )
 

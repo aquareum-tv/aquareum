@@ -1,9 +1,11 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"math/rand"
+	"net/http"
 	"os"
 	"strings"
 
@@ -29,11 +31,45 @@ var BuildTime = "%d"
 var UUID = "%s"
 `
 
+func gitlabURL() string {
+	CI_API_V4_URL := os.Getenv("CI_API_V4_URL")
+	CI_PROJECT_ID := os.Getenv("CI_PROJECT_ID")
+	if CI_API_V4_URL == "" || CI_PROJECT_ID == "" {
+		panic("missing CI_PROJECT_ID or CI_API_V4_URL")
+	}
+	return fmt.Sprintf("%s/projects/%s", CI_API_V4_URL, CI_PROJECT_ID)
+}
+
+func gitlab(suffix string, dest any) {
+	u := fmt.Sprintf("%s%s", gitlabURL(), suffix)
+
+	req, err := http.Get(u)
+	if err != nil {
+		panic(err)
+	}
+	if err := json.NewDecoder(req.Body).Decode(dest); err != nil {
+		panic(err)
+	}
+}
+
+func gitlabList(suffix string) []map[string]any {
+	var result []map[string]any
+	gitlab(suffix, &result)
+	return result
+}
+
+func gitlabDict(suffix string) map[string]any {
+	var result map[string]any
+	gitlab(suffix, &result)
+	return result
+}
+
 func makeGit() error {
 	output := flag.String("o", "", "file to output to")
 	version := flag.Bool("v", false, "just print version")
 	env := flag.Bool("env", false, "print a bunch of useful environment variables")
 	doBranch := flag.Bool("branch", false, "print branch")
+	doRelease := flag.Bool("release", false, "print release json file")
 
 	flag.Parse()
 	r, err := git.PlainOpenWithOptions(".", &git.PlainOpenOptions{DetectDotGit: true})
@@ -71,8 +107,6 @@ func makeGit() error {
 	} else if *doBranch {
 		out = branch()
 	} else if *env {
-		CI_API_V4_URL := os.Getenv("CI_API_V4_URL")
-		CI_PROJECT_ID := os.Getenv("CI_PROJECT_ID")
 		AQUAREUM_BRANCH := branch()
 		outMap := map[string]string{}
 		outMap["AQUAREUM_BRANCH"] = AQUAREUM_BRANCH
@@ -81,12 +115,39 @@ func makeGit() error {
 		// https://git.aquareum.tv/api/v4/projects/1/packages/generic/$(BRANCH)/aquareum-v0.0.9-8650d0fa-linux-arm64.tar.gz
 		for _, arch := range []string{"amd64", "arm64"} {
 			k := fmt.Sprintf("AQUAREUM_URL_%s", strings.ToUpper(arch))
-			v := fmt.Sprintf("%s/projects/%s/packages/generic/%s/%s/aquareum-%s-linux-%s.tar.gz", CI_API_V4_URL, CI_PROJECT_ID, AQUAREUM_BRANCH, desc, desc, arch)
+			v := fmt.Sprintf("%s/packages/generic/%s/%s/aquareum-%s-linux-%s.tar.gz", gitlabURL(), AQUAREUM_BRANCH, desc, desc, arch)
 			outMap[k] = v
 		}
 		for k, v := range outMap {
 			out = out + fmt.Sprintf("%s=%s\n", k, v)
 		}
+	} else if *doRelease {
+		outMap := map[string]any{}
+		outMap["name"] = desc
+		outMap["tag-name"] = desc
+		pkgs := gitlabList(fmt.Sprintf("/packages?order_by=created_at&sort=desc&package_name=%s", branch()))
+		id := pkgs[0]["id"].(float64)
+		pkgFiles := gitlabList(fmt.Sprintf("/packages/%d/package_files", int(id)))
+		outFiles := []string{}
+		for _, file := range pkgFiles {
+			fileJson := map[string]string{
+				"name": file["file_name"].(string),
+				"url":  fmt.Sprintf("%s/packages/generic/%s/%s/%s", gitlabURL(), branch(), desc, file["file_name"].(string)),
+			}
+			bs, err := json.Marshal(fileJson)
+			if err != nil {
+				return err
+			}
+			outFiles = append(outFiles, string(bs))
+		}
+		outMap["assets-link"] = outFiles
+		changelog := gitlabDict(fmt.Sprintf("/repository/changelog?version=%s", desc))
+		outMap["description"] = changelog["notes"]
+		bs, err := json.MarshalIndent(outMap, "", "  ")
+		if err != nil {
+			return err
+		}
+		out = string(bs)
 	} else {
 		out = fmt.Sprintf(tmpl, desc, ts, u)
 	}
@@ -96,16 +157,6 @@ func makeGit() error {
 	} else {
 		fmt.Print(out)
 	}
-	// 	if *version {
-	// 	} else {
-	// 		out := fmt.Sprintf(tmpl, desc, ts, u)
-	// 		os.WriteFile(*output, []byte(out), 0644)
-	// 	}
-	// } else if *version {
-	// 	fmt.Print(desc)
-	// } else {
-	// 	fmt.Printf("%d %s %s", ts, u, desc)
-	// }
 	return nil
 }
 

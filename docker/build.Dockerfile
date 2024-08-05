@@ -31,18 +31,20 @@ RUN export NODEARCH="$TARGETARCH" \
   && tar -xf node.tar.gz \
   && cp -r node-v$NODE_VERSION-linux-$NODEARCH/* /usr/local \
   && rm -rf node.tar.gz node-v$NODE_VERSION-linux-$NODEARCH
-  
+
 RUN npm install -g yarn
 
 ARG ANDROID_SDK_VERSION=11076708
 ENV ANDROID_HOME /opt/android-sdk
 RUN mkdir -p ${ANDROID_HOME}/cmdline-tools && \
-    curl -L -O https://dl.google.com/android/repository/commandlinetools-linux-${ANDROID_SDK_VERSION}_latest.zip && \
-    unzip *tools*linux*.zip -d ${ANDROID_HOME}/cmdline-tools && \
-    mv ${ANDROID_HOME}/cmdline-tools/cmdline-tools ${ANDROID_HOME}/cmdline-tools/tools && \
-    rm *tools*linux*.zip && \
-    curl -L https://raw.githubusercontent.com/thyrlian/AndroidSDK/bfcbf0cdfd6bb1ef45579e6ddc4d3876264cbdd1/android-sdk/license_accepter.sh | bash
+  curl -L -O https://dl.google.com/android/repository/commandlinetools-linux-${ANDROID_SDK_VERSION}_latest.zip && \
+  unzip *tools*linux*.zip -d ${ANDROID_HOME}/cmdline-tools && \
+  mv ${ANDROID_HOME}/cmdline-tools/cmdline-tools ${ANDROID_HOME}/cmdline-tools/tools && \
+  rm *tools*linux*.zip && \
+  curl -L https://raw.githubusercontent.com/thyrlian/AndroidSDK/bfcbf0cdfd6bb1ef45579e6ddc4d3876264cbdd1/android-sdk/license_accepter.sh | bash
 
 FROM builder AS cached-builder
+ARG CI_COMMIT_BRANCH=next
+ENV CI_COMMIT_BRANCH $CI_COMMIT_BRANCH
 WORKDIR /cached-build
 RUN git clone https://git.aquareum.tv/aquareum-tv/aquareum && cd aquareum && make all -j$(nproc) && cd .. && rm -rf aquareum

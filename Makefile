@@ -182,12 +182,8 @@ release:
 .PHONY: ci-release
 ci-release:
 	go install gitlab.com/gitlab-org/release-cli/cmd/release-cli
-	curl --silent --fail "$$CI_API_V4_URL/projects/$$CI_PROJECT_ID/repository/changelog?version=$(VERSION)" | jq -r '.notes' > description.md
-	release-cli create \
-		--name $(VERSION) \
-		--tag-name $(VERSION) \
-		--description description.md \
-		--assets-link '$(shell ./util/release-files.sh $(VERSION))'
+	go run ./pkg/config/git/git.go -release -o release.yml
+	release-cli create-from-file --file release.yml
 
 .PHONY: check
 check: install
