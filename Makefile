@@ -104,7 +104,7 @@ node-all-platforms: app
 node-all-platforms-macos: app
 	meson setup build
 	meson compile -C build archive
-	meson setup --cross-file util/darwin-amd64-apple.ini build-aarch64
+	meson setup --cross-file util/darwin-amd64-apple.ini build-amd64
 	meson compile -C build-amd64 archive
 
 # link your local version of mist for dev
