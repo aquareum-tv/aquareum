@@ -51,7 +51,7 @@ all: version install check app test node-all-platforms android
 ci: version install check app test node-all-platforms ci-upload-node
 
 .PHONY: ci-macos
-ci-macos: version install check app node-all-platforms-macos ci-upload-node-macos
+ci-macos: version install check app node-all-platforms-macos ci-upload-node-macos ios ci-upload-ios
 
 .PHONY: ci-macos
 ci-android: version install check android ci-upload-android
