@@ -24,6 +24,7 @@ export default function Provider({ children }: { children: React.ReactNode }) {
         <RainbowKitProvider coolMode={true}>
           {/* RainbowKitProvider hides our children unless we do this...? */}
           <View
+            id="rainbowkit-interior" // Also this......?????
             f={1}
             style={{
               position: "absolute",
