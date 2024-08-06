@@ -36,7 +36,6 @@ func Start(build *config.BuildFlags) error {
 			ff.WithEnvVarPrefix("AQ"),
 		)
 		*fname = strings.TrimPrefix(*fname, config.AQUAREUM_SCHEME_PREFIX)
-		fmt.Printf("file slurpin args=%s\n", strings.Join(os.Args, ", "))
 
 		fullURL := fmt.Sprintf("%s/segment/%s", *inurl, *fname)
 
@@ -50,7 +49,9 @@ func Start(build *config.BuildFlags) error {
 		if err != nil {
 			panic(err)
 		}
-		fmt.Printf("http %s\n", resp.Status)
+		if resp.StatusCode != 200 {
+			fmt.Printf("http %s\n", resp.Status)
+		}
 		os.Exit(0)
 	}
 	err := normalizeXDG()

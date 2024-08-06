@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 
+	"aquareum.tv/aquareum/pkg/errors"
 	"aquareum.tv/aquareum/pkg/log"
 	"aquareum.tv/aquareum/pkg/mist/misttriggers"
 	"github.com/julienschmidt/httprouter"
@@ -34,11 +35,14 @@ func (a *AquareumAPI) InternalHandler(ctx context.Context) (http.Handler, error)
 	triggerCollection := misttriggers.NewMistCallbackHandlersCollection(a.CLI, broker)
 	router.POST("/mist-trigger", triggerCollection.Trigger())
 	router.POST("/segment/*anything", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		// log.Log(ctx, "segment start")
 		bs, err := io.ReadAll(r.Body)
 		if err != nil {
-			log.Log(ctx, "cmaf error", "error", err)
+			log.Log(ctx, "segment error", "error", err, "len", len(bs))
+			errors.WriteHTTPInternalServerError(w, "segment error", err)
+			return
 		}
-		log.Log(ctx, "cmaf stuff", "len", len(bs), "url", r.URL.String())
+		// log.Log(ctx, "segment success", "len", len(bs), "url", r.URL.String())
 	})
 	handler := sloghttp.Recovery(router)
 	handler = sloghttp.New(slog.Default())(handler)
