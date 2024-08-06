@@ -32,7 +32,7 @@ func Generate(cli *config.CLI) ([]byte, error) {
 		},
 		"autopushes": [][]any{{
 			"stream+",
-			fmt.Sprintf("mkv-exec:%s-slurp-file $stream/source/$datetime.mkv?split=1&video=source&append=true&waittrackcount=2&maxwaittrackms=5000", exec),
+			fmt.Sprintf("%s$wildcard/$uuid/source/$segmentCounter.ts?m3u8=../output.m3u8&split=1&video=source&audio=AAC&append=1&waittrackcount=2&recstart=-1", config.AQUAREUM_SCHEME_PREFIX),
 		}},
 		"bandwidth": map[string]any{
 			"exceptions": []string{
@@ -79,8 +79,11 @@ func Generate(cli *config.CLI) ([]byte, error) {
 					"port":      cli.MistHTTPPort,
 				},
 				{
-					"connector": "WebRTC",
-					"bindhost":  "0.0.0.0",
+					"connector":     "WebRTC",
+					"jitterlog":     false,
+					"mergesessions": false,
+					"nackdisable":   false,
+					"packetlog":     false,
 				},
 			},
 			"sessionInputMode":       15,
