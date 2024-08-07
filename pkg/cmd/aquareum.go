@@ -73,6 +73,11 @@ func Start(build *config.BuildFlags) error {
 	}
 	dbFile = fmt.Sprintf("sqlite://%s", dbFile)
 
+	defaultDataDir, err := config.DefaultDataDir()
+	if err != nil {
+		return err
+	}
+
 	fs := flag.NewFlagSet("aquareum", flag.ExitOnError)
 	cli := config.CLI{Build: build}
 	fs.StringVar(&cli.HttpAddr, "http-addr", ":8080", "Public HTTP address")
@@ -89,6 +94,7 @@ func Start(build *config.BuildFlags) error {
 	fs.IntVar(&cli.MistRTMPPort, "mist-rtmp-port", 11935, "MistServer RTMP port (internal use only)")
 	fs.IntVar(&cli.MistHTTPPort, "mist-http-port", 18080, "MistServer HTTP port (internal use only)")
 	fs.StringVar(&cli.GitLabURL, "gitlab-url", "https://git.aquareum.tv/api/v4/projects/1", "gitlab url for generating download links")
+	fs.StringVar(&cli.DataDir, "data-dir", defaultDataDir, "directory for keeping all aquareum data")
 	version := fs.Bool("version", false, "print version and exit")
 
 	ff.Parse(
@@ -107,6 +113,10 @@ func Start(build *config.BuildFlags) error {
 		return nil
 	}
 
+	err = os.MkdirAll(cli.DataDir, os.ModePerm)
+	if err != nil {
+		return fmt.Errorf("error creating aquareum dir at %s:%w", cli.DataDir, err)
+	}
 	schema, err := v0.MakeV0Schema()
 	if err != nil {
 		return err

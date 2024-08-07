@@ -32,7 +32,7 @@ func Generate(cli *config.CLI) ([]byte, error) {
 		},
 		"autopushes": [][]any{{
 			"stream+",
-			fmt.Sprintf("%s$wildcard/$segmentCounter.mkv?split=1&video=source&audio=AAC&append=1&waittrackcount=2", config.AQUAREUM_SCHEME_PREFIX),
+			fmt.Sprintf("%s$wildcard/$segmentCounter.ts?split=1&video=maxbps&audio=AAC&append=1", config.AQUAREUM_SCHEME_PREFIX),
 		}},
 		"bandwidth": map[string]any{
 			"exceptions": []string{

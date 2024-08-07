@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"path"
 	"time"
 
 	"golang.org/x/exp/rand"
@@ -29,21 +30,22 @@ func (b BuildFlags) BuildTimeStrExpo() string {
 }
 
 type CLI struct {
-	TLSCertPath            string
-	TLSKeyPath             string
-	SigningKeyPath         string
-	DBPath                 string
-	Insecure               bool
-	HttpAddr               string
-	HttpsAddr              string
-	HttpInternalAddr       string
-	GitLabURL              string
-	FirebaseServiceAccount string
 	AdminAccount           string
 	Build                  *BuildFlags
+	DataDir                string
+	DBPath                 string
+	FirebaseServiceAccount string
+	GitLabURL              string
+	HttpAddr               string
+	HttpInternalAddr       string
+	HttpsAddr              string
+	Insecure               bool
 	MistAdminPort          int
-	MistRTMPPort           int
 	MistHTTPPort           int
+	MistRTMPPort           int
+	SigningKeyPath         string
+	TLSCertPath            string
+	TLSKeyPath             string
 }
 
 var AQUAREUM_SCHEME_PREFIX = "aquareum://"
@@ -83,4 +85,12 @@ func RandomTrailer(length int) string {
 		res[i] = charset[rand.Intn(len(charset))]
 	}
 	return string(res)
+}
+
+func DefaultDataDir() (string, error) {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "", fmt.Errorf("error finding default data dir: %w", err)
+	}
+	return path.Join(home, ".aquareum"), nil
 }
