@@ -1,21 +1,21 @@
 package api
 
 import (
-	"bufio"
 	"context"
 	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
-	"net/url"
 	"os"
 	"path"
-	"strings"
+	"regexp"
+	"strconv"
+	"time"
 
 	"aquareum.tv/aquareum/pkg/errors"
 	"aquareum.tv/aquareum/pkg/log"
+	"aquareum.tv/aquareum/pkg/mist/mistconfig"
 	"aquareum.tv/aquareum/pkg/mist/misttriggers"
-	"github.com/google/uuid"
 	"github.com/julienschmidt/httprouter"
 	sloghttp "github.com/samber/slog-http"
 )
@@ -32,46 +32,87 @@ func (a *AquareumAPI) ServeInternalHTTP(ctx context.Context) error {
 	})
 }
 
+var segmentRE *regexp.Regexp
+
+func init() {
+	segmentRE = regexp.MustCompile(`^\/segment\/([a-z0-9-\.]+)_([0-9]+)\/([0-9]+)\.ts$`)
+}
+
 func (a *AquareumAPI) InternalHandler(ctx context.Context) (http.Handler, error) {
 	router := httprouter.New()
 	broker := misttriggers.NewTriggerBroker()
 	broker.OnPushOutStart(func(ctx context.Context, payload *misttriggers.PushOutStartPayload) (string, error) {
-		log.Log(ctx, "got push out start", "streamName", payload.StreamName, "url", payload.URL)
-		u, err := url.Parse(payload.URL)
-		if err != nil {
-			return "", err
-		}
-		uu, err := uuid.NewV7()
-		if err != nil {
-			return "", fmt.Errorf("error generating uuid: %w", err)
-		}
-		u.Path, err = url.JoinPath(uu.String(), u.Path)
-		if err != nil {
-			return "", fmt.Errorf("error joining path: %w", err)
-		}
+		// aquareum://$wildcard/$currentMediaTime.ts?split=1&video=maxbps&audio=AAC&append=1
+		// log.Log(ctx, "got push out start", "streamName", payload.StreamName, "url", payload.URL)
+		// u, err := url.Parse(payload.URL)
+		// if err != nil {
+		// 	return "", err
+		// }
+		// u.Path, err = url.JoinPath(uu.String(), u.Path)
+		// if err != nil {
+		// 	return "", fmt.Errorf("error joining path: %w", err)
+		// }
 
-		return u.String(), nil
+		return payload.URL, nil
+	})
+	broker.OnPushRewrite(func(ctx context.Context, payload *misttriggers.PushRewritePayload) (string, error) {
+		log.Log(ctx, "got push out start", "streamName", payload.StreamName, "url", payload.URL.String())
+
+		ms := time.Now().UnixMilli()
+		out := fmt.Sprintf("%s+%s_%d", mistconfig.STREAM_NAME, payload.StreamName, ms)
+
+		return out, nil
 	})
 	triggerCollection := misttriggers.NewMistCallbackHandlersCollection(a.CLI, broker)
 	router.POST("/mist-trigger", triggerCollection.Trigger())
 	router.POST("/segment/*anything", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		log.Log(ctx, "segment start")
-		suffix := strings.TrimPrefix(r.URL.Path, "/")
-		err := os.MkdirAll(path.Join(a.CLI.DataDir, path.Dir(suffix)), 0700)
+		matches := segmentRE.FindStringSubmatch(r.URL.Path)
+		if len(matches) != 4 {
+			log.Log(ctx, "regex failed on /segment/url", "path", r.URL.Path)
+			errors.WriteHTTPInternalServerError(w, "segment error", nil)
+			return
+		}
+		user := matches[1]
+		startTimeStr := matches[2]
+		mediaTimeStr := matches[3]
+		startTime, err := strconv.ParseInt(startTimeStr, 10, 64)
+		if err != nil {
+			log.Log(ctx, "error parsing number", "error", err)
+			errors.WriteHTTPInternalServerError(w, "error parsing number", err)
+			return
+		}
+		mediaTime, err := strconv.ParseInt(mediaTimeStr, 10, 64)
+		if err != nil {
+			log.Log(ctx, "error parsing number", "error", err)
+			errors.WriteHTTPInternalServerError(w, "error parsing number", err)
+			return
+		}
+		segmentTime := startTime + mediaTime
+		log.Log(ctx, fmt.Sprintf("%d + %d = %d", startTime, mediaTime, segmentTime))
+
+		if err != nil {
+			log.Log(ctx, "error parsing segment start time", "error", err, "startTime", startTimeStr)
+			errors.WriteHTTPInternalServerError(w, "segment error", err)
+			return
+		}
+		userDir := path.Join(a.CLI.DataDir, "segments", user)
+		err = os.MkdirAll(userDir, 0700)
 		if err != nil {
 			log.Log(ctx, "error making directory", "error", err)
 			errors.WriteHTTPInternalServerError(w, "directory create error", err)
 			return
 		}
-		f, err := os.Create(path.Join(a.CLI.DataDir, suffix))
+		segmentFile := path.Join(userDir, fmt.Sprintf("%d.ts", segmentTime))
+		log.Log(ctx, "writing to", "segmentFile", segmentFile)
+		f, err := os.Create(segmentFile)
 		if err != nil {
 			log.Log(ctx, "error opening file", "error", err)
 			errors.WriteHTTPInternalServerError(w, "file open error", err)
 			return
 		}
 		defer f.Close()
-		fwrite := bufio.NewWriter(f)
-		count, err := io.Copy(fwrite, r.Body)
+		count, err := io.Copy(f, r.Body)
 		if err != nil {
 			log.Log(ctx, "segment error", "error", err, "len", count)
 			errors.WriteHTTPInternalServerError(w, "segment error", err)

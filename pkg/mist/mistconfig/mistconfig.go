@@ -10,6 +10,8 @@ import (
 	"aquareum.tv/aquareum/pkg/mist/misttriggers"
 )
 
+var STREAM_NAME = "stream"
+
 func Generate(cli *config.CLI) ([]byte, error) {
 	exec, err := os.Executable()
 	if err != nil {
@@ -31,8 +33,8 @@ func Generate(cli *config.CLI) ([]byte, error) {
 			},
 		},
 		"autopushes": [][]any{{
-			"stream+",
-			fmt.Sprintf("%s$wildcard/$segmentCounter.ts?split=1&video=maxbps&audio=AAC&append=1", config.AQUAREUM_SCHEME_PREFIX),
+			fmt.Sprintf("%s+", STREAM_NAME),
+			fmt.Sprintf("%s$wildcard/$currentMediaTime.ts?split=1&video=maxbps&audio=AAC&append=1", config.AQUAREUM_SCHEME_PREFIX),
 		}},
 		"bandwidth": map[string]any{
 			"exceptions": []string{
@@ -96,8 +98,8 @@ func Generate(cli *config.CLI) ([]byte, error) {
 			"trustedproxy":           []string{},
 		},
 		"streams": map[string]map[string]any{
-			"stream": {
-				"name":          "stream",
+			STREAM_NAME: {
+				"name":          STREAM_NAME,
 				"segmentsize":   1,
 				"source":        "push://",
 				"stop_sessions": false,

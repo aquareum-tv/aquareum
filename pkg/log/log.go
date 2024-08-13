@@ -94,6 +94,12 @@ func (v *VerboseLogger) log(ctx context.Context, message string, args ...any) {
 	if !glog.V(v.level) {
 		return
 	}
+	// I want a compile time assertion for this... but short of that let's be REALLY ANNOYING
+	if len(args)%2 != 0 {
+		for range 6 {
+			fmt.Println("!!!!!!!!!!!!!!!! FOLLOWING LOG LINE HAS AN ODD NUMBER OF ARGUMENTS !!!!!!!!!!!!!!!!")
+		}
+	}
 	meta, _ := ctx.Value(clogContextKey).(metadata)
 	hasCaller := false
 
