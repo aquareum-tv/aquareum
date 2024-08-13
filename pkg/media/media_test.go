@@ -9,13 +9,14 @@ import (
 	"runtime"
 	"testing"
 
+	_ "aquareum.tv/aquareum/pkg/media/mediatesting"
 	"github.com/stretchr/testify/require"
 )
 
 func getFixture(name string) string {
 	_, filename, _, _ := runtime.Caller(0)
 	dir := filepath.Dir(filename)
-	return filepath.Join(dir, "..", "..", "tests", "fixtures", name)
+	return filepath.Join(dir, "..", "..", "test", "fixtures", name)
 }
 
 func TestMuxToMP4(t *testing.T) {
