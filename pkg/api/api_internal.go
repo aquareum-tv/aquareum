@@ -3,7 +3,6 @@ package api
 import (
 	"context"
 	"fmt"
-	"io"
 	"log/slog"
 	"net/http"
 	"os"
@@ -14,6 +13,7 @@ import (
 
 	"aquareum.tv/aquareum/pkg/errors"
 	"aquareum.tv/aquareum/pkg/log"
+	"aquareum.tv/aquareum/pkg/media"
 	"aquareum.tv/aquareum/pkg/mist/mistconfig"
 	"aquareum.tv/aquareum/pkg/mist/misttriggers"
 	"github.com/julienschmidt/httprouter"
@@ -67,6 +67,7 @@ func (a *AquareumAPI) InternalHandler(ctx context.Context) (http.Handler, error)
 	router.POST("/mist-trigger", triggerCollection.Trigger())
 	router.POST("/segment/*anything", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		log.Log(ctx, "segment start")
+		ms := time.Now().UnixMilli()
 		matches := segmentRE.FindStringSubmatch(r.URL.Path)
 		if len(matches) != 4 {
 			log.Log(ctx, "regex failed on /segment/url", "path", r.URL.Path)
@@ -89,7 +90,7 @@ func (a *AquareumAPI) InternalHandler(ctx context.Context) (http.Handler, error)
 			return
 		}
 		segmentTime := startTime + mediaTime
-		log.Log(ctx, fmt.Sprintf("%d + %d = %d", startTime, mediaTime, segmentTime))
+		drift := ms - segmentTime
 
 		if err != nil {
 			log.Log(ctx, "error parsing segment start time", "error", err, "startTime", startTimeStr)
@@ -103,8 +104,7 @@ func (a *AquareumAPI) InternalHandler(ctx context.Context) (http.Handler, error)
 			errors.WriteHTTPInternalServerError(w, "directory create error", err)
 			return
 		}
-		segmentFile := path.Join(userDir, fmt.Sprintf("%d.ts", segmentTime))
-		log.Log(ctx, "writing to", "segmentFile", segmentFile)
+		segmentFile := path.Join(userDir, fmt.Sprintf("%d.mp4", segmentTime))
 		f, err := os.Create(segmentFile)
 		if err != nil {
 			log.Log(ctx, "error opening file", "error", err)
@@ -112,13 +112,13 @@ func (a *AquareumAPI) InternalHandler(ctx context.Context) (http.Handler, error)
 			return
 		}
 		defer f.Close()
-		count, err := io.Copy(f, r.Body)
+		err = media.MuxToMP4(ctx, r.Body, f)
 		if err != nil {
-			log.Log(ctx, "segment error", "error", err, "len", count)
+			log.Log(ctx, "segment error", "error", err)
 			errors.WriteHTTPInternalServerError(w, "segment error", err)
 			return
 		}
-		log.Log(ctx, "segment success", "len", count, "url", r.URL.String())
+		log.Log(ctx, "segment success", "url", r.URL.String(), "file", segmentFile, "drift", drift)
 	})
 	handler := sloghttp.Recovery(router)
 	handler = sloghttp.New(slog.Default())(handler)
