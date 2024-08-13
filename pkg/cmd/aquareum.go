@@ -14,6 +14,7 @@ import (
 
 	"aquareum.tv/aquareum/pkg/crypto/signers/eip712"
 	"aquareum.tv/aquareum/pkg/log"
+	"aquareum.tv/aquareum/pkg/media"
 	"aquareum.tv/aquareum/pkg/notifications"
 	"aquareum.tv/aquareum/pkg/proc"
 	v0 "aquareum.tv/aquareum/pkg/schema/v0"
@@ -27,6 +28,30 @@ import (
 
 // parse the CLI and fire up an aquareum node!
 func Start(build *config.BuildFlags) error {
+	if os.Args[1] == "mux-to-mp4" {
+		fs := flag.NewFlagSet("aquareum-mux-to-mp4", flag.ExitOnError)
+		input := fs.String("input", "", "Input file")
+		output := fs.String("output", "", "Output file")
+		ff.Parse(
+			fs, os.Args[2:],
+			ff.WithEnvVarPrefix("AQ"),
+		)
+		in, err := os.Open(*input)
+		if err != nil {
+			return err
+		}
+		defer in.Close()
+		out, err := os.Create(*output)
+		if err != nil {
+			return err
+		}
+		defer out.Close()
+		err = media.MuxToMP4(context.Background(), in, out)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
 	if os.Args[1] == "slurp-file" {
 		fs := flag.NewFlagSet("aquareum-slurp-file", flag.ExitOnError)
 		inurl := fs.String("url", "", "Base URL to send slurped files to")

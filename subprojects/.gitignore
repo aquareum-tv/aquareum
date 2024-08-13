@@ -1,3 +1,4 @@
 *
 !.gitignore
 !mistserver.wrap
+!ffmpeg.wrap

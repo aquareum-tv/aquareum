@@ -12,6 +12,7 @@ require (
 	github.com/golang/glog v1.2.0
 	github.com/google/uuid v1.6.0
 	github.com/julienschmidt/httprouter v1.3.0
+	github.com/livepeer/lpms v0.0.0-20240812093642-b5181eb92cb2
 	github.com/lmittmann/tint v1.0.4
 	github.com/orandin/slog-gorm v1.3.2
 	github.com/peterbourgon/ff/v3 v3.3.1
@@ -86,6 +87,7 @@ require (
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
 	github.com/jstemmer/go-junit-report v1.0.0 // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
+	github.com/livepeer/m3u8 v0.11.1 // indirect
 	github.com/mitchellh/gox v1.0.1 // indirect
 	github.com/mitchellh/iochan v1.0.0 // indirect
 	github.com/mmcloughlin/addchain v0.4.0 // indirect

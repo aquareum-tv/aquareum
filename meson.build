@@ -76,6 +76,24 @@ mistserver_proj = subproject(
 )
 mistserver = mistserver_proj.get_variable('libmistserver_dep')
 
+ffmpeg_proj = subproject(
+  'ffmpeg',
+  # vvc seems to have problems building as a submodule?
+  default_options: {
+    'vvc_decoder': 'disabled',
+    'vvc_demuxer': 'disabled',
+    'vvc_metadata_bsf': 'disabled',
+    'vvc_mp4toannexb_bsf': 'disabled',
+    'vvc_muxer': 'disabled',
+    'vvc_parser': 'disabled',
+    'signature_cuda_filter': 'enabled',
+    'signature_filter': 'enabled',
+    'gpl': 'enabled',
+  },
+)
+avformat = ffmpeg_proj.get_variable('libavformat_dep')
+avfilter = ffmpeg_proj.get_variable('libavfilter_dep')
+
 aquareum_deps = []
 if host_machine.system() == 'darwin'
   aquareum_deps += [dependency('appleframeworks', modules: ['CoreFoundation', 'Security'])]
@@ -83,13 +101,13 @@ endif
 aquareum = executable(
   'aquareum',
   ['cmd/aquareum/aquareum.c', libaquareum],
-  dependencies: [mistserver, aquareum_deps],
+  dependencies: [avformat, avfilter, mistserver, aquareum_deps],
 )
 
 prog_tar = find_program('tar')
 # archive_name = aquareum-$(VERSION)-$$GOOS-$$GOARCH.tar.gz
 archive_name = 'aquareum-' + version + '-' + GOOS + '-' + GOARCH + '.tar.gz'
-archive = custom_target(
+custom_target(
   'archive',
   input: [aquareum],
   output: [archive_name],
