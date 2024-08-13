@@ -35,7 +35,10 @@ aquareum_go = custom_target(
   command: ['cp', '@INPUT@', '@OUTPUT@'],
 )
 
-env = {}
+env = {
+  'PKG_CONFIG_PATH': meson.current_build_dir() + '/meson-private',
+  'CPATH': meson.current_source_dir() + '/subprojects/ffmpeg',
+}
 GOOS = meson.get_external_property('GOOS', host_machine.system())
 GOARCH = meson.get_external_property('GOARCH', host_machine.cpu())
 if GOARCH == 'x86_64'
@@ -52,21 +55,6 @@ if meson.is_cross_build()
     'CC': meson.get_compiler('c', native: false).cmd_array()[0],
   }
 endif
-libaquareum = custom_target(
-  'libaquareum',
-  input: [aquareum_go, flags],
-  output: ['aquareum.a', 'aquareum.h'],
-  command: [
-    prog_go,
-    'build',
-    '-o', '@OUTPUT0@',
-    '-buildmode', 'c-archive',
-    '-tags', 'netgo',
-    '@INPUT@',
-  ],
-  build_always_stale: true,
-  env: env,
-)
 
 mistserver_proj = subproject(
   'mistserver',
@@ -93,6 +81,22 @@ ffmpeg_proj = subproject(
 )
 avformat = ffmpeg_proj.get_variable('libavformat_dep')
 avfilter = ffmpeg_proj.get_variable('libavfilter_dep')
+
+libaquareum = custom_target(
+  'libaquareum',
+  input: [aquareum_go, flags],
+  output: ['aquareum.a', 'aquareum.h'],
+  command: [
+    prog_go,
+    'build',
+    '-o', '@OUTPUT0@',
+    '-buildmode', 'c-archive',
+    '-tags', 'netgo',
+    '@INPUT@',
+  ],
+  build_always_stale: true,
+  env: env,
+)
 
 aquareum_deps = []
 if host_machine.system() == 'darwin'
