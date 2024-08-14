@@ -48,7 +48,7 @@ if GOARCH == 'aarch64'
   GOARCH = 'arm64'
 endif
 if meson.is_cross_build()
-  env = {
+  env += {
     'GOOS': GOOS,
     'GOARCH': GOARCH,
     'CGO_ENABLED': '1',
