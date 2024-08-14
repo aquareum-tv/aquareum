@@ -94,16 +94,30 @@ ios: app
 	&& curl -L -o ./.build/bundletool.jar https://github.com/google/bundletool/releases/download/1.17.0/bundletool-all-1.17.0.jar
 
 .PHONY: node-all-platforms
-node-all-platforms: app
+node-all-platforms: app node-all-platforms-amd64-native node-all-platforms-arm64-cross
+
+.PHONY: node-all-platforms-amd64-native
+node-all-platforms-amd64-native:
 	meson setup build
 	meson compile -C build archive
+
+.PHONY: node-all-platforms-arm64-cross
+node-all-platforms-arm64-cross:
+	rustup target add aarch64-unknown-linux-gnu
 	meson setup --cross-file util/linux-arm64-gnu.ini build-aarch64
 	meson compile -C build-aarch64 archive
 
 .PHONY: node-all-platforms-macos
-node-all-platforms-macos: app
+node-all-platforms-macos: app node-all-platforms-macos-arm64-native node-all-platforms-macos-amd64-cross
+
+.PHONY: node-all-platforms-macos-arm64-native
+node-all-platforms-macos-arm64-native:
 	meson setup build
 	meson compile -C build archive
+
+.PHONY: node-all-platforms-macos-amd64-cross
+node-all-platforms-macos-amd64-cross:
+	rustup target add x86_64-apple-darwin
 	meson setup --cross-file util/darwin-amd64-apple.ini build-amd64
 	meson compile -C build-amd64 archive
 

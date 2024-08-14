@@ -56,7 +56,15 @@ if meson.is_cross_build()
   }
 endif
 
-c2pa_go_proj = subproject('c2pa_go')
+c2pa_go_opts = {}
+triple = meson.get_external_property('RUST_TRIPLE', '')
+if triple != ''
+  c2pa_go_opts += {'RUST_TRIPLE': triple}
+endif
+c2pa_go_proj = subproject(
+  'c2pa_go',
+  default_options: c2pa_go_opts,
+)
 c2pa_go_dep = c2pa_go_proj.get_variable('c2pa_go_dep')
 
 mistserver_proj = subproject(
