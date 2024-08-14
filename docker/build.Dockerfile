@@ -10,7 +10,7 @@ ENV GO_VERSION 1.22.4
 ENV NODE_VERSION 22.3.0
 
 RUN apt update \
-  && apt install -y build-essential curl git openjdk-17-jdk unzip jq g++ python3-pip ninja-build gcc-aarch64-linux-gnu g++-aarch64-linux-gnu clang lld qemu-user-static \
+  && apt install -y build-essential curl git openjdk-17-jdk unzip jq g++ python3-pip ninja-build gcc-aarch64-linux-gnu g++-aarch64-linux-gnu clang lld qemu-user-static pkg-config \
   && pip install meson \
   && curl -L --fail https://go.dev/dl/go$GO_VERSION.linux-$TARGETARCH.tar.gz -o go.tar.gz \
   && tar -C /usr/local -xf go.tar.gz \
@@ -42,6 +42,8 @@ RUN mkdir -p ${ANDROID_HOME}/cmdline-tools && \
   mv ${ANDROID_HOME}/cmdline-tools/cmdline-tools ${ANDROID_HOME}/cmdline-tools/tools && \
   rm *tools*linux*.zip && \
   curl -L https://raw.githubusercontent.com/thyrlian/AndroidSDK/bfcbf0cdfd6bb1ef45579e6ddc4d3876264cbdd1/android-sdk/license_accepter.sh | bash
+
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
 FROM builder AS cached-builder
 ARG CI_COMMIT_BRANCH=next
