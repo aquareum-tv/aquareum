@@ -104,9 +104,9 @@ build-mac:
   script:
     - git fetch --unshallow || echo 'already unshallow'
     - brew install meson ninja go && go version
+    - sudo gem install --user-install xcpretty
     - curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > rustup.sh && bash rustup.sh -y && rm rustup.sh
-    # - PATH="$PATH:$HOME/.cargo/bin" make ci-macos -j16
-    - PATH="$PATH:$HOME/.cargo/bin" make ci-macos
+    - PATH="$PATH:$HOME/.cargo/bin:$(find $HOME/.gem/ruby -type d -name bin -maxdepth 2)" make ci-macos -j16
 
 release:
   stage: build
