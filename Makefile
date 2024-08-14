@@ -97,12 +97,12 @@ ios: app
 node-all-platforms: app node-all-platforms-amd64-native node-all-platforms-arm64-cross
 
 .PHONY: node-all-platforms-amd64-native
-node-all-platforms-amd64-native:
+node-all-platforms-amd64-native: app
 	meson setup build
 	meson compile -C build archive
 
 .PHONY: node-all-platforms-arm64-cross
-node-all-platforms-arm64-cross:
+node-all-platforms-arm64-cross: app
 	rustup target add aarch64-unknown-linux-gnu
 	meson setup --cross-file util/linux-arm64-gnu.ini build-aarch64
 	meson compile -C build-aarch64 archive
@@ -111,12 +111,12 @@ node-all-platforms-arm64-cross:
 node-all-platforms-macos: app node-all-platforms-macos-arm64-native node-all-platforms-macos-amd64-cross
 
 .PHONY: node-all-platforms-macos-arm64-native
-node-all-platforms-macos-arm64-native:
+node-all-platforms-macos-arm64-native: app
 	meson setup build
 	meson compile -C build archive
 
 .PHONY: node-all-platforms-macos-amd64-cross
-node-all-platforms-macos-amd64-cross:
+node-all-platforms-macos-amd64-cross: app
 	rustup target add x86_64-apple-darwin
 	meson setup --cross-file util/darwin-amd64-apple.ini build-amd64
 	meson compile -C build-amd64 archive
