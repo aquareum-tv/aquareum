@@ -97,7 +97,6 @@ libaquareum = custom_target(
   'libaquareum',
   input: [aquareum_go, flags],
   output: ['aquareum.a', 'aquareum.h'],
-  # depends: [c2pa_go_custom],
   command: [
     prog_go,
     'build',
@@ -123,7 +122,7 @@ aquareum = executable(
 
 if not meson.is_cross_build()
   test('go-tests', prog_go,
-    depends: [aquareum],
+    depends: [libaquareum],
     env: env,
     verbose: true,
     timeout: 0,
