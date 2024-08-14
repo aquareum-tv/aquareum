@@ -136,7 +136,6 @@ docker-release:
 	cd docker \
 	&& docker build -f release.Dockerfile \
 	  --build-arg TARGETARCH=$(BUILDARCH) \
-	  --build-arg AQUAREUM_URL=https://git.aquareum.tv/aquareum-tv/aquareum/-/package_files/773/download \
 		-t aqrm.io/aquareum-tv/aquareum \
 		.
 
