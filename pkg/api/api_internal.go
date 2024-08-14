@@ -92,11 +92,6 @@ func (a *AquareumAPI) InternalHandler(ctx context.Context) (http.Handler, error)
 		segmentTime := startTime + mediaTime
 		drift := ms - segmentTime
 
-		if err != nil {
-			log.Log(ctx, "error parsing segment start time", "error", err, "startTime", startTimeStr)
-			errors.WriteHTTPInternalServerError(w, "segment error", err)
-			return
-		}
 		userDir := path.Join(a.CLI.DataDir, "segments", user)
 		err = os.MkdirAll(userDir, 0700)
 		if err != nil {
@@ -113,6 +108,9 @@ func (a *AquareumAPI) InternalHandler(ctx context.Context) (http.Handler, error)
 		}
 		defer f.Close()
 		err = media.MuxToMP4(ctx, r.Body, f)
+		f.Close()
+		signedFile := path.Join(userDir, fmt.Sprintf("%d-signed.mp4", segmentTime))
+		media.SignMP4(ctx, segmentFile, signedFile)
 		if err != nil {
 			log.Log(ctx, "segment error", "error", err)
 			errors.WriteHTTPInternalServerError(w, "segment error", err)

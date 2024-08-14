@@ -56,6 +56,9 @@ if meson.is_cross_build()
   }
 endif
 
+c2pa_go_proj = subproject('c2pa_go')
+c2pa_go_dep = c2pa_go_proj.get_variable('c2pa_go_dep')
+
 mistserver_proj = subproject(
   'mistserver',
   default_options: {
@@ -86,6 +89,7 @@ libaquareum = custom_target(
   'libaquareum',
   input: [aquareum_go, flags],
   output: ['aquareum.a', 'aquareum.h'],
+  # depends: [c2pa_go_custom],
   command: [
     prog_go,
     'build',
@@ -106,6 +110,7 @@ aquareum = executable(
   'aquareum',
   ['cmd/aquareum/aquareum.c', libaquareum],
   dependencies: [avformat, avfilter, mistserver, aquareum_deps],
+  link_with: [c2pa_go_dep],
 )
 
 prog_tar = find_program('tar')

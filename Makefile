@@ -113,6 +113,12 @@ link-mist:
 	rm -rf subprojects/mistserver
 	ln -s $$(realpath ../mistserver) ./subprojects/mistserver
 
+# link your local version of c2pa-gop for dev
+.PHONY: link-c2pa-go
+link-c2pa-go:
+	rm -rf subprojects/c2pa_go
+	ln -s $$(realpath ../c2pa-go) ./subprojects/c2pa_go
+
 .PHONY: docker-build
 docker-build: docker-build-builder docker-build-in-container
 
