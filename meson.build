@@ -121,6 +121,20 @@ aquareum = executable(
   link_with: [c2pa_go_dep],
 )
 
+if not meson.is_cross_build()
+  test('go-tests', prog_go,
+    depends: [aquareum],
+    env: env,
+    verbose: true,
+    timeout: 0,
+    args : [
+    'test',
+    '@0@/pkg/...'.format(meson.current_source_dir()),
+    '@0@/cmd/...'.format(meson.current_source_dir()),
+  ]
+)
+endif
+
 prog_tar = find_program('tar')
 # archive_name = aquareum-$(VERSION)-$$GOOS-$$GOARCH.tar.gz
 archive_name = 'aquareum-' + version + '-' + GOOS + '-' + GOARCH + '.tar.gz'

@@ -41,20 +41,25 @@ schema:
 	&& go run pkg/crypto/signers/eip712/export-schema/export-schema.go > js/app/generated/eip712-schema.json
 
 .PHONY: test
-test: app
-	go test ./pkg/... ./cmd/...
+test:
+	meson test -C build go-tests
 
 .PHONY: all
 all: version install check app test node-all-platforms android
 
 .PHONY: ci
-ci: version install check app test node-all-platforms ci-upload-node
+ci: version install check app node-all-platforms ci-upload-node
 
 .PHONY: ci-macos
 ci-macos: version install check app node-all-platforms-macos ci-upload-node-macos ios ci-upload-ios
 
 .PHONY: ci-macos
 ci-android: version install check android ci-upload-android
+
+.PHONY: ci-test
+ci-test: app
+	meson setup build
+	meson test -C build go-tests
 
 .PHONY: android
 android: app .build/bundletool.jar

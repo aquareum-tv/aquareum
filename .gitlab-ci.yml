@@ -28,6 +28,17 @@ build:
     reports:
       dotenv: .ci/build.env
 
+test:
+  stage: build
+  interruptible: true
+  image: "$CI_REGISTRY_IMAGE:builder-$DOCKERFILE_HASH"
+  script:
+    - git fetch --unshallow || echo 'already unshallow'
+    - make ci-test -j$(nproc)
+  artifacts:
+    reports:
+      dotenv: .ci/build.env
+
 build-docker-amd64:
   stage: build
   interruptible: true
