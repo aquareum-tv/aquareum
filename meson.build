@@ -37,7 +37,7 @@ aquareum_go = custom_target(
 
 env = {
   'PKG_CONFIG_PATH': meson.current_build_dir() + '/meson-private',
-  'CPATH': meson.current_source_dir() + '/subprojects/ffmpeg',
+  'CPATH': meson.current_source_dir() + '/subprojects/ffmpeg' + ':' + meson.current_build_dir() + '/subprojects/ffmpeg',
 }
 GOOS = meson.get_external_property('GOOS', host_machine.system())
 GOARCH = meson.get_external_property('GOARCH', host_machine.cpu())

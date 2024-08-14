@@ -16,7 +16,7 @@ RUN apt update \
   && curl -L --fail https://go.dev/dl/go$GO_VERSION.linux-$TARGETARCH.tar.gz -o go.tar.gz \
   && tar -C /usr/local -xf go.tar.gz \
   && rm go.tar.gz
-ENV PATH $PATH:/usr/local/go/bin:/root/go/bin
+ENV PATH $PATH:/usr/local/go/bin:/root/go/bin:/root/.cargo/bin
 
 RUN  echo 'deb [arch=arm64] http://ports.ubuntu.com/ jammy main multiverse universe' >> /etc/apt/sources.list \
   && echo 'deb [arch=arm64] http://ports.ubuntu.com/ jammy-security main multiverse universe' >> /etc/apt/sources.list \
