@@ -122,7 +122,7 @@ aquareum = executable(
 
 if not meson.is_cross_build()
   test('go-tests', prog_go,
-    depends: [libaquareum],
+    depends: [aquareum],
     env: env,
     verbose: true,
     timeout: 0,
