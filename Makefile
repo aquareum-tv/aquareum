@@ -41,20 +41,25 @@ schema:
 	&& go run pkg/crypto/signers/eip712/export-schema/export-schema.go > js/app/generated/eip712-schema.json
 
 .PHONY: test
-test: app
-	go test ./pkg/... ./cmd/...
+test:
+	meson test -C build go-tests
 
 .PHONY: all
 all: version install check app test node-all-platforms android
 
 .PHONY: ci
-ci: version install check app test node-all-platforms ci-upload-node
+ci: version install check app node-all-platforms ci-upload-node
 
 .PHONY: ci-macos
 ci-macos: version install check app node-all-platforms-macos ci-upload-node-macos ios ci-upload-ios
 
 .PHONY: ci-macos
 ci-android: version install check android ci-upload-android
+
+.PHONY: ci-test
+ci-test: app
+	meson setup build
+	meson test -C build go-tests
 
 .PHONY: android
 android: app .build/bundletool.jar
@@ -83,7 +88,7 @@ ios: app
 		AD_HOC_CODE_SIGNING_ALLOWED=YES \
 		CODE_SIGN_STYLE=Automatic \
 		DEVELOPMENT_TEAM=ZZZZZZZZZZ \
-		clean archive \
+		clean archive | xcpretty \
 	&& cd bin \
 	&& tar -czvf aquareum-$(VERSION)-ios-release.xcarchive.tar.gz aquareum-$(VERSION)-ios-release.xcarchive
 
@@ -97,6 +102,7 @@ ios: app
 node-all-platforms: app
 	meson setup build
 	meson compile -C build archive
+	rustup target add aarch64-unknown-linux-gnu
 	meson setup --cross-file util/linux-arm64-gnu.ini build-aarch64
 	meson compile -C build-aarch64 archive
 
@@ -104,6 +110,7 @@ node-all-platforms: app
 node-all-platforms-macos: app
 	meson setup build
 	meson compile -C build archive
+	rustup target add x86_64-apple-darwin
 	meson setup --cross-file util/darwin-amd64-apple.ini build-amd64
 	meson compile -C build-amd64 archive
 
@@ -112,6 +119,12 @@ node-all-platforms-macos: app
 link-mist:
 	rm -rf subprojects/mistserver
 	ln -s $$(realpath ../mistserver) ./subprojects/mistserver
+
+# link your local version of c2pa-gop for dev
+.PHONY: link-c2pa-go
+link-c2pa-go:
+	rm -rf subprojects/c2pa_go
+	ln -s $$(realpath ../c2pa-go) ./subprojects/c2pa_go
 
 .PHONY: docker-build
 docker-build: docker-build-builder docker-build-in-container
@@ -123,14 +136,13 @@ docker-build-builder:
 
 .PHONY: docker-build-builder
 docker-build-in-container:
-	docker run -v $$(pwd):$$(pwd) -w $$(pwd) --rm -it aqrm.io/aquareum-tv/aquareum:builder make
+	docker run -v $$(pwd):$$(pwd) -w $$(pwd) --rm -it aqrm.io/aquareum-tv/aquareum:builder make android
 
 .PHONY: docker-release
 docker-release:
 	cd docker \
 	&& docker build -f release.Dockerfile \
 	  --build-arg TARGETARCH=$(BUILDARCH) \
-	  --build-arg AQUAREUM_URL=https://git.aquareum.tv/aquareum-tv/aquareum/-/package_files/773/download \
 		-t aqrm.io/aquareum-tv/aquareum \
 		.
 

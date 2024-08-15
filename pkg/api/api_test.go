@@ -10,6 +10,7 @@ import (
 	"aquareum.tv/aquareum/pkg/config"
 	"aquareum.tv/aquareum/pkg/crypto/signers/eip712"
 	"aquareum.tv/aquareum/pkg/crypto/signers/eip712/eip712test"
+	_ "aquareum.tv/aquareum/pkg/media/mediatesting"
 	"aquareum.tv/aquareum/pkg/model"
 	v0 "aquareum.tv/aquareum/pkg/schema/v0"
 	"github.com/stretchr/testify/assert"

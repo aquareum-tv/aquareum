@@ -1,12 +1,15 @@
 package cmd
 
 import (
+	"bufio"
 	"context"
 	"flag"
 	"fmt"
+	"net/http"
 	"os"
 	"os/signal"
 	"runtime"
+	"strings"
 	"syscall"
 
 	"aquareum.tv/aquareum/pkg/crypto/signers/eip712"
@@ -24,6 +27,33 @@ import (
 
 // parse the CLI and fire up an aquareum node!
 func Start(build *config.BuildFlags) error {
+	if os.Args[1] == "slurp-file" {
+		fs := flag.NewFlagSet("aquareum-slurp-file", flag.ExitOnError)
+		inurl := fs.String("url", "", "Base URL to send slurped files to")
+		fname := fs.String("file", "", "Name of this file we're uploading")
+		ff.Parse(
+			fs, os.Args[2:],
+			ff.WithEnvVarPrefix("AQ"),
+		)
+		*fname = strings.TrimPrefix(*fname, config.AQUAREUM_SCHEME_PREFIX)
+
+		fullURL := fmt.Sprintf("%s/segment/%s", *inurl, *fname)
+
+		reader := bufio.NewReader(os.Stdin)
+		req, err := http.NewRequest("POST", fullURL, reader)
+		if err != nil {
+			panic(err)
+		}
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		if err != nil {
+			panic(err)
+		}
+		if resp.StatusCode != 200 {
+			fmt.Printf("http %s\n", resp.Status)
+		}
+		os.Exit(0)
+	}
 	err := normalizeXDG()
 	if err != nil {
 		return err
@@ -43,6 +73,11 @@ func Start(build *config.BuildFlags) error {
 	}
 	dbFile = fmt.Sprintf("sqlite://%s", dbFile)
 
+	defaultDataDir, err := config.DefaultDataDir()
+	if err != nil {
+		return err
+	}
+
 	fs := flag.NewFlagSet("aquareum", flag.ExitOnError)
 	cli := config.CLI{Build: build}
 	fs.StringVar(&cli.HttpAddr, "http-addr", ":8080", "Public HTTP address")
@@ -59,6 +94,7 @@ func Start(build *config.BuildFlags) error {
 	fs.IntVar(&cli.MistRTMPPort, "mist-rtmp-port", 11935, "MistServer RTMP port (internal use only)")
 	fs.IntVar(&cli.MistHTTPPort, "mist-http-port", 18080, "MistServer HTTP port (internal use only)")
 	fs.StringVar(&cli.GitLabURL, "gitlab-url", "https://git.aquareum.tv/api/v4/projects/1", "gitlab url for generating download links")
+	fs.StringVar(&cli.DataDir, "data-dir", defaultDataDir, "directory for keeping all aquareum data")
 	version := fs.Bool("version", false, "print version and exit")
 
 	ff.Parse(
@@ -77,6 +113,10 @@ func Start(build *config.BuildFlags) error {
 		return nil
 	}
 
+	err = os.MkdirAll(cli.DataDir, os.ModePerm)
+	if err != nil {
+		return fmt.Errorf("error creating aquareum dir at %s:%w", cli.DataDir, err)
+	}
 	schema, err := v0.MakeV0Schema()
 	if err != nil {
 		return err

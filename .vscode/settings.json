@@ -4,6 +4,7 @@
   },
   "files.associations": {
     "mistserver.h": "c",
-    "aquareum.h": "c"
+    "aquareum.h": "c",
+    "avfilter.h": "c"
   }
 }

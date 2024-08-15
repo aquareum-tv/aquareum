@@ -1,3 +1,5 @@
 *
 !.gitignore
 !mistserver.wrap
+!ffmpeg.wrap
+!c2pa_go.wrap

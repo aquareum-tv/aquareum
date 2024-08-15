@@ -10,12 +10,13 @@ ENV GO_VERSION 1.22.4
 ENV NODE_VERSION 22.3.0
 
 RUN apt update \
-  && apt install -y build-essential curl git openjdk-17-jdk unzip jq g++ python3-pip ninja-build gcc-aarch64-linux-gnu g++-aarch64-linux-gnu clang lld qemu-user-static \
-  && pip install meson \
+  && apt install -y build-essential curl git openjdk-17-jdk unzip jq g++ python3-pip ninja-build \
+  gcc-aarch64-linux-gnu g++-aarch64-linux-gnu clang lld qemu-user-static pkg-config \
+  && pip install meson tomli \
   && curl -L --fail https://go.dev/dl/go$GO_VERSION.linux-$TARGETARCH.tar.gz -o go.tar.gz \
   && tar -C /usr/local -xf go.tar.gz \
   && rm go.tar.gz
-ENV PATH $PATH:/usr/local/go/bin:/root/go/bin
+ENV PATH $PATH:/usr/local/go/bin:/root/go/bin:/root/.cargo/bin
 
 RUN  echo 'deb [arch=arm64] http://ports.ubuntu.com/ jammy main multiverse universe' >> /etc/apt/sources.list \
   && echo 'deb [arch=arm64] http://ports.ubuntu.com/ jammy-security main multiverse universe' >> /etc/apt/sources.list \
@@ -43,8 +44,12 @@ RUN mkdir -p ${ANDROID_HOME}/cmdline-tools && \
   rm *tools*linux*.zip && \
   curl -L https://raw.githubusercontent.com/thyrlian/AndroidSDK/bfcbf0cdfd6bb1ef45579e6ddc4d3876264cbdd1/android-sdk/license_accepter.sh | bash
 
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > rustup.sh \
+  && bash rustup.sh -y \
+  && rm rustup.sh
+
 FROM builder AS cached-builder
-ARG CI_COMMIT_BRANCH=next
-ENV CI_COMMIT_BRANCH $CI_COMMIT_BRANCH
-WORKDIR /cached-build
-RUN git clone https://git.aquareum.tv/aquareum-tv/aquareum && cd aquareum && make all -j$(nproc) && cd .. && rm -rf aquareum
+# ARG CI_COMMIT_BRANCH=next
+# ENV CI_COMMIT_BRANCH $CI_COMMIT_BRANCH
+# WORKDIR /cached-build
+# RUN git clone https://git.aquareum.tv/aquareum-tv/aquareum && cd aquareum && make all -j$(nproc) && cd .. && rm -rf aquareum
