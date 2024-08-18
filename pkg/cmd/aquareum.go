@@ -29,7 +29,7 @@ type jobFunc func(ctx context.Context, cli *config.CLI) error
 
 // parse the CLI and fire up an aquareum node!
 func start(build *config.BuildFlags, platformJobs []jobFunc) error {
-	if os.Args[1] == "slurp-file" {
+	if len(os.Args) > 1 && os.Args[1] == "slurp-file" {
 		fs := flag.NewFlagSet("aquareum-slurp-file", flag.ExitOnError)
 		inurl := fs.String("url", "", "Base URL to send slurped files to")
 		fname := fs.String("file", "", "Name of this file we're uploading")
