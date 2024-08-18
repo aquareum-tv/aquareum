@@ -21,12 +21,11 @@ func MuxToMP4(ctx context.Context, input io.Reader, output io.Writer) error {
 	if err != nil {
 		return fmt.Errorf("error opening pipe: %w", err)
 	}
-	dname, err := os.MkdirTemp("", "sampledir")
+	dname, err := os.MkdirTemp("", "aquareum-muxing")
 	if err != nil {
 		return fmt.Errorf("error making temp directory: %w", err)
 	}
 	defer func() {
-		os.RemoveAll(dname)
 		log.Log(ctx, "cleaning up")
 		tc.StopTranscoder()
 	}()
@@ -45,6 +44,7 @@ func MuxToMP4(ctx context.Context, input io.Reader, output io.Writer) error {
 				Name: "mp4",
 				// main option is 'frag_keyframe' which tells ffmpeg to create fragmented MP4 (which we need to be able to stream generatd file)
 				// other options is not mandatory but they will slightly improve generated MP4 file
+				Opts: map[string]string{"movflags": "+faststart"},
 				// Opts: map[string]string{"movflags": "frag_keyframe+negative_cts_offsets+omit_tfhd_offset+disable_chpl+default_base_moof"},
 			},
 		},
@@ -74,8 +74,56 @@ func MuxToMP4(ctx context.Context, input io.Reader, output io.Writer) error {
 		return err
 	}
 	defer of.Close()
-	of.WriteTo(output)
+	written, err := io.Copy(output, of)
+	if err != nil {
+		return err
+	}
+	log.Log(ctx, "transmuxing complete", "out-file", oname, "wrote", written)
 	return nil
+}
+
+func SegmentToHTTP(ctx context.Context, input io.Reader, prefix string) error {
+	tc := ffmpeg.NewTranscoder()
+	defer tc.StopTranscoder()
+	ir, iw, err := os.Pipe()
+	if err != nil {
+		return fmt.Errorf("error opening pipe: %w", err)
+	}
+	out := []ffmpeg.TranscodeOptions{
+		{
+			Oname: fmt.Sprintf("%s/%%d.mkv", prefix),
+			VideoEncoder: ffmpeg.ComponentOptions{
+				Name: "copy",
+			},
+			AudioEncoder: ffmpeg.ComponentOptions{
+				Name: "copy",
+			},
+			Profile: ffmpeg.VideoProfile{Format: ffmpeg.FormatNone},
+			Muxer: ffmpeg.ComponentOptions{
+				Name: "stream_segment",
+				Opts: map[string]string{
+					"segment_time": "0.1",
+				},
+			},
+		},
+	}
+	iname := fmt.Sprintf("pipe:%d", ir.Fd())
+	in := &ffmpeg.TranscodeOptionsIn{Fname: iname, Transmuxing: true}
+	g, _ := errgroup.WithContext(ctx)
+	g.Go(func() error {
+		_, err := io.Copy(iw, input)
+		log.Log(ctx, "input copy done", "error", err)
+		iw.Close()
+		return err
+	})
+	g.Go(func() error {
+		_, err = tc.Transcode(in, out)
+		log.Log(ctx, "transcode done", "error", err)
+		tc.StopTranscoder()
+		ir.Close()
+		return err
+	})
+	return g.Wait()
 }
 
 var certBytes = []byte(`-----BEGIN CERTIFICATE-----
@@ -116,7 +164,7 @@ mLsopnxVDVAEYoL1vL1jglahRANCAAR1RJfnhmsEHUATmWV+p0fuOPl+G0TwZ5Zi
 sGwWFA/J+fD6wjP6mW44Ob3TTMLMCCFfy5Gl5CjuXJru19UH0wVL
 -----END PRIVATE KEY-----`)
 
-func SignMP4(ctx context.Context, input io.ReadSeeker, output io.Writer) error {
+func SignMP4(ctx context.Context, input io.ReadSeeker, output io.ReadWriteSeeker) error {
 	manifestBs := []byte(`
 		{
 			"title": "Image File",

@@ -1,4 +1,13 @@
-import { Button, View, TextArea, Input, Label } from "tamagui";
+import {
+  Button,
+  View,
+  TextArea,
+  Input,
+  Label,
+  H5,
+  Text,
+  Paragraph,
+} from "tamagui";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useSignTypedData, useAccount } from "wagmi";
 import schema from "generated/eip712-schema.json";
@@ -13,6 +22,7 @@ export default function AdminPage() {
   const [title, setTitle] = useState("");
   const [loading, setLoading] = useState(false);
   const toast = useToastController();
+  const [streamKey, setStreamKey] = useState("");
   const disabled = loading || streamer === "" || title === "";
   return (
     <View f={1} ai="center" jc="center">
@@ -76,6 +86,52 @@ export default function AdminPage() {
           >
             {loading ? "Loading..." : "Sign message"}
           </Button>
+          <Button
+            onPress={async () => {
+              try {
+                const message = {
+                  signer: account.address,
+                  time: Date.now(),
+                  data: {
+                    authorized: "my-server",
+                  },
+                };
+                const signature = await signTypedDataAsync({
+                  types: schema.types,
+                  domain: schema.domain,
+                  primaryType: "StreamKey",
+                  message: message,
+                });
+                let key = JSON.stringify({
+                  primaryType: "StreamKey",
+                  domain: schema.domain,
+                  message: message,
+                  signature: signature,
+                });
+                key = btoa(key);
+                key = key.replaceAll("+", "-");
+                key = key.replaceAll("/", "_");
+                setStreamKey(key);
+                toast.show("Created Stream Key", {
+                  message: "Let's goooooo!",
+                });
+                setStreamer("");
+                setTitle("");
+              } catch (e) {
+                toast.show("Stream Key Creation Failed", {
+                  message: e.message,
+                });
+              }
+            }}
+          >
+            {"Generate Stream Key"}
+          </Button>
+          {streamKey && (
+            <View f={1} alignItems="stretch" maxWidth="100vw">
+              <H5>Stream Key:</H5>
+              <Paragraph p="$10">{streamKey}</Paragraph>
+            </View>
+          )}
         </View>
       )}
     </View>
