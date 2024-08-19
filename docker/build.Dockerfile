@@ -12,7 +12,7 @@ ENV NODE_VERSION 22.3.0
 RUN apt update \
   && apt install -y build-essential curl git openjdk-17-jdk unzip jq g++ python3-pip ninja-build \
   gcc-aarch64-linux-gnu g++-aarch64-linux-gnu clang lld qemu-user-static pkg-config \
-  wine64 nasm gcc-mingw-w64-x86-64 zip \
+  wine64 nasm gcc-mingw-w64-x86-64 g++-mingw-w64-x86-64 mingw-w64-tools zip \
   && pip install meson tomli \
   && curl -L --fail https://go.dev/dl/go$GO_VERSION.linux-$TARGETARCH.tar.gz -o go.tar.gz \
   && tar -C /usr/local -xf go.tar.gz \
