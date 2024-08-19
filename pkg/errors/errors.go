@@ -22,6 +22,11 @@ func writeHttpError(w http.ResponseWriter, msg string, status int, err error) AP
 		errorDetail = err.Error()
 	}
 
+	if err != nil {
+		log.Log(context.TODO(), msg, "status", status, "error", err)
+	} else {
+		log.Log(context.TODO(), msg, "status", status)
+	}
 	if err := json.NewEncoder(w).Encode(map[string]string{"error": msg, "error_detail": errorDetail}); err != nil {
 		log.Log(context.TODO(), "error writing HTTP error", "http_error_msg", msg, "error", err)
 	}

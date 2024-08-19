@@ -261,7 +261,9 @@ func (signer *EIP712Signer) Verify(bs []byte) (SignedMessage, error) {
 		return nil, fmt.Errorf("error on hexutil.Decode: %w", err)
 	}
 	if !bytes.Equal(messageSignerAddr, addr.Bytes()) {
-		return nil, fmt.Errorf("message signature does not match signer on message")
+		specifiedSigner := hexutil.Encode(messageSignerAddr)
+		actualSigner := hexutil.Encode(addr.Bytes())
+		return nil, fmt.Errorf("message signature does not match signer on message specified=%s actual=%s", specifiedSigner, actualSigner)
 	}
 	typ, ok := signer.EIP712Schema.NameToType[unverified.PrimaryType]
 	if !ok {

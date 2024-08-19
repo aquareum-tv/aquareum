@@ -15,7 +15,6 @@ import (
 	"aquareum.tv/aquareum/pkg/crypto/signers/eip712"
 	"aquareum.tv/aquareum/pkg/log"
 	"aquareum.tv/aquareum/pkg/notifications"
-	"aquareum.tv/aquareum/pkg/proc"
 	v0 "aquareum.tv/aquareum/pkg/schema/v0"
 
 	"aquareum.tv/aquareum/pkg/api"
@@ -25,9 +24,12 @@ import (
 	"github.com/peterbourgon/ff/v3"
 )
 
+// Additional jobs that can be injected by platforms
+type jobFunc func(ctx context.Context, cli *config.CLI) error
+
 // parse the CLI and fire up an aquareum node!
-func Start(build *config.BuildFlags) error {
-	if os.Args[1] == "slurp-file" {
+func start(build *config.BuildFlags, platformJobs []jobFunc) error {
+	if len(os.Args) > 1 && os.Args[1] == "slurp-file" {
 		fs := flag.NewFlagSet("aquareum-slurp-file", flag.ExitOnError)
 		inurl := fs.String("url", "", "Base URL to send slurped files to")
 		fname := fs.String("file", "", "Name of this file we're uploading")
@@ -167,9 +169,11 @@ func Start(build *config.BuildFlags) error {
 		return a.ServeInternalHTTP(ctx)
 	})
 
-	group.Go(func() error {
-		return proc.RunMistServer(ctx, &cli)
-	})
+	for _, job := range platformJobs {
+		group.Go(func() error {
+			return job(ctx, &cli)
+		})
+	}
 
 	return group.Wait()
 }

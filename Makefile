@@ -105,6 +105,9 @@ node-all-platforms: app
 	rustup target add aarch64-unknown-linux-gnu
 	meson setup --cross-file util/linux-arm64-gnu.ini build-aarch64
 	meson compile -C build-aarch64 archive
+	rustup target add x86_64-pc-windows-gnu
+	meson setup --cross-file util/windows-amd64-gnu.ini build-windows
+	meson compile -C build-windows archive
 
 .PHONY: node-all-platforms-macos
 node-all-platforms-macos: app
@@ -154,6 +157,12 @@ ci-upload-node: node-all-platforms
 	for GOOS in linux; do \
 		for GOARCH in amd64 arm64; do \
 			export file=aquareum-$(VERSION)-$$GOOS-$$GOARCH.tar.gz \
+			&& $(MAKE) ci-upload-file upload_file=$$file; \
+		done \
+	done;
+	for GOOS in windows; do \
+		for GOARCH in amd64; do \
+			export file=aquareum-$(VERSION)-$$GOOS-$$GOARCH.zip \
 			&& $(MAKE) ci-upload-file upload_file=$$file; \
 		done \
 	done;
