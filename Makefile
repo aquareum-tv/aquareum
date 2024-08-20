@@ -107,7 +107,7 @@ node-all-platforms: app
 	meson compile -C build-aarch64 archive
 	rustup target add x86_64-pc-windows-gnu
 	meson setup --cross-file util/windows-amd64-gnu.ini build-windows
-	meson compile -C build-windows archive
+	meson compile -C build-windows archive 2>&1 | grep -v drectve
 
 .PHONY: node-all-platforms-macos
 node-all-platforms-macos: app
