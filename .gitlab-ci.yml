@@ -30,10 +30,9 @@ builder-rebuild:
     - echo "CI_PROJECT_ID=$CI_PROJECT_ID"
     - >
       curl
+      --header "JOB-TOKEN: $CI_JOB_TOKEN"
       --fail-with-body
-      -X POST
-      --form "token=$CI_JOB_TOKEN"
-      "$CI_API_V4_URL/projects/$CI_PROJECT_ID/pipelines/$CI_PIPELINE_ID/retry"
+      "$CI_API_V4_URL/projects/$CI_PROJECT_ID/pipelines/$CI_PIPELINE_ID"
 
 build:
   stage: build
