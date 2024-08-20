@@ -25,12 +25,15 @@ builder-rebuild:
   needs:
     - job: builder
   script:
+    - echo "CI_PIPELINE_ID=$CI_PIPELINE_ID"
+    - echo "CI_PIPELINE_IID=$CI_PIPELINE_IID"
+    - echo "CI_PROJECT_ID=$CI_PROJECT_ID"
     - >
       curl
       --header "JOB-TOKEN: $CI_JOB_TOKEN"
       --fail-with-body
       -X POST
-      "$CI_API_V4_URL/projects/$CI_PROJECT_ID/pipelines/$CI_PIPELINE_ID/retry"
+      "$CI_API_V4_URL/projects/$CI_PROJECT_ID/pipelines/$CI_PIPELINE_IID/retry"
 
 build:
   stage: build
