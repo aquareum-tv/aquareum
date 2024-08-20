@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"syscall"
@@ -20,7 +21,6 @@ import (
 	"aquareum.tv/aquareum/pkg/api"
 	"aquareum.tv/aquareum/pkg/config"
 	"aquareum.tv/aquareum/pkg/model"
-	"github.com/adrg/xdg"
 	"github.com/peterbourgon/ff/v3"
 )
 
@@ -56,24 +56,6 @@ func start(build *config.BuildFlags, platformJobs []jobFunc) error {
 		}
 		os.Exit(0)
 	}
-	err := normalizeXDG()
-	if err != nil {
-		return err
-	}
-
-	tlsCertFile, err := xdg.ConfigFile("aquareum/tls/tls.crt")
-	if err != nil {
-		return err
-	}
-	tlsKeyFile, err := xdg.ConfigFile("aquareum/tls/tls.key")
-	if err != nil {
-		return err
-	}
-	dbFile, err := xdg.DataFile("aquareum/db.sqlite")
-	if err != nil {
-		return err
-	}
-	dbFile = fmt.Sprintf("sqlite://%s", dbFile)
 
 	defaultDataDir, err := config.DefaultDataDir()
 	if err != nil {
@@ -82,26 +64,28 @@ func start(build *config.BuildFlags, platformJobs []jobFunc) error {
 
 	fs := flag.NewFlagSet("aquareum", flag.ExitOnError)
 	cli := config.CLI{Build: build}
+	fs.StringVar(&cli.DataDir, "data-dir", defaultDataDir, "directory for keeping all aquareum data")
 	fs.StringVar(&cli.HttpAddr, "http-addr", ":8080", "Public HTTP address")
 	fs.StringVar(&cli.HttpInternalAddr, "http-internal-addr", "127.0.0.1:9090", "Private, admin-only HTTP address")
 	fs.StringVar(&cli.HttpsAddr, "https-addr", ":8443", "Public HTTPS address")
 	fs.BoolVar(&cli.Insecure, "insecure", false, "Run without HTTPS. not recomended, as WebRTC support requires HTTPS")
-	fs.StringVar(&cli.TLSCertPath, "tls-cert", tlsCertFile, "Path to TLS certificate")
-	fs.StringVar(&cli.TLSKeyPath, "tls-key", tlsKeyFile, "Path to TLS key")
+	cli.DataDirFlag(fs, &cli.TLSCertPath, "tls-cert", filepath.Join("tls", "tls.crt"), "Path to TLS certificate")
+	cli.DataDirFlag(fs, &cli.TLSKeyPath, "tls-key", filepath.Join("tls", "tls.crt"), "Path to TLS key")
 	fs.StringVar(&cli.SigningKeyPath, "signing-key", "", "Path to signing key for pushing OTA updates to the app")
-	fs.StringVar(&cli.DBPath, "db-path", dbFile, "path to sqlite database file")
+	cli.DataDirFlag(fs, &cli.DBPath, "db-path", "db.sqlite", "path to sqlite database file")
 	fs.StringVar(&cli.AdminAccount, "admin-account", "", "ethereum account that administrates this aquareum node")
 	fs.StringVar(&cli.FirebaseServiceAccount, "firebase-service-account", "", "JSON string of a firebase service account key")
-	fs.IntVar(&cli.MistAdminPort, "mist-admin-port", 14242, "MistServer admin port (internal use only)")
-	fs.IntVar(&cli.MistRTMPPort, "mist-rtmp-port", 11935, "MistServer RTMP port (internal use only)")
-	fs.IntVar(&cli.MistHTTPPort, "mist-http-port", 18080, "MistServer HTTP port (internal use only)")
 	fs.StringVar(&cli.GitLabURL, "gitlab-url", "https://git.aquareum.tv/api/v4/projects/1", "gitlab url for generating download links")
-	fs.StringVar(&cli.DataDir, "data-dir", defaultDataDir, "directory for keeping all aquareum data")
 	version := fs.Bool("version", false, "print version and exit")
 
-	ff.Parse(
+	if runtime.GOOS == "linux" {
+		fs.IntVar(&cli.MistAdminPort, "mist-admin-port", 14242, "MistServer admin port (internal use only)")
+		fs.IntVar(&cli.MistRTMPPort, "mist-rtmp-port", 11935, "MistServer RTMP port (internal use only)")
+		fs.IntVar(&cli.MistHTTPPort, "mist-http-port", 18080, "MistServer HTTP port (internal use only)")
+	}
+
+	cli.Parse(
 		fs, os.Args[1:],
-		ff.WithEnvVarPrefix("AQ"),
 	)
 
 	log.Log(context.Background(),
@@ -176,22 +160,6 @@ func start(build *config.BuildFlags, platformJobs []jobFunc) error {
 	}
 
 	return group.Wait()
-}
-
-// xdg sometimes gets confused in systemd, give it a default
-func normalizeXDG() error {
-	if xdg.Home == "/" {
-		home, err := os.UserHomeDir()
-		if err != nil {
-			return err
-		}
-		os.Setenv("HOME", home)
-		xdg.Reload()
-	}
-	if xdg.Home == "/" {
-		return fmt.Errorf("couldn't find home directory")
-	}
-	return nil
 }
 
 func handleSignals(ctx context.Context) error {

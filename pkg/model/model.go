@@ -34,7 +34,7 @@ type Notification struct {
 func MakeDB(dbURL string) (Model, error) {
 	log.Log(context.Background(), "starting database", "dbURL", dbURL)
 	if !strings.HasPrefix(dbURL, "sqlite://") {
-		return nil, fmt.Errorf("only sqlite:// urls currently supported, got %s", dbURL)
+		dbURL = fmt.Sprintf("sqlite://%s", dbURL)
 	}
 	sqliteSuffix := dbURL[len("sqlite://"):]
 	// if this isn't ":memory:", ensure that directory exists (eg, if db
