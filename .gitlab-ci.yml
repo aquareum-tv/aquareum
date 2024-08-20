@@ -33,6 +33,7 @@ builder-rebuild:
       -X POST
       --fail-with-body
       -H "Authorization: Bearer $JOB_TOKEN"
+      -H "Content-Type: application/json"
       --data-raw '{"query":"mutation { pipelineRetry(input: { id: \"gid://gitlab/Ci::Pipeline/'$CI_PIPELINE_ID'\" }) { errors }}"}'
     # - >
     #   curl
