@@ -1,5 +1,5 @@
 #include <string.h>
-#ifdef __LINUX__
+#ifdef __linux__
 #include <mistserver.h>
 #endif
 #include "aquareum.h"
@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
   {
     AquareumMain();
   }
-#ifdef __LINUX__
+#ifdef __linux__
   else if (strncmp("Mist", argv[1], 4) == 0)
   {
     return MistServerMain(argc, argv);
