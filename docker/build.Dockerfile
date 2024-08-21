@@ -59,3 +59,5 @@ RUN git clone https://git.aquareum.tv/aquareum-tv/aquareum \
   && make test \
   && cd .. \
   && rm -rf aquareum
+
+LABEL org.opencontainers.image.authors="support@aquareum.tv"
