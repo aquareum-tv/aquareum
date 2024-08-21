@@ -181,10 +181,15 @@ func SignMP4(ctx context.Context, input io.ReadSeeker, output io.ReadWriteSeeker
 	if err != nil {
 		return err
 	}
+	signer := c2pa.MakeStaticSigner(certBytes, keyBytes)
+	alg, err := c2pa.GetSigningAlgorithm(string(c2pa.ES256K))
+	if err != nil {
+		return err
+	}
 	b, err := c2pa.NewBuilder(&manifest, &c2pa.BuilderParams{
 		Cert:      certBytes,
-		Key:       keyBytes,
-		Algorithm: "es256k",
+		Signer:    signer,
+		Algorithm: alg,
 		TAURL:     "http://timestamp.digicert.com",
 	})
 	if err != nil {

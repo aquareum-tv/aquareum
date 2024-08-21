@@ -4,7 +4,7 @@ go 1.22.2
 
 require (
 	firebase.google.com/go/v4 v4.14.1
-	git.aquareum.tv/aquareum-tv/c2pa-go v0.0.0-20240818224008-eda5e5f4a685
+	git.aquareum.tv/aquareum-tv/c2pa-go v0.0.0-20240820235448-2f6cb265cc81
 	github.com/NYTimes/gziphandler v1.1.1
 	github.com/adrg/xdg v0.4.0
 	github.com/dunglas/httpsfv v1.0.2
