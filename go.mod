@@ -2,6 +2,8 @@ module aquareum.tv/aquareum
 
 go 1.22.2
 
+replace git.aquareum.tv/aquareum-tv/c2pa-go => ../c2pa-go
+
 require (
 	firebase.google.com/go/v4 v4.14.1
 	git.aquareum.tv/aquareum-tv/c2pa-go v0.0.0-20240820235448-2f6cb265cc81

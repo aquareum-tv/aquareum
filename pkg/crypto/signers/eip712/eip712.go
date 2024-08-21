@@ -3,8 +3,10 @@ package eip712
 import (
 	"bytes"
 	"context"
+	gocrypto "crypto"
 	"encoding/json"
 	"fmt"
+	"io"
 	"math/big"
 	"reflect"
 	"strings"
@@ -285,4 +287,21 @@ func (signer *EIP712Signer) Verify(bs []byte) (SignedMessage, error) {
 		MsgData:   something,
 	}
 	return &signed, nil
+}
+
+func (signer *EIP712Signer) Sign(rand io.Reader, digest []byte, opts gocrypto.SignerOpts) (signature []byte, err error) {
+	sig, err := signer.KeyStore.SignHash(*signer.Account, digest)
+	if err != nil {
+		return []byte{}, err
+	}
+	v := sig[64]
+	if v == byte(0) || v == byte(1) {
+		v += 27
+	}
+	sig = append(sig[:64], v)
+	return sig[:64], nil
+}
+
+func (signer *EIP712Signer) Public() gocrypto.PublicKey {
+	panic("not implemented")
 }

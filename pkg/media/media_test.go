@@ -9,6 +9,7 @@ import (
 	"runtime"
 	"testing"
 
+	"aquareum.tv/aquareum/pkg/crypto/signers/eip712"
 	"aquareum.tv/aquareum/pkg/crypto/signers/eip712/eip712test"
 	_ "aquareum.tv/aquareum/pkg/media/mediatesting"
 	"git.aquareum.tv/aquareum-tv/c2pa-go/pkg/c2pa"
@@ -45,4 +46,15 @@ func TestSignMP4(t *testing.T) {
 	require.NoError(t, err)
 	err = SignMP4(context.Background(), signer, eip712test.CertBytes, r, f)
 	require.NoError(t, err)
+}
+
+func TestSignMP4WithWallet(t *testing.T) {
+	eip712test.WithTestSigner(func(signer *eip712.EIP712Signer) {
+		mp4bs := mp4(t)
+		r := bytes.NewReader(mp4bs)
+		f, err := os.CreateTemp("", "*.mp4")
+		require.NoError(t, err)
+		err = SignMP4(context.Background(), signer, eip712test.CertBytes, r, f)
+		require.NoError(t, err)
+	})
 }
