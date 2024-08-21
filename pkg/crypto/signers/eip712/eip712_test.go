@@ -35,7 +35,7 @@ func TestSignGoLive(t *testing.T) {
 			Streamer: "@aquareum.tv",
 			Title:    "Let's gooooooo!",
 		}
-		_, err := signer.Sign(goLive)
+		_, err := signer.SignMessage(goLive)
 		require.NoError(t, err)
 	})
 }

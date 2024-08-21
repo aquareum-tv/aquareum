@@ -152,7 +152,7 @@ func (msg *AquareumEIP712Message) Data() any {
 	return msg.MsgData
 }
 
-func (signer *EIP712Signer) Sign(something any) ([]byte, error) {
+func (signer *EIP712Signer) SignMessage(something any) ([]byte, error) {
 	typ := reflect.TypeOf(something)
 	name, ok := signer.EIP712Schema.TypeToName[typ]
 	if !ok {

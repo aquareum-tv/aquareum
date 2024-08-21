@@ -13,12 +13,14 @@ import (
 	"strconv"
 	"time"
 
+	"aquareum.tv/aquareum/pkg/crypto/signers/eip712/eip712test"
 	"aquareum.tv/aquareum/pkg/errors"
 	"aquareum.tv/aquareum/pkg/log"
 	"aquareum.tv/aquareum/pkg/media"
 	"aquareum.tv/aquareum/pkg/mist/mistconfig"
 	"aquareum.tv/aquareum/pkg/mist/misttriggers"
 	v0 "aquareum.tv/aquareum/pkg/schema/v0"
+	"git.aquareum.tv/aquareum-tv/c2pa-go/pkg/c2pa"
 	"github.com/google/uuid"
 	"github.com/julienschmidt/httprouter"
 	sloghttp "github.com/samber/slog-http"
@@ -109,8 +111,14 @@ func (a *AquareumAPI) InternalHandler(ctx context.Context) (http.Handler, error)
 		defer f.Close()
 		buf := bytes.Buffer{}
 		err = media.MuxToMP4(ctx, r.Body, &buf)
+		if err != nil {
+			log.Log(ctx, "segment error", "error", err)
+			errors.WriteHTTPInternalServerError(w, "segment error", err)
+			return
+		}
 		reader := bytes.NewReader(buf.Bytes())
-		media.SignMP4(ctx, reader, f)
+		signer := c2pa.MakeStaticSigner(eip712test.CertBytes, eip712test.KeyBytes)
+		err = media.SignMP4(ctx, signer, eip712test.CertBytes, reader, f)
 		if err != nil {
 			log.Log(ctx, "segment error", "error", err)
 			errors.WriteHTTPInternalServerError(w, "segment error", err)
@@ -158,7 +166,8 @@ func (a *AquareumAPI) InternalHandler(ctx context.Context) (http.Handler, error)
 			return
 		}
 		defer f.Close()
-		err = media.SignMP4(ctx, reader, f)
+		signer := c2pa.MakeStaticSigner(eip712test.CertBytes, eip712test.KeyBytes)
+		err = media.SignMP4(ctx, signer, eip712test.CertBytes, reader, f)
 		if err != nil {
 			log.Log(ctx, "segment error", "error", err)
 			errors.WriteHTTPInternalServerError(w, "segment error", err)
