@@ -119,6 +119,10 @@ func start(build *config.BuildFlags, platformJobs []jobFunc) error {
 	if err != nil {
 		return err
 	}
+	_, err = signer.GenerateCert()
+	if err != nil {
+		return err
+	}
 	mod, err := model.MakeDB(cli.DBPath)
 	if err != nil {
 		return err

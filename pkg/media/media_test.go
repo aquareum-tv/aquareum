@@ -54,7 +54,9 @@ func TestSignMP4WithWallet(t *testing.T) {
 		r := bytes.NewReader(mp4bs)
 		f, err := os.CreateTemp("", "*.mp4")
 		require.NoError(t, err)
-		err = SignMP4(context.Background(), signer, eip712test.CertBytes, r, f)
+		certBs, err := signer.GenerateCert()
+		require.NoError(t, err)
+		err = SignMP4(context.Background(), signer, certBs, r, f)
 		require.NoError(t, err)
 	})
 }
