@@ -72,7 +72,7 @@ func MakeEIP712Signer(ctx context.Context, opts *EIP712SignerOptions) (*EIP712Si
 		if err != nil {
 			return nil, err
 		}
-		log.Log(ctx, "successfully initalized keystore", "opts.EthKeystorePath", opts.EthKeystorePath)
+		log.Log(ctx, "successfully initalized keystore", "keystorePath", opts.EthKeystorePath, "address", signer.Hex())
 	} else {
 		log.Log(ctx, "my EthKeystorePath is empty; EIP-712 signing won't work (which is fine, i guess)")
 	}
@@ -83,20 +83,38 @@ func MakeEIP712Signer(ctx context.Context, opts *EIP712SignerOptions) (*EIP712Si
 func (signer *EIP712Signer) InitKeystore(ctx context.Context) error {
 	keyStore := keystore.NewKeyStore(signer.Opts.EthKeystorePath, keystore.StandardScryptN, keystore.StandardScryptP)
 
-	addr := common.HexToAddress(signer.Opts.EthAccountAddr)
-
-	acctExists := keyStore.HasAddress(addr)
-	if !acctExists {
-		return fmt.Errorf("keystore does not contain account %s", signer.Opts.EthAccountAddr)
-	}
 	var account *accounts.Account
-	for _, a := range keyStore.Accounts() {
-		if a.Address == addr {
-			account = &a
+	if signer.Opts.EthAccountAddr != "" {
+		addr := common.HexToAddress(signer.Opts.EthAccountAddr)
+
+		acctExists := keyStore.HasAddress(addr)
+		if !acctExists {
+			return fmt.Errorf("keystore does not contain account %s", signer.Opts.EthAccountAddr)
 		}
-	}
-	if account == nil {
-		return fmt.Errorf("keystore does not contain account %s", signer.Opts.EthAccountAddr)
+		for _, a := range keyStore.Accounts() {
+			if a.Address == addr {
+				account = &a
+			}
+		}
+		if account == nil {
+			return fmt.Errorf("keystore does not contain account %s", signer.Opts.EthAccountAddr)
+		}
+	} else {
+		count := len(keyStore.Accounts())
+		if count > 1 {
+			return fmt.Errorf("keystore contains more than one account; specify which one to use with -eth-account-addr")
+		}
+		if count == 1 {
+			account = &keyStore.Accounts()[0]
+		}
+		if count == 0 {
+			acct, err := keyStore.NewAccount(signer.Opts.EthKeystorePassword)
+			if err != nil {
+				return fmt.Errorf("unable to generate new ethereum account: %w", err)
+			}
+			account = &acct
+			log.Log(ctx, "generated new ethereum key", "addr", signer.Hex())
+		}
 	}
 	err := keyStore.Unlock(*account, signer.Opts.EthKeystorePassword)
 	if err != nil {
@@ -105,6 +123,11 @@ func (signer *EIP712Signer) InitKeystore(ctx context.Context) error {
 	signer.Account = account
 	signer.KeyStore = keyStore
 	return nil
+}
+
+// return account address as a hex string
+func (signer *EIP712Signer) Hex() string {
+	return hexutil.Encode(signer.Account.Address.Bytes())
 }
 
 func (signer *EIP712Signer) KnownTypes() []string {

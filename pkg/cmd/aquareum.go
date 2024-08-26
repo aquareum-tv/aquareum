@@ -76,6 +76,9 @@ func start(build *config.BuildFlags, platformJobs []jobFunc) error {
 	fs.StringVar(&cli.AdminAccount, "admin-account", "", "ethereum account that administrates this aquareum node")
 	fs.StringVar(&cli.FirebaseServiceAccount, "firebase-service-account", "", "JSON string of a firebase service account key")
 	fs.StringVar(&cli.GitLabURL, "gitlab-url", "https://git.aquareum.tv/api/v4/projects/1", "gitlab url for generating download links")
+	cli.DataDirFlag(fs, &cli.EthKeystorePath, "eth-keystore-path", "keystore", "path to ethereum keystore")
+	fs.StringVar(&cli.EthAccountAddr, "eth-account-addr", "", "ethereum account address to use (if keystore contains more than one)")
+	fs.StringVar(&cli.EthPassword, "eth-password", "", "password for encrypting keystore")
 	version := fs.Bool("version", false, "print version and exit")
 
 	if runtime.GOOS == "linux" {
@@ -108,7 +111,10 @@ func start(build *config.BuildFlags, platformJobs []jobFunc) error {
 		return err
 	}
 	signer, err := eip712.MakeEIP712Signer(context.Background(), &eip712.EIP712SignerOptions{
-		Schema: schema,
+		Schema:              schema,
+		EthKeystorePath:     cli.EthKeystorePath,
+		EthAccountAddr:      cli.EthAccountAddr,
+		EthKeystorePassword: cli.EthPassword,
 	})
 	if err != nil {
 		return err

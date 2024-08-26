@@ -51,7 +51,11 @@ type CLI struct {
 	SigningKeyPath         string
 	TLSCertPath            string
 	TLSKeyPath             string
-	dataDirFlags           []*string
+	EthKeystorePath        string
+	EthAccountAddr         string
+	EthPassword            string
+
+	dataDirFlags []*string
 }
 
 var AQUAREUM_SCHEME_PREFIX = "aquareum://"
