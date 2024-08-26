@@ -6,7 +6,7 @@ require (
 	firebase.google.com/go/v4 v4.14.1
 	git.aquareum.tv/aquareum-tv/c2pa-go v0.0.0-20240821182412-c7339a12f026
 	github.com/NYTimes/gziphandler v1.1.1
-	github.com/adrg/xdg v0.4.0
+	github.com/decred/dcrd/dcrec/secp256k1 v1.0.4
 	github.com/dunglas/httpsfv v1.0.2
 	github.com/ethereum/go-ethereum v1.14.7
 	github.com/go-git/go-git/v5 v5.12.0
@@ -66,7 +66,6 @@ require (
 	github.com/crate-crypto/go-kzg-4844 v1.0.0 // indirect
 	github.com/cyphar/filepath-securejoin v0.2.4 // indirect
 	github.com/deckarep/golang-set/v2 v2.6.0 // indirect
-	github.com/decred/dcrd/dcrec/secp256k1 v1.0.4 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v2 v2.0.0 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.0.1 // indirect
 	github.com/emirpasic/gods v1.18.1 // indirect
