@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"testing"
+	"time"
 
 	"aquareum.tv/aquareum/pkg/config"
 	"aquareum.tv/aquareum/pkg/crypto/signers/eip712"
@@ -46,12 +47,16 @@ func TestSignMP4(t *testing.T) {
 	f, err := os.CreateTemp("", "*.mp4")
 	require.NoError(t, err)
 	mm := MediaManager{
-		cli:    &config.CLI{},
+		cli: &config.CLI{
+			TAURL: "http://timestamp.digicert.com",
+		},
 		signer: signer,
 		cert:   eip712test.CertBytes,
+		user:   "testuser",
 	}
 	require.NoError(t, err)
-	err = mm.SignMP4(context.Background(), r, f)
+	ms := time.Now().UnixMilli()
+	err = mm.SignMP4(context.Background(), r, f, ms)
 	require.NoError(t, err)
 }
 
@@ -60,15 +65,19 @@ func TestSignMP4WithWallet(t *testing.T) {
 		certBs, err := signer.GenerateCert()
 		require.NoError(t, err)
 		mm := MediaManager{
-			cli:    &config.CLI{},
+			cli: &config.CLI{
+				TAURL: "http://timestamp.digicert.com",
+			},
 			signer: signer,
 			cert:   certBs,
+			user:   "testuser",
 		}
 		mp4bs := mp4(t)
 		r := bytes.NewReader(mp4bs)
 		f, err := os.CreateTemp("", "*.mp4")
 		require.NoError(t, err)
-		err = mm.SignMP4(context.Background(), r, f)
+		ms := time.Now().UnixMilli()
+		err = mm.SignMP4(context.Background(), r, f, ms)
 		require.NoError(t, err)
 	})
 }

@@ -9,6 +9,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"time"
 
 	"aquareum.tv/aquareum/pkg/config"
 	"aquareum.tv/aquareum/pkg/crypto/signers/eip712"
@@ -26,6 +27,7 @@ type MediaManager struct {
 	cli    *config.CLI
 	signer crypto.Signer
 	cert   []byte
+	user   string
 }
 
 func MakeMediaManager(ctx context.Context, cli *config.CLI, signer *eip712.EIP712Signer) (*MediaManager, error) {
@@ -52,6 +54,7 @@ func MakeMediaManager(ctx context.Context, cli *config.CLI, signer *eip712.EIP71
 		cli:    cli,
 		signer: signer,
 		cert:   cert,
+		user:   signer.Hex(),
 	}, nil
 }
 
@@ -64,12 +67,12 @@ func (mm *MediaManager) SignSegment(ctx context.Context, input io.Reader, ms int
 		return fmt.Errorf("error muxing to mp4: %w", err)
 	}
 	reader := bytes.NewReader(buf.Bytes())
-	fd, err := mm.cli.DataFileCreate([]string{SEGMENTS_DIR, segmentFile}, false)
+	fd, err := mm.cli.DataFileCreate([]string{SEGMENTS_DIR, mm.user, segmentFile}, false)
 	if err != nil {
 		return err
 	}
 	defer fd.Close()
-	err = mm.SignMP4(ctx, reader, fd)
+	err = mm.SignMP4(ctx, reader, fd, ms)
 	if err != nil {
 		return fmt.Errorf("error signing mp4: %w", err)
 	}
@@ -184,18 +187,21 @@ func SegmentToHTTP(ctx context.Context, input io.Reader, prefix string) error {
 	return g.Wait()
 }
 
-func (mm *MediaManager) SignMP4(ctx context.Context, input io.ReadSeeker, output io.ReadWriteSeeker) error {
-	manifestBs := []byte(`
+func (mm *MediaManager) SignMP4(ctx context.Context, input io.ReadSeeker, output io.ReadWriteSeeker, now int64) error {
+	manifestBs := []byte(fmt.Sprintf(`
 		{
-			"title": "Image File",
+			"title": "Livestream Segment at %s",
 			"assertions": [
 				{
 					"label": "c2pa.actions",
-					"data": { "actions": [{ "action": "c2pa.published" }] }
+					"data": {"actions": [
+						{ "action": "c2pa.created" },
+						{ "action": "c2pa.published" }
+					]}
 				}
 			]
 		}
-	`)
+	`, time.UnixMilli(now).UTC().Format("2006-01-02T15:04:05.999Z")))
 	var manifest c2pa.ManifestDefinition
 	err := json.Unmarshal(manifestBs, &manifest)
 	if err != nil {
@@ -209,7 +215,7 @@ func (mm *MediaManager) SignMP4(ctx context.Context, input io.ReadSeeker, output
 		Cert:      mm.cert,
 		Signer:    mm.signer,
 		Algorithm: alg,
-		TAURL:     "http://timestamp.digicert.com",
+		TAURL:     mm.cli.TAURL,
 	})
 	if err != nil {
 		return err

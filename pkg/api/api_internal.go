@@ -59,6 +59,7 @@ func (a *AquareumAPI) InternalHandler(ctx context.Context) (http.Handler, error)
 	triggerCollection := misttriggers.NewMistCallbackHandlersCollection(a.CLI, broker)
 	router.POST("/mist-trigger", triggerCollection.Trigger())
 
+	// internal route called for each pushed segment from ffmpeg
 	router.POST("/segment/:uuid/:user/:file", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		ms := time.Now().UnixMilli()
 		uu := p.ByName("uuid")
@@ -82,6 +83,7 @@ func (a *AquareumAPI) InternalHandler(ctx context.Context) (http.Handler, error)
 		log.Log(ctx, "segment success", "url", r.URL.String())
 	})
 
+	// route to accept an incoming mkv stream from OBS, segment it, and push the segments back to this HTTP handler
 	router.POST("/stream/:key", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		log.Log(ctx, "stream start")
 		user, err := a.keyToUser(ctx, p.ByName("key"))

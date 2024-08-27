@@ -41,6 +41,9 @@ type CLI struct {
 	Build                  *BuildFlags
 	DataDir                string
 	DBPath                 string
+	EthAccountAddr         string
+	EthKeystorePath        string
+	EthPassword            string
 	FirebaseServiceAccount string
 	GitLabURL              string
 	HttpAddr               string
@@ -51,11 +54,9 @@ type CLI struct {
 	MistHTTPPort           int
 	MistRTMPPort           int
 	SigningKeyPath         string
+	TAURL                  string
 	TLSCertPath            string
 	TLSKeyPath             string
-	EthKeystorePath        string
-	EthAccountAddr         string
-	EthPassword            string
 
 	dataDirFlags []*string
 }
@@ -164,7 +165,7 @@ func (cli *CLI) DataFileCreate(fpath []string, overwrite bool) (*os.File, error)
 		}
 	}
 	if len(fpath) > 1 {
-		dirs := filepath.Join(fpath[:len(fpath)-1]...)
+		dirs, _ := filepath.Split(ddpath)
 		err := os.MkdirAll(dirs, os.ModePerm)
 		if err != nil {
 			return nil, fmt.Errorf("error creating subdirectories for %s: %w", ddpath, err)

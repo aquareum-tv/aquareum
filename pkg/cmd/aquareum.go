@@ -80,6 +80,7 @@ func start(build *config.BuildFlags, platformJobs []jobFunc) error {
 	cli.DataDirFlag(fs, &cli.EthKeystorePath, "eth-keystore-path", "keystore", "path to ethereum keystore")
 	fs.StringVar(&cli.EthAccountAddr, "eth-account-addr", "", "ethereum account address to use (if keystore contains more than one)")
 	fs.StringVar(&cli.EthPassword, "eth-password", "", "password for encrypting keystore")
+	fs.StringVar(&cli.TAURL, "ta-url", "http://timestamp.digicert.com", "timestamp authority server for signing")
 	version := fs.Bool("version", false, "print version and exit")
 
 	if runtime.GOOS == "linux" {
