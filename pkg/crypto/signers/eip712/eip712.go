@@ -505,7 +505,6 @@ func (signer *EIP712Signer) GenerateCert() ([]byte, error) {
 	}
 
 	bs := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: k256DERBytes})
-	fmt.Println(string(bs))
 	return bs, nil
 }
 

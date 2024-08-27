@@ -22,6 +22,7 @@ import (
 	"aquareum.tv/aquareum/pkg/crypto/signers/eip712"
 	apierrors "aquareum.tv/aquareum/pkg/errors"
 	"aquareum.tv/aquareum/pkg/log"
+	"aquareum.tv/aquareum/pkg/media"
 	"aquareum.tv/aquareum/pkg/model"
 	"aquareum.tv/aquareum/pkg/notifications"
 	v0 "aquareum.tv/aquareum/pkg/schema/v0"
@@ -34,14 +35,15 @@ type AquareumAPI struct {
 	Signer           *eip712.EIP712Signer
 	Mimes            map[string]string
 	FirebaseNotifier notifications.FirebaseNotifier
+	MediaManager     *media.MediaManager
 }
 
-func MakeAquareumAPI(cli *config.CLI, mod model.Model, signer *eip712.EIP712Signer, noter notifications.FirebaseNotifier) (*AquareumAPI, error) {
+func MakeAquareumAPI(cli *config.CLI, mod model.Model, signer *eip712.EIP712Signer, noter notifications.FirebaseNotifier, mm *media.MediaManager) (*AquareumAPI, error) {
 	updater, err := PrepareUpdater(cli)
 	if err != nil {
 		return nil, err
 	}
-	a := &AquareumAPI{CLI: cli, Model: mod, Updater: updater, Signer: signer, FirebaseNotifier: noter}
+	a := &AquareumAPI{CLI: cli, Model: mod, Updater: updater, Signer: signer, FirebaseNotifier: noter, MediaManager: mm}
 	a.Mimes, err = updater.GetMimes()
 	if err != nil {
 		return nil, err

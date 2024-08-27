@@ -21,6 +21,8 @@ firebase.google.com/go/v4 v4.14.1 h1:4qiUETaFRWoFGE1XP5VbcEdtPX93Qs+8B/7KvP2825g
 firebase.google.com/go/v4 v4.14.1/go.mod h1:fgk2XshgNDEKaioKco+AouiegSI9oTWVqRaBdTTGBoM=
 git.aquareum.tv/aquareum-tv/c2pa-go v0.0.0-20240821182412-c7339a12f026 h1:6GprIUXv9uXc16zD0c0IY72o+xroaTZP1isC3Pbhf2c=
 git.aquareum.tv/aquareum-tv/c2pa-go v0.0.0-20240821182412-c7339a12f026/go.mod h1:lp4UzqUyNZ4gieOSCdjsGoSUudZsDrBpsBgnRoNLlSw=
+git.aquareum.tv/aquareum-tv/c2pa-go v0.0.0-20240827194057-dc4fd1d2c425 h1:4xgRxVpXdHwBGyf5BAyWfWp0WrwjD1gP0EU5K6r8sw4=
+git.aquareum.tv/aquareum-tv/c2pa-go v0.0.0-20240827194057-dc4fd1d2c425/go.mod h1:lp4UzqUyNZ4gieOSCdjsGoSUudZsDrBpsBgnRoNLlSw=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/BurntSushi/toml v1.3.2 h1:o7IhLm0Msx3BaB+n3Ag7L8EVlByGnpq14C4YWiu/gL8=
 github.com/BurntSushi/toml v1.3.2/go.mod h1:CxXYINrC8qIiEnFrOxCa7Jy5BFHlXnUU2pbicEuybxQ=

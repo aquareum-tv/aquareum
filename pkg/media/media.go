@@ -1,20 +1,79 @@
 package media
 
 import (
+	"bytes"
 	"context"
-	"crypto"
 	"encoding/json"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
 
+	"aquareum.tv/aquareum/pkg/config"
+	"aquareum.tv/aquareum/pkg/crypto/signers/eip712"
 	"aquareum.tv/aquareum/pkg/log"
 	"github.com/livepeer/lpms/ffmpeg"
 	"golang.org/x/sync/errgroup"
 
 	"git.aquareum.tv/aquareum-tv/c2pa-go/pkg/c2pa"
 )
+
+const CERT_FILE = "cert.pem"
+const SEGMENTS_DIR = "segments"
+
+type MediaManager struct {
+	cli    *config.CLI
+	signer *eip712.EIP712Signer
+	cert   []byte
+}
+
+func MakeMediaManager(ctx context.Context, cli *config.CLI, signer *eip712.EIP712Signer) (*MediaManager, error) {
+	exists, err := cli.DataFileExists([]string{CERT_FILE})
+	if err != nil {
+		return nil, err
+	}
+	if !exists {
+		cert, err := signer.GenerateCert()
+		if err != nil {
+			return nil, err
+		}
+		r := bytes.NewReader(cert)
+		err = cli.DataFileWrite([]string{CERT_FILE}, r, false)
+		if err != nil {
+			return nil, err
+		}
+		log.Log(ctx, "wrote new media signing certificate", "file", CERT_FILE)
+	}
+	buf := bytes.Buffer{}
+	cli.DataFileRead([]string{CERT_FILE}, &buf)
+	cert := buf.Bytes()
+	return &MediaManager{
+		cli:    cli,
+		signer: signer,
+		cert:   cert,
+	}, nil
+}
+
+// accept an incoming mkv segment, mux to mp4, and sign it
+func (mm *MediaManager) SignSegment(ctx context.Context, input io.Reader, ms int64) error {
+	segmentFile := fmt.Sprintf("%d.mp4", ms)
+	buf := bytes.Buffer{}
+	err := MuxToMP4(ctx, input, &buf)
+	if err != nil {
+		return fmt.Errorf("error muxing to mp4: %w", err)
+	}
+	reader := bytes.NewReader(buf.Bytes())
+	fd, err := mm.cli.DataFileCreate([]string{SEGMENTS_DIR, segmentFile}, false)
+	if err != nil {
+		return err
+	}
+	defer fd.Close()
+	err = mm.SignMP4(ctx, reader, fd)
+	if err != nil {
+		return fmt.Errorf("error signing mp4: %w", err)
+	}
+	return nil
+}
 
 func MuxToMP4(ctx context.Context, input io.Reader, output io.Writer) error {
 	tc := ffmpeg.NewTranscoder()
@@ -43,10 +102,7 @@ func MuxToMP4(ctx context.Context, input io.Reader, output io.Writer) error {
 			Profile: ffmpeg.VideoProfile{Format: ffmpeg.FormatNone},
 			Muxer: ffmpeg.ComponentOptions{
 				Name: "mp4",
-				// main option is 'frag_keyframe' which tells ffmpeg to create fragmented MP4 (which we need to be able to stream generatd file)
-				// other options is not mandatory but they will slightly improve generated MP4 file
 				Opts: map[string]string{"movflags": "+faststart"},
-				// Opts: map[string]string{"movflags": "frag_keyframe+negative_cts_offsets+omit_tfhd_offset+disable_chpl+default_base_moof"},
 			},
 		},
 	}
@@ -127,7 +183,7 @@ func SegmentToHTTP(ctx context.Context, input io.Reader, prefix string) error {
 	return g.Wait()
 }
 
-func SignMP4(ctx context.Context, signer crypto.Signer, certBytes []byte, input io.ReadSeeker, output io.ReadWriteSeeker) error {
+func (mm *MediaManager) SignMP4(ctx context.Context, input io.ReadSeeker, output io.ReadWriteSeeker) error {
 	manifestBs := []byte(`
 		{
 			"title": "Image File",
@@ -149,8 +205,8 @@ func SignMP4(ctx context.Context, signer crypto.Signer, certBytes []byte, input 
 		return err
 	}
 	b, err := c2pa.NewBuilder(&manifest, &c2pa.BuilderParams{
-		Cert:      certBytes,
-		Signer:    signer,
+		Cert:      mm.cert,
+		Signer:    mm.signer,
 		Algorithm: alg,
 		TAURL:     "http://timestamp.digicert.com",
 	})

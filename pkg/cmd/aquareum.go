@@ -15,6 +15,7 @@ import (
 
 	"aquareum.tv/aquareum/pkg/crypto/signers/eip712"
 	"aquareum.tv/aquareum/pkg/log"
+	"aquareum.tv/aquareum/pkg/media"
 	"aquareum.tv/aquareum/pkg/notifications"
 	v0 "aquareum.tv/aquareum/pkg/schema/v0"
 
@@ -91,7 +92,9 @@ func start(build *config.BuildFlags, platformJobs []jobFunc) error {
 		fs, os.Args[1:],
 	)
 
-	log.Log(context.Background(),
+	ctx := context.Background()
+
+	log.Log(ctx,
 		"aquareum",
 		"version", build.Version,
 		"buildTime", build.BuildTimeStr(),
@@ -110,7 +113,7 @@ func start(build *config.BuildFlags, platformJobs []jobFunc) error {
 	if err != nil {
 		return err
 	}
-	signer, err := eip712.MakeEIP712Signer(context.Background(), &eip712.EIP712SignerOptions{
+	signer, err := eip712.MakeEIP712Signer(ctx, &eip712.EIP712SignerOptions{
 		Schema:              schema,
 		EthKeystorePath:     cli.EthKeystorePath,
 		EthAccountAddr:      cli.EthAccountAddr,
@@ -119,7 +122,7 @@ func start(build *config.BuildFlags, platformJobs []jobFunc) error {
 	if err != nil {
 		return err
 	}
-	_, err = signer.GenerateCert()
+	mm, err := media.MakeMediaManager(ctx, &cli, signer)
 	if err != nil {
 		return err
 	}
@@ -129,17 +132,17 @@ func start(build *config.BuildFlags, platformJobs []jobFunc) error {
 	}
 	var noter notifications.FirebaseNotifier
 	if cli.FirebaseServiceAccount != "" {
-		noter, err = notifications.MakeFirebaseNotifier(context.Background(), cli.FirebaseServiceAccount)
+		noter, err = notifications.MakeFirebaseNotifier(ctx, cli.FirebaseServiceAccount)
 		if err != nil {
 			return err
 		}
 	}
-	a, err := api.MakeAquareumAPI(&cli, mod, signer, noter)
+	a, err := api.MakeAquareumAPI(&cli, mod, signer, noter, mm)
 	if err != nil {
 		return err
 	}
 
-	group, ctx := TimeoutGroupWithContext(context.Background())
+	group, ctx := TimeoutGroupWithContext(ctx)
 	ctx = log.WithLogValues(ctx, "version", build.Version)
 
 	group.Go(func() error {

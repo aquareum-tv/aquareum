@@ -4,8 +4,10 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
+	"errors"
 	"flag"
 	"fmt"
+	"io"
 	"net"
 	"os"
 	"path/filepath"
@@ -115,6 +117,78 @@ func (cli *CLI) Parse(fs *flag.FlagSet, args []string) {
 	}
 }
 
+func (cli *CLI) dataFilePath(fpath []string) string {
+	fpath = append([]string{cli.DataDir}, fpath...)
+	fdpath := filepath.Join(fpath...)
+	return fdpath
+}
+
+// does a file exist in our data dir?
+func (cli *CLI) DataFileExists(fpath []string) (bool, error) {
+	ddpath := cli.dataFilePath(fpath)
+	_, err := os.Stat(ddpath)
+	if err == nil {
+		return true, nil
+	}
+	if errors.Is(err, os.ErrNotExist) {
+		return false, nil
+	}
+	return false, err
+}
+
+// write a file to our data dir
+func (cli *CLI) DataFileWrite(fpath []string, r io.Reader, overwrite bool) error {
+	fd, err := cli.DataFileCreate(fpath, overwrite)
+	if err != nil {
+		return err
+	}
+	defer fd.Close()
+	_, err = io.Copy(fd, r)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// create a file in our data dir. don't forget to close it!
+func (cli *CLI) DataFileCreate(fpath []string, overwrite bool) (*os.File, error) {
+	ddpath := cli.dataFilePath(fpath)
+	if !overwrite {
+		exists, err := cli.DataFileExists(fpath)
+		if err != nil {
+			return nil, err
+		}
+		if exists {
+			return nil, fmt.Errorf("refusing to overwrite file that exists: %s", ddpath)
+		}
+	}
+	if len(fpath) > 1 {
+		dirs := filepath.Join(fpath[:len(fpath)-1]...)
+		err := os.MkdirAll(dirs, os.ModePerm)
+		if err != nil {
+			return nil, fmt.Errorf("error creating subdirectories for %s: %w", ddpath, err)
+		}
+	}
+	return os.Create(ddpath)
+}
+
+// read a file from our data dir
+func (cli *CLI) DataFileRead(fpath []string, w io.Writer) error {
+	ddpath := cli.dataFilePath(fpath)
+
+	fd, err := os.Open(ddpath)
+	if err != nil {
+		return err
+	}
+	_, err = io.Copy(w, fd)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (cli *CLI) DataDirFlag(fs *flag.FlagSet, dest *string, name, defaultValue, usage string) {
 	cli.dataDirFlags = append(cli.dataDirFlags, dest)
 	*dest = filepath.Join(AQ_DATA_DIR, defaultValue)
@@ -124,5 +198,3 @@ func (cli *CLI) DataDirFlag(fs *flag.FlagSet, dest *string, name, defaultValue, 
 		return nil
 	})
 }
-
-// fs.StringVar(&cli.TLSCertPath, "tls-cert", filepath.Join("$AQ_DATA_DIR", "tls", "tls.crt"), "Path to TLS certificate")
