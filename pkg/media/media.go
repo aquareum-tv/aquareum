@@ -3,6 +3,7 @@ package media
 import (
 	"bytes"
 	"context"
+	"crypto"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -23,7 +24,7 @@ const SEGMENTS_DIR = "segments"
 
 type MediaManager struct {
 	cli    *config.CLI
-	signer *eip712.EIP712Signer
+	signer crypto.Signer
 	cert   []byte
 }
 

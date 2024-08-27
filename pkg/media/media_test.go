@@ -9,6 +9,7 @@ import (
 	"runtime"
 	"testing"
 
+	"aquareum.tv/aquareum/pkg/config"
 	"aquareum.tv/aquareum/pkg/crypto/signers/eip712"
 	"aquareum.tv/aquareum/pkg/crypto/signers/eip712/eip712test"
 	_ "aquareum.tv/aquareum/pkg/media/mediatesting"
@@ -44,19 +45,30 @@ func TestSignMP4(t *testing.T) {
 	r := bytes.NewReader(mp4bs)
 	f, err := os.CreateTemp("", "*.mp4")
 	require.NoError(t, err)
-	err = SignMP4(context.Background(), signer, eip712test.CertBytes, r, f)
+	mm := MediaManager{
+		cli:    &config.CLI{},
+		signer: signer,
+		cert:   eip712test.CertBytes,
+	}
+	require.NoError(t, err)
+	err = mm.SignMP4(context.Background(), r, f)
 	require.NoError(t, err)
 }
 
 func TestSignMP4WithWallet(t *testing.T) {
 	eip712test.WithTestSigner(func(signer *eip712.EIP712Signer) {
+		certBs, err := signer.GenerateCert()
+		require.NoError(t, err)
+		mm := MediaManager{
+			cli:    &config.CLI{},
+			signer: signer,
+			cert:   certBs,
+		}
 		mp4bs := mp4(t)
 		r := bytes.NewReader(mp4bs)
 		f, err := os.CreateTemp("", "*.mp4")
 		require.NoError(t, err)
-		certBs, err := signer.GenerateCert()
-		require.NoError(t, err)
-		err = SignMP4(context.Background(), signer, certBs, r, f)
+		err = mm.SignMP4(context.Background(), r, f)
 		require.NoError(t, err)
 	})
 }
