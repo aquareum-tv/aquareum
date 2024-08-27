@@ -117,7 +117,7 @@ func TestGoLiveHandler(t *testing.T) {
 					Streamer: "@aquareum.tv",
 					Title:    "Let's gooooooo!",
 				}
-				signed, err := signer.Sign(goLive)
+				signed, err := signer.SignMessage(goLive)
 				require.NoError(t, err)
 
 				req := httptest.NewRequest("POST", "https://aquareum.tv/api/golive", bytes.NewReader(signed))

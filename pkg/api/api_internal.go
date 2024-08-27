@@ -1,16 +1,11 @@
 package api
 
 import (
-	"bytes"
 	"context"
 	"encoding/base64"
 	"fmt"
 	"log/slog"
 	"net/http"
-	"os"
-	"path"
-	"regexp"
-	"strconv"
 	"time"
 
 	"aquareum.tv/aquareum/pkg/errors"
@@ -38,10 +33,8 @@ func (a *AquareumAPI) ServeInternalHTTP(ctx context.Context) error {
 
 // lightweight way to authenticate push requests to ourself
 var secretUUID string
-var segmentRE *regexp.Regexp
 
 func init() {
-	segmentRE = regexp.MustCompile(`^\/segment\/([a-z0-9-\.]+)_([0-9]+)\/([0-9]+)\.ts$`)
 	uu, err := uuid.NewV7()
 	if err != nil {
 		panic(err)
@@ -65,60 +58,8 @@ func (a *AquareumAPI) InternalHandler(ctx context.Context) (http.Handler, error)
 	})
 	triggerCollection := misttriggers.NewMistCallbackHandlersCollection(a.CLI, broker)
 	router.POST("/mist-trigger", triggerCollection.Trigger())
-	router.POST("/mist-segment/*anything", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-		log.Log(ctx, "segment start")
-		ms := time.Now().UnixMilli()
-		matches := segmentRE.FindStringSubmatch(r.URL.Path)
-		if len(matches) != 4 {
-			log.Log(ctx, "regex failed on /segment/url", "path", r.URL.Path)
-			errors.WriteHTTPInternalServerError(w, "segment error", nil)
-			return
-		}
-		user := matches[1]
-		startTimeStr := matches[2]
-		mediaTimeStr := matches[3]
-		startTime, err := strconv.ParseInt(startTimeStr, 10, 64)
-		if err != nil {
-			log.Log(ctx, "error parsing number", "error", err)
-			errors.WriteHTTPInternalServerError(w, "error parsing number", err)
-			return
-		}
-		mediaTime, err := strconv.ParseInt(mediaTimeStr, 10, 64)
-		if err != nil {
-			log.Log(ctx, "error parsing number", "error", err)
-			errors.WriteHTTPInternalServerError(w, "error parsing number", err)
-			return
-		}
-		segmentTime := startTime + mediaTime
-		drift := ms - segmentTime
 
-		userDir := path.Join(a.CLI.DataDir, "segments", user)
-		err = os.MkdirAll(userDir, 0700)
-		if err != nil {
-			log.Log(ctx, "error making directory", "error", err)
-			errors.WriteHTTPInternalServerError(w, "directory create error", err)
-			return
-		}
-		segmentFile := path.Join(userDir, fmt.Sprintf("%d.mp4", segmentTime))
-		f, err := os.Create(segmentFile)
-		if err != nil {
-			log.Log(ctx, "error opening file", "error", err)
-			errors.WriteHTTPInternalServerError(w, "file open error", err)
-			return
-		}
-		defer f.Close()
-		buf := bytes.Buffer{}
-		err = media.MuxToMP4(ctx, r.Body, &buf)
-		reader := bytes.NewReader(buf.Bytes())
-		media.SignMP4(ctx, reader, f)
-		if err != nil {
-			log.Log(ctx, "segment error", "error", err)
-			errors.WriteHTTPInternalServerError(w, "segment error", err)
-			return
-		}
-		log.Log(ctx, "segment success", "url", r.URL.String(), "file", segmentFile, "drift", drift)
-	})
-
+	// internal route called for each pushed segment from ffmpeg
 	router.POST("/segment/:uuid/:user/:file", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		ms := time.Now().UnixMilli()
 		uu := p.ByName("uuid")
@@ -133,40 +74,16 @@ func (a *AquareumAPI) InternalHandler(ctx context.Context) (http.Handler, error)
 			return
 		}
 		ctx := log.WithLogValues(ctx, "user", user, "file", p.ByName("file"), "time", fmt.Sprintf("%d", ms))
-
-		userDir := path.Join(a.CLI.DataDir, "segments", user)
-		err := os.MkdirAll(userDir, 0700)
-		if err != nil {
-			log.Log(ctx, "error making directory", "error", err)
-			errors.WriteHTTPInternalServerError(w, "directory create error", err)
-			return
-		}
-		segmentFile := path.Join(userDir, fmt.Sprintf("%d.mp4", ms))
-		buf := bytes.Buffer{}
-		err = media.MuxToMP4(ctx, r.Body, &buf)
-		if err != nil {
-			log.Log(ctx, "mp4 muxing error", "error", err)
-			errors.WriteHTTPInternalServerError(w, "segment error", err)
-			return
-		}
-		log.Log(ctx, "got back from MuxToMP4", "len", len(buf.Bytes()))
-		reader := bytes.NewReader(buf.Bytes())
-		f, err := os.Create(segmentFile)
-		if err != nil {
-			log.Log(ctx, "error opening file", "error", err)
-			errors.WriteHTTPInternalServerError(w, "file open error", err)
-			return
-		}
-		defer f.Close()
-		err = media.SignMP4(ctx, reader, f)
+		err := a.MediaManager.SignSegment(ctx, r.Body, ms)
 		if err != nil {
 			log.Log(ctx, "segment error", "error", err)
 			errors.WriteHTTPInternalServerError(w, "segment error", err)
 			return
 		}
-		log.Log(ctx, "segment success", "url", r.URL.String(), "file", segmentFile)
+		log.Log(ctx, "segment success", "url", r.URL.String())
 	})
 
+	// route to accept an incoming mkv stream from OBS, segment it, and push the segments back to this HTTP handler
 	router.POST("/stream/:key", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		log.Log(ctx, "stream start")
 		user, err := a.keyToUser(ctx, p.ByName("key"))
