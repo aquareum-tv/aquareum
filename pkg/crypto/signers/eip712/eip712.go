@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"aquareum.tv/aquareum/pkg/log"
+	_ "aquareum.tv/aquareum/pkg/media/mediatesting"
 	"aquareum.tv/aquareum/pkg/schema"
 	"git.aquareum.tv/aquareum-tv/c2pa-go/pkg/c2pa"
 	"github.com/ethereum/go-ethereum/accounts"
@@ -470,7 +471,7 @@ func (signer *EIP712Signer) GenerateCert() ([]byte, error) {
 
 	tbs := tbsCertificate{
 		Version:            old.Version,
-		SerialNumber:       big.NewInt(2),
+		SerialNumber:       old.SerialNumber,
 		SignatureAlgorithm: old.SignatureAlgorithm,
 		Issuer:             old.Issuer,
 		Validity:           old.Validity,
