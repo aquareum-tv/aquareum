@@ -2,6 +2,8 @@ module aquareum.tv/aquareum
 
 go 1.22.2
 
+replace github.com/livepeer/lpms => github.com/aquareum-tv/lpms v0.0.0-20240828210246-5ac9b407751e
+
 require (
 	firebase.google.com/go/v4 v4.14.1
 	git.aquareum.tv/aquareum-tv/c2pa-go v0.0.0-20240827194057-dc4fd1d2c425

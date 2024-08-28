@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"path/filepath"
 	"time"
 
 	"aquareum.tv/aquareum/pkg/errors"
@@ -59,6 +60,84 @@ func (a *AquareumAPI) InternalHandler(ctx context.Context) (http.Handler, error)
 	triggerCollection := misttriggers.NewMistCallbackHandlersCollection(a.CLI, broker)
 	router.POST("/mist-trigger", triggerCollection.Trigger())
 
+	router.GET("/playback/:user/concat", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		user := p.ByName("user")
+		if user == "" {
+			errors.WriteHTTPBadRequest(w, "user required", nil)
+			return
+		}
+		w.Header().Set("content-type", "text/plain")
+		fmt.Fprintf(w, "ffconcat version 1.0\n")
+		// intermittent reports that you need two here to make things work properly? shouldn't matter.
+		for i := 0; i < 2; i += 1 {
+			fmt.Fprintf(w, "file '%s/playback/%s/latest.mp4'\n", a.CLI.OwnInternalURL(), user)
+		}
+	})
+
+	router.GET("/playback/:user/latest.mp4", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		user := p.ByName("user")
+		if user == "" {
+			errors.WriteHTTPBadRequest(w, "user required", nil)
+			return
+		}
+		log.Log(ctx, "got latest.mp4 request", "user", user)
+		file := <-a.MediaManager.SubscribeSegment(ctx, user)
+		w.Header().Set("Location", fmt.Sprintf("%s/playback/%s/segment/%s\n", a.CLI.OwnInternalURL(), user, file))
+		w.WriteHeader(301)
+	})
+
+	router.GET("/playback/:user/segment/:file", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		user := p.ByName("user")
+		if user == "" {
+			errors.WriteHTTPBadRequest(w, "user required", nil)
+			return
+		}
+		file := p.ByName("file")
+		if file == "" {
+			errors.WriteHTTPBadRequest(w, "file required", nil)
+			return
+		}
+		fullpath := filepath.Join(a.CLI.DataDir, "segments", user, file)
+		http.ServeFile(w, r, fullpath)
+	})
+
+	router.GET("/playback/:user/stream.mkv", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		user := p.ByName("user")
+		if user == "" {
+			errors.WriteHTTPBadRequest(w, "user required", nil)
+			return
+		}
+		w.Header().Set("Content-Type", "video/x-matroska")
+		w.WriteHeader(200)
+		a.MediaManager.StreamToMKV(ctx, user, w)
+	})
+
+	router.HEAD("/playback/:user/stream.mkv", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		user := p.ByName("user")
+		if user == "" {
+			errors.WriteHTTPBadRequest(w, "user required", nil)
+			return
+		}
+		w.Header().Set("Content-Type", "video/x-matroska")
+		w.Header().Set("Transfer-Encoding", "chunked")
+		w.WriteHeader(200)
+	})
+
+	// handler for post-segmented mkv streams
+	router.POST("/playback/:user/:uuid/stream.mkv", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		user := p.ByName("user")
+		if user == "" {
+			errors.WriteHTTPBadRequest(w, "user required", nil)
+			return
+		}
+		uu := p.ByName("uuid")
+		if uu == "" {
+			errors.WriteHTTPBadRequest(w, "uuid required", nil)
+			return
+		}
+		a.MediaManager.HandleMKVStream(ctx, user, uu, r.Body)
+	})
+
 	// internal route called for each pushed segment from ffmpeg
 	router.POST("/segment/:uuid/:user/:file", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		ms := time.Now().UnixMilli()
@@ -80,7 +159,6 @@ func (a *AquareumAPI) InternalHandler(ctx context.Context) (http.Handler, error)
 			errors.WriteHTTPInternalServerError(w, "segment error", err)
 			return
 		}
-		log.Log(ctx, "segment success", "url", r.URL.String())
 	})
 
 	// route to accept an incoming mkv stream from OBS, segment it, and push the segments back to this HTTP handler

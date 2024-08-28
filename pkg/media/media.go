@@ -9,11 +9,13 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"sync"
 	"time"
 
 	"aquareum.tv/aquareum/pkg/config"
 	"aquareum.tv/aquareum/pkg/crypto/signers/eip712"
 	"aquareum.tv/aquareum/pkg/log"
+	"github.com/google/uuid"
 	"github.com/livepeer/lpms/ffmpeg"
 	"golang.org/x/sync/errgroup"
 
@@ -24,10 +26,14 @@ const CERT_FILE = "cert.pem"
 const SEGMENTS_DIR = "segments"
 
 type MediaManager struct {
-	cli    *config.CLI
-	signer crypto.Signer
-	cert   []byte
-	user   string
+	cli        *config.CLI
+	signer     crypto.Signer
+	cert       []byte
+	user       string
+	mp4subs    map[string][]chan string
+	mp4subsmut sync.Mutex
+	mkvsubs    map[string]io.Writer
+	mkvsubsmut sync.Mutex
 }
 
 func MakeMediaManager(ctx context.Context, cli *config.CLI, signer *eip712.EIP712Signer) (*MediaManager, error) {
@@ -51,10 +57,12 @@ func MakeMediaManager(ctx context.Context, cli *config.CLI, signer *eip712.EIP71
 	cli.DataFileRead([]string{CERT_FILE}, &buf)
 	cert := buf.Bytes()
 	return &MediaManager{
-		cli:    cli,
-		signer: signer,
-		cert:   cert,
-		user:   signer.Hex(),
+		cli:     cli,
+		signer:  signer,
+		cert:    cert,
+		user:    signer.Hex(),
+		mp4subs: map[string][]chan string{},
+		mkvsubs: map[string]io.Writer{},
 	}, nil
 }
 
@@ -76,7 +84,31 @@ func (mm *MediaManager) SignSegment(ctx context.Context, input io.Reader, ms int
 	if err != nil {
 		return fmt.Errorf("error signing mp4: %w", err)
 	}
+	go mm.PublishSegment(ctx, mm.user, segmentFile)
 	return nil
+}
+
+// subscribe to the latest segments from a given user for livestreaming purposes
+func (mm *MediaManager) SubscribeSegment(ctx context.Context, user string) chan string {
+	mm.mp4subsmut.Lock()
+	defer mm.mp4subsmut.Unlock()
+	_, ok := mm.mp4subs[user]
+	if !ok {
+		mm.mp4subs[user] = []chan string{}
+	}
+	c := make(chan string)
+	mm.mp4subs[user] = append(mm.mp4subs[user], c)
+	return c
+}
+
+// subscribe to the latest segments from a given user for livestreaming purposes
+func (mm *MediaManager) PublishSegment(ctx context.Context, user, file string) {
+	mm.mp4subsmut.Lock()
+	defer mm.mp4subsmut.Unlock()
+	for _, sub := range mm.mp4subs[user] {
+		sub <- file
+	}
+	mm.mp4subs[user] = []chan string{}
 }
 
 func MuxToMP4(ctx context.Context, input io.Reader, output io.Writer) error {
@@ -90,7 +122,7 @@ func MuxToMP4(ctx context.Context, input io.Reader, output io.Writer) error {
 		return fmt.Errorf("error making temp directory: %w", err)
 	}
 	defer func() {
-		log.Log(ctx, "cleaning up")
+		// log.Log(ctx, "cleaning up")
 		tc.StopTranscoder()
 	}()
 	oname := filepath.Join(dname, "output.mp4")
@@ -115,13 +147,13 @@ func MuxToMP4(ctx context.Context, input io.Reader, output io.Writer) error {
 	g, _ := errgroup.WithContext(ctx)
 	g.Go(func() error {
 		_, err := io.Copy(iw, input)
-		log.Log(ctx, "input copy done", "error", err)
+		// log.Log(ctx, "input copy done", "error", err)
 		iw.Close()
 		return err
 	})
 	g.Go(func() error {
 		_, err = tc.Transcode(in, out)
-		log.Log(ctx, "transcode done", "error", err)
+		// log.Log(ctx, "transcode done", "error", err)
 		tc.StopTranscoder()
 		ir.Close()
 		return err
@@ -135,11 +167,17 @@ func MuxToMP4(ctx context.Context, input io.Reader, output io.Writer) error {
 		return err
 	}
 	defer of.Close()
-	written, err := io.Copy(output, of)
+	_, err = io.Copy(output, of)
 	if err != nil {
 		return err
 	}
-	log.Log(ctx, "transmuxing complete", "out-file", oname, "wrote", written)
+	of.Close()
+	status, info, err := ffmpeg.GetCodecInfo(oname)
+	if err != nil {
+		return fmt.Errorf("error in GetCodecInfo: %w", err)
+	}
+	fmt.Printf("%v %v\n", status, info.DurSecs)
+	// log.Log(ctx, "transmuxing complete", "out-file", oname, "wrote", written)
 	return nil
 }
 
@@ -173,18 +211,72 @@ func SegmentToHTTP(ctx context.Context, input io.Reader, prefix string) error {
 	g, _ := errgroup.WithContext(ctx)
 	g.Go(func() error {
 		_, err := io.Copy(iw, input)
-		log.Log(ctx, "input copy done", "error", err)
+		// log.Log(ctx, "input copy done", "error", err)
 		iw.Close()
 		return err
 	})
 	g.Go(func() error {
 		_, err = tc.Transcode(in, out)
-		log.Log(ctx, "transcode done", "error", err)
+		// log.Log(ctx, "transcode done", "error", err)
 		tc.StopTranscoder()
 		ir.Close()
 		return err
 	})
 	return g.Wait()
+}
+
+func (mm *MediaManager) StreamToMKV(ctx context.Context, user string, w io.Writer) error {
+	tc := ffmpeg.NewTranscoder()
+	defer tc.StopTranscoder()
+	uu, err := uuid.NewV7()
+	if err != nil {
+		return err
+	}
+	mm.mkvsubsmut.Lock()
+	mm.mkvsubs[uu.String()] = w
+	mm.mkvsubsmut.Unlock()
+	iname := fmt.Sprintf("%s/playback/%s/concat", mm.cli.OwnInternalURL(), user)
+	in := &ffmpeg.TranscodeOptionsIn{
+		Fname:       iname,
+		Transmuxing: true,
+		Profile:     ffmpeg.VideoProfile{},
+		Loop:        -1,
+		Demuxer: ffmpeg.ComponentOptions{
+			Name: "concat",
+			Opts: map[string]string{
+				"safe":               "0",
+				"protocol_whitelist": "file,http,https,tcp,tls",
+			},
+		},
+	}
+	out := []ffmpeg.TranscodeOptions{
+		{
+			Oname: fmt.Sprintf("%s/playback/%s/%s/stream.mkv", mm.cli.OwnInternalURL(), user, uu.String()),
+			VideoEncoder: ffmpeg.ComponentOptions{
+				Name: "copy",
+			},
+			AudioEncoder: ffmpeg.ComponentOptions{
+				Name: "copy",
+			},
+			Profile: ffmpeg.VideoProfile{Format: ffmpeg.FormatNone},
+			Muxer: ffmpeg.ComponentOptions{
+				Name: "matroska",
+			},
+		},
+	}
+	_, err = tc.Transcode(in, out)
+	return err
+}
+
+func (mm *MediaManager) HandleMKVStream(ctx context.Context, user, uu string, r io.Reader) error {
+	mm.mkvsubsmut.Lock()
+	w, ok := mm.mkvsubs[uu]
+	mm.mkvsubsmut.Unlock()
+	if !ok {
+		return fmt.Errorf("uuid not found: %s", uu)
+	}
+	_, err := io.Copy(w, r)
+	return err
 }
 
 func (mm *MediaManager) SignMP4(ctx context.Context, input io.ReadSeeker, output io.ReadWriteSeeker, now int64) error {
