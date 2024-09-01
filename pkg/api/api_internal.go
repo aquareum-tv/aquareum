@@ -109,7 +109,10 @@ func (a *AquareumAPI) InternalHandler(ctx context.Context) (http.Handler, error)
 		}
 		w.Header().Set("Content-Type", "video/x-matroska")
 		w.WriteHeader(200)
-		a.MediaManager.StreamToMKV(ctx, user, w)
+		err := a.MediaManager.StreamToMKV(ctx, user, w)
+		if err != nil {
+			log.Log(ctx, "stream.mkv error", "error", err)
+		}
 	})
 
 	router.HEAD("/playback/:user/stream.mkv", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
