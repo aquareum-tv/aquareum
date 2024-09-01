@@ -129,6 +129,12 @@ link-c2pa-go:
 	rm -rf subprojects/c2pa_go
 	ln -s $$(realpath ../c2pa-go) ./subprojects/c2pa_go
 
+# link your local version of gstreamer
+.PHONY: link-gstreamer
+link-gstreamer:
+	rm -rf subprojects/gstreamer-full
+	ln -s $$(realpath ../gstreamer) ./subprojects/gstreamer-full
+
 .PHONY: docker-build
 docker-build: docker-build-builder docker-build-in-container
 

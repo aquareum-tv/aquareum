@@ -20,6 +20,8 @@ import (
 	"aquareum.tv/aquareum/pkg/api"
 	"aquareum.tv/aquareum/pkg/config"
 	"aquareum.tv/aquareum/pkg/model"
+	_ "github.com/go-gst/go-glib/glib"
+	_ "github.com/go-gst/go-gst/gst"
 )
 
 // Additional jobs that can be injected by platforms

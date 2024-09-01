@@ -2,7 +2,14 @@ project(
   'aquareum',
   'c',
   'cpp',
-  default_options: ['cpp_std=c++98', 'default_library=static'],
+  default_options: {
+    'cpp_std': 'c++98',
+    'default_library': 'static',
+    'auto_features': 'disabled',
+    'force_fallback_for': 'glib-2.0,gobject-2.0,gio-2.0,gio-unix-2.0',
+    'gst-plugins-base:audioresample': 'enabled',
+    'glib-networking:openssl': 'enabled',
+  },
 )
 
 fs = import('fs')
@@ -35,9 +42,16 @@ aquareum_go = custom_target(
   command: ['cp', '@INPUT@', '@OUTPUT@'],
 )
 
+# todo: teach meson to automatically populate this CPATH thing for go
 env = {
   'PKG_CONFIG_PATH': meson.current_build_dir() + '/meson-private',
-  'CPATH': meson.current_source_dir() + '/subprojects/ffmpeg' + ':' + meson.current_build_dir() + '/subprojects/ffmpeg',
+  'CPATH': meson.current_source_dir() + '/subprojects/FFmpeg' 
+    + ':' + meson.current_build_dir() + '/subprojects/FFmpeg'
+    + ':' + meson.current_source_dir() + '/subprojects/gstreamer-full/subprojects/gstreamer'
+    + ':' + meson.current_build_dir() + '/subprojects/gstreamer-full/subprojects/gstreamer'
+    + ':' + meson.current_source_dir() + '/subprojects/gstreamer-full/subprojects/gstreamer/libs'
+    + ':' + meson.current_build_dir() + '/subprojects/gstreamer-full/subprojects/gstreamer/libs'
+    + ':' + meson.current_source_dir() + '/subprojects/gstreamer-full/subprojects/gstreamer',
 }
 GOOS = meson.get_external_property('GOOS', host_machine.system())
 GOARCH = meson.get_external_property('GOARCH', host_machine.cpu())
@@ -80,7 +94,7 @@ if host_machine.system() == 'linux'
 endif
 
 ffmpeg_proj = subproject(
-  'ffmpeg',
+  'FFmpeg',
   # vvc seems to have problems building as a submodule?
   default_options: {
     'vvc_decoder': 'disabled',
@@ -96,6 +110,27 @@ ffmpeg_proj = subproject(
 )
 avformat = ffmpeg_proj.get_variable('libavformat_dep')
 avfilter = ffmpeg_proj.get_variable('libavfilter_dep')
+
+gstreamer_proj = subproject(
+  'gstreamer-full',
+  default_options: {
+    'gst-full': 'enabled',
+    'gst-full-plugins': 'libgstaudioresample.a',
+    'gst-full-libraries': 'gstreamer-controller-1.0',
+    'gst-full-target-type': 'static_library',
+    'bad': 'disabled',
+    'ugly': 'disabled',
+    'tls': 'enabled',
+    'gpl': 'enabled',
+    'force_fallback_for': 'glib,gio',
+    # 'gst-full-elements': 'coreelements:filesrc,fakesink,identity;alsa:alsasrc:'
+    # 'gst-full-typefind-functions': 'typefindfunctions:wav,flv:'
+    # 'gst-full-device-providers': 'alsa:alsadeviceprovider:'
+    # 'gst-full-dynamic-types': 'pbtypes:video_multiview_flagset:'
+  },
+)
+
+gst_full_dep = gstreamer_proj.get_variable('gst_full_dep')
 
 libaquareum = custom_target(
   'libaquareum',
@@ -123,10 +158,11 @@ if host_machine.system() == 'windows'
     '-lcrypt32',
   ], language : [ 'c', 'cpp' ])
 endif
+controller = dependency('gstreamer-controller-1.0')
 aquareum = executable(
   'aquareum',
   ['cmd/aquareum/aquareum.c', libaquareum],
-  dependencies: [avformat, avfilter, aquareum_deps],
+  dependencies: [avformat, avfilter, gst_full_dep, controller, aquareum_deps],
   link_with: [c2pa_go_dep],
 )
 
