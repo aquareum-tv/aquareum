@@ -33,6 +33,10 @@ app: schema install
 .PHONY: node
 node: schema
 	meson setup build --native=./util/linux-amd64-gnu.ini && meson compile -C build
+	meson configure build \
+		-D 'gstreamer-full:gst-full-plugins=libgstaudioresample.a;libgstmatroska.a' \
+		-D 'gstreamer-full:bad=enabled' \
+		
 	mv ./build/aquareum ./bin/aquareum
 
 .PHONY: schema

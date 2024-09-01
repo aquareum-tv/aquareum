@@ -3,12 +3,15 @@ project(
   'c',
   'cpp',
   default_options: {
-    'cpp_std': 'c++98',
+    'cpp_std': 'c++11',
     'default_library': 'static',
     'auto_features': 'disabled',
     'force_fallback_for': 'glib-2.0,gobject-2.0,gio-2.0,gio-unix-2.0',
-    'gst-plugins-base:audioresample': 'enabled',
     'glib-networking:openssl': 'enabled',
+    'gst-plugins-base:audioresample': 'enabled',
+    'gst-plugins-base:opus': 'enabled',
+    'gst-plugins-good:matroska': 'enabled',
+    'gst-plugins-bad:fdkaac': 'enabled',
   },
 )
 
@@ -45,14 +48,17 @@ aquareum_go = custom_target(
 # todo: teach meson to automatically populate this CPATH thing for go
 env = {
   'PKG_CONFIG_PATH': meson.current_build_dir() + '/meson-private',
-  'CPATH': meson.current_source_dir() + '/subprojects/FFmpeg' 
-    + ':' + meson.current_build_dir() + '/subprojects/FFmpeg'
+  'CPATH': meson.current_source_dir()  + '/subprojects/FFmpeg' 
+    + ':' + meson.current_build_dir()  + '/subprojects/FFmpeg'
     + ':' + meson.current_source_dir() + '/subprojects/gstreamer-full/subprojects/gstreamer'
-    + ':' + meson.current_build_dir() + '/subprojects/gstreamer-full/subprojects/gstreamer'
+    + ':' + meson.current_build_dir()  + '/subprojects/gstreamer-full/subprojects/gstreamer'
     + ':' + meson.current_source_dir() + '/subprojects/gstreamer-full/subprojects/gstreamer/libs'
-    + ':' + meson.current_build_dir() + '/subprojects/gstreamer-full/subprojects/gstreamer/libs'
-    + ':' + meson.current_source_dir() + '/subprojects/gstreamer-full/subprojects/gstreamer',
+    + ':' + meson.current_build_dir()  + '/subprojects/gstreamer-full/subprojects/gstreamer/libs'
+    + ':' + meson.current_source_dir() + '/subprojects/gstreamer-full/subprojects/gstreamer'
+    + ':' + meson.current_source_dir() + '/subprojects/glib-2.78.3'
+    + ':' + meson.current_build_dir()  + '/subprojects/glib-2.78.3',
 }
+
 GOOS = meson.get_external_property('GOOS', host_machine.system())
 GOARCH = meson.get_external_property('GOARCH', host_machine.cpu())
 if GOARCH == 'x86_64'
@@ -115,15 +121,15 @@ gstreamer_proj = subproject(
   'gstreamer-full',
   default_options: {
     'gst-full': 'enabled',
-    'gst-full-plugins': 'libgstaudioresample.a',
+    'gst-full-plugins': 'libgstaudioresample.a;libgstmatroska.a;libgstfdkaac.a;libgstopus.a',
     'gst-full-libraries': 'gstreamer-controller-1.0',
     'gst-full-target-type': 'static_library',
-    'bad': 'disabled',
+    'bad': 'enabled',
     'ugly': 'disabled',
     'tls': 'enabled',
     'gpl': 'enabled',
     'force_fallback_for': 'glib,gio',
-    # 'gst-full-elements': 'coreelements:filesrc,fakesink,identity;alsa:alsasrc:'
+    'gst-full-elements': 'coreelements:fdsrc,fdsink',
     # 'gst-full-typefind-functions': 'typefindfunctions:wav,flv:'
     # 'gst-full-device-providers': 'alsa:alsadeviceprovider:'
     # 'gst-full-dynamic-types': 'pbtypes:video_multiview_flagset:'
