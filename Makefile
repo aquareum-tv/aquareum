@@ -33,7 +33,6 @@ app: schema install
 .PHONY: node
 node: schema
 	meson setup build --native=./util/linux-amd64-gnu.ini && meson compile -C build
-		
 	mv ./build/aquareum ./bin/aquareum
 
 .PHONY: schema
@@ -48,7 +47,7 @@ test:
 # test to make sure we haven't added any more dynamic dependencies
 .PHONY: link-test
 link-test:
-	count=$(shell ldd ./bin/aquareum | wc -l) \
+	count=$(shell ldd ./build/aquareum | wc -l) \
 	&& echo $$count \
 	&& if [ "$$count" != "6" ]; then echo "ldd reports new libaries linked! want 6 got $$count" \
 		&& ldd ./bin/aquareum \
