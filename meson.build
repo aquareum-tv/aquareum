@@ -37,7 +37,7 @@ aquareum_go = custom_target(
 
 env = {
   'PKG_CONFIG_PATH': meson.current_build_dir() + '/meson-private',
-  'CPATH': meson.current_source_dir() + '/subprojects/ffmpeg' + ':' + meson.current_build_dir() + '/subprojects/ffmpeg',
+  'CPATH': meson.current_source_dir() + '/subprojects/FFmpeg' + ':' + meson.current_build_dir() + '/subprojects/FFmpeg',
 }
 GOOS = meson.get_external_property('GOOS', host_machine.system())
 GOARCH = meson.get_external_property('GOARCH', host_machine.cpu())
@@ -80,7 +80,7 @@ if host_machine.system() == 'linux'
 endif
 
 ffmpeg_proj = subproject(
-  'ffmpeg',
+  'FFmpeg',
   # vvc seems to have problems building as a submodule?
   default_options: {
     'vvc_decoder': 'disabled',
