@@ -106,9 +106,17 @@ ios: app
 node-all-platforms: app
 	meson setup build
 	meson compile -C build archive
+	$(MAKE) linux-arm64
+	$(MAKE) windows-amd64
+
+.PHONY: linux-arm64
+linux-arm64:
 	rustup target add aarch64-unknown-linux-gnu
 	meson setup --cross-file util/linux-arm64-gnu.ini build-aarch64
 	meson compile -C build-aarch64 archive
+
+.PHONY: windows-amd64
+windows-amd64:
 	rustup target add x86_64-pc-windows-gnu
 	meson setup --cross-file util/windows-amd64-gnu.ini build-windows
 	meson compile -C build-windows archive 2>&1 | grep -v drectve
