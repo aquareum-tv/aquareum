@@ -8,8 +8,8 @@ import (
 	"aquareum.tv/aquareum/pkg/log"
 
 	"aquareum.tv/aquareum/pkg/cmd"
-	_ "github.com/go-gst/go-glib/glib"
-	_ "github.com/go-gst/go-gst/gst"
+	// _ "github.com/go-gst/go-glib/glib"
+	// _ "github.com/go-gst/go-gst/gst"
 )
 
 import "C"

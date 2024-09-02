@@ -173,6 +173,10 @@ ffmpeg_proj = subproject(
     'wav_demuxer': 'enabled',
     'wav_muxer': 'enabled',
     'webm_muxer': 'enabled',
+    'lzma': 'enabled',
+    'zlib': 'enabled',
+    'zlib_decoder': 'enabled',
+    'zlib_encoder': 'enabled',
   },
 )
 avformat = ffmpeg_proj.get_variable('libavformat_dep')
@@ -230,7 +234,14 @@ controller = dependency('gstreamer-controller-1.0')
 aquareum = executable(
   'aquareum',
   ['cmd/aquareum/aquareum.c', libaquareum],
-  dependencies: [avformat, avfilter, gst_full_dep, controller, gio, aquareum_deps],
+  dependencies: [
+    avformat,
+    avfilter,
+    gst_full_dep,
+    controller,
+    gio,
+    aquareum_deps,
+  ],
   link_with: [c2pa_go_dep],
 )
 
