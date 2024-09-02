@@ -56,7 +56,14 @@ env = {
     + ':' + meson.current_build_dir()  + '/subprojects/gstreamer-full/subprojects/gstreamer/libs'
     + ':' + meson.current_source_dir() + '/subprojects/gstreamer-full/subprojects/gstreamer'
     + ':' + meson.current_source_dir() + '/subprojects/glib-2.78.3'
-    + ':' + meson.current_build_dir()  + '/subprojects/glib-2.78.3',
+    + ':' + meson.current_build_dir()  + '/subprojects/glib-2.78.3'
+    + ':' + meson.current_source_dir() + '/subprojects/glib-2.78.3/glib'
+    + ':' + meson.current_build_dir()  + '/subprojects/glib-2.78.3/glib'
+    + ':' + meson.current_source_dir() + '/subprojects/glib-2.78.3/gmodule'
+    + ':' + meson.current_build_dir()  + '/subprojects/glib-2.78.3/gmodule'
+    + ':' + meson.current_source_dir() + '/subprojects/proxy-libintl'
+    + ':' + meson.current_build_dir()  + '/subprojects/proxy-libintl'
+    ,
 }
 
 GOOS = meson.get_external_property('GOOS', host_machine.system())
