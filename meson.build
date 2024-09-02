@@ -7,7 +7,6 @@ project(
     'default_library': 'static',
     'auto_features': 'disabled',
     'force_fallback_for': 'glib-2.0,gobject-2.0,gio-2.0,gio-unix-2.0',
-    'glib-networking:openssl': 'enabled',
     'gst-plugins-base:audioresample': 'enabled',
     'gst-plugins-base:opus': 'enabled',
     'gst-plugins-good:matroska': 'enabled',
@@ -133,7 +132,7 @@ gstreamer_proj = subproject(
     'gst-full-target-type': 'static_library',
     'bad': 'enabled',
     'ugly': 'disabled',
-    'tls': 'enabled',
+    'tls': 'disabled',
     'gpl': 'enabled',
     'force_fallback_for': 'glib,gio',
     'gst-full-elements': 'coreelements:fdsrc,fdsink',
@@ -171,11 +170,12 @@ if host_machine.system() == 'windows'
     '-lcrypt32',
   ], language : [ 'c', 'cpp' ])
 endif
+gio = dependency('gio-2.0')
 controller = dependency('gstreamer-controller-1.0')
 aquareum = executable(
   'aquareum',
   ['cmd/aquareum/aquareum.c', libaquareum],
-  dependencies: [avformat, avfilter, gst_full_dep, controller, aquareum_deps],
+  dependencies: [avformat, avfilter, gst_full_dep, controller, gio, aquareum_deps],
   link_with: [c2pa_go_dep],
 )
 
