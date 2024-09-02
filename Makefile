@@ -48,6 +48,16 @@ schema:
 test:
 	meson test -C build go-tests
 
+# test to make sure we haven't added any more dynamic dependencies
+.PHONY: link-test
+link-test:
+	count=$(shell ldd ./bin/aquareum | wc -l) \
+	&& echo $$count \
+	&& if [ "$$count" != "6" ]; then echo "ldd reports new libaries linked! want 6 got $$count" \
+		&& ldd ./bin/aquareum \
+		&& exit 1; \
+	fi
+
 .PHONY: all
 all: version install check app test node-all-platforms android
 
@@ -106,6 +116,7 @@ ios: app
 node-all-platforms: app
 	meson setup build
 	meson compile -C build archive
+	$(MAKE) link-test
 	$(MAKE) linux-arm64
 	$(MAKE) windows-amd64
 

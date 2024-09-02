@@ -6,7 +6,7 @@ project(
     'cpp_std': 'c++11',
     'default_library': 'static',
     'auto_features': 'disabled',
-    'force_fallback_for': 'glib-2.0,gobject-2.0,gio-2.0,gio-unix-2.0',
+    'force_fallback_for': 'glib-2.0,gobject-2.0,gio-2.0,gio-unix-2.0,fdk-aac,zlib,libffi,pcre2,intl',
     'gst-plugins-base:audioresample': 'enabled',
     'gst-plugins-base:opus': 'enabled',
     'gst-plugins-good:matroska': 'enabled',
@@ -110,15 +110,17 @@ ffmpeg_proj = subproject(
   'FFmpeg',
   # vvc seems to have problems building as a submodule?
   default_options: {
-    'vvc_decoder': 'disabled',
-    'vvc_demuxer': 'disabled',
-    'vvc_metadata_bsf': 'disabled',
-    'vvc_mp4toannexb_bsf': 'disabled',
-    'vvc_muxer': 'disabled',
-    'vvc_parser': 'disabled',
+    'concat_demuxer': 'enabled',
+    'fd_protocol': 'enabled',
+    'gpl': 'enabled',
+    'http_protocol': 'enabled',
+    'matroska_audio_muxer': 'enabled',
+    'matroska_demuxer': 'enabled',
+    'matroska_muxer': 'enabled',
+    'mp4_muxer': 'enabled',
+    'segment_muxer': 'enabled',
     'signature_cuda_filter': 'enabled',
     'signature_filter': 'enabled',
-    'gpl': 'enabled',
   },
 )
 avformat = ffmpeg_proj.get_variable('libavformat_dep')
