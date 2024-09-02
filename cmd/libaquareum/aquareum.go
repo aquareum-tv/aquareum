@@ -10,6 +10,7 @@ import (
 	"aquareum.tv/aquareum/pkg/cmd"
 )
 
+//#cgo LDFLAGS: -lz
 import "C"
 
 //export AquareumMain
