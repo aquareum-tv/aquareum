@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"regexp"
 	"time"
 
 	"aquareum.tv/aquareum/pkg/errors"
@@ -33,6 +34,7 @@ func (a *AquareumAPI) ServeInternalHTTP(ctx context.Context) error {
 
 // lightweight way to authenticate push requests to ourself
 var secretUUID string
+var mkvRE *regexp.Regexp
 
 func init() {
 	uu, err := uuid.NewV7()
@@ -40,6 +42,10 @@ func init() {
 		panic(err)
 	}
 	secretUUID = uu.String()
+
+	// Compile the regular expression
+	mkvRE = regexp.MustCompile(`^\d+\.mkv$`)
+
 }
 
 func (a *AquareumAPI) InternalHandler(ctx context.Context) (http.Handler, error) {
@@ -71,6 +77,11 @@ func (a *AquareumAPI) InternalHandler(ctx context.Context) (http.Handler, error)
 		if user == "" {
 			log.Log(ctx, "invalid code path: got empty user?")
 			errors.WriteHTTPInternalServerError(w, "invalid code path: got empty user?", nil)
+			return
+		}
+		f := p.ByName("file")
+		if !mkvRE.MatchString(f) {
+			errors.WriteHTTPBadRequest(w, "file was not in number.mp4 format", nil)
 			return
 		}
 		ctx := log.WithLogValues(ctx, "user", user, "file", p.ByName("file"), "time", fmt.Sprintf("%d", ms))

@@ -129,7 +129,6 @@ ffmpeg_proj = subproject(
     'hwupload_cuda_filter': 'enabled',
     'image2_demuxer': 'enabled',
     'libxcb': 'enabled',
-    'lzma': 'enabled',
     'matroska_audio_muxer': 'enabled',
     'matroska_demuxer': 'enabled',
     'matroska_muxer': 'enabled',
@@ -153,6 +152,7 @@ ffmpeg_proj = subproject(
     'scale_cuda_filter': 'enabled',
     'scale_filter': 'enabled',
     'segment_muxer': 'enabled',
+    'stream_segment_muxer': 'enabled',
     'select_filter': 'enabled',
     'signature_cuda_filter': 'enabled',
     'signature_filter': 'enabled',
@@ -170,6 +170,10 @@ ffmpeg_proj = subproject(
     'zlib_decoder': 'enabled',
     'zlib_encoder': 'enabled',
     'zlib': 'enabled',
+    'mov_muxer': 'enabled',
+    'vp9_superframe_bsf': 'enabled',
+    'ac3_parser': 'enabled',
+    'pgs_frame_merge_bsf': 'enabled',
   },
 )
 avformat = ffmpeg_proj.get_variable('libavformat_dep')
