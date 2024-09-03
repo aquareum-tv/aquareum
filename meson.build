@@ -47,23 +47,7 @@ aquareum_go = custom_target(
 
 # todo: teach meson to automatically populate this CPATH thing for go
 env = {
-  'PKG_CONFIG_PATH': meson.current_build_dir() + '/meson-private',
-  'CPATH': meson.current_source_dir()  + '/subprojects/FFmpeg' 
-    + ':' + meson.current_build_dir()  + '/subprojects/FFmpeg'
-    + ':' + meson.current_source_dir() + '/subprojects/gstreamer-full/subprojects/gstreamer'
-    + ':' + meson.current_build_dir()  + '/subprojects/gstreamer-full/subprojects/gstreamer'
-    + ':' + meson.current_source_dir() + '/subprojects/gstreamer-full/subprojects/gstreamer/libs'
-    + ':' + meson.current_build_dir()  + '/subprojects/gstreamer-full/subprojects/gstreamer/libs'
-    + ':' + meson.current_source_dir() + '/subprojects/gstreamer-full/subprojects/gstreamer'
-    + ':' + meson.current_source_dir() + '/subprojects/glib-2.78.3'
-    + ':' + meson.current_build_dir()  + '/subprojects/glib-2.78.3'
-    + ':' + meson.current_source_dir() + '/subprojects/glib-2.78.3/glib'
-    + ':' + meson.current_build_dir()  + '/subprojects/glib-2.78.3/glib'
-    + ':' + meson.current_source_dir() + '/subprojects/glib-2.78.3/gmodule'
-    + ':' + meson.current_build_dir()  + '/subprojects/glib-2.78.3/gmodule'
-    + ':' + meson.current_source_dir() + '/subprojects/proxy-libintl'
-    + ':' + meson.current_build_dir()  + '/subprojects/proxy-libintl'
-    ,
+  'PKG_CONFIG_PATH': meson.current_build_dir() + '/meson-uninstalled',
 }
 
 GOOS = meson.get_external_property('GOOS', host_machine.system())
@@ -202,6 +186,7 @@ ffmpeg_proj = subproject(
 )
 avformat = ffmpeg_proj.get_variable('libavformat_dep')
 avfilter = ffmpeg_proj.get_variable('libavfilter_dep')
+aquareum_deps += [avformat, avfilter]
 
 gstreamer_proj = subproject(
   'gstreamer-full',
@@ -221,8 +206,10 @@ gstreamer_proj = subproject(
     # 'gst-full-dynamic-types': 'pbtypes:video_multiview_flagset:'
   },
 )
-
+gio = dependency('gio-2.0')
+controller = dependency('gstreamer-controller-1.0')
 gst_full_dep = gstreamer_proj.get_variable('gst_full_dep')
+aquareum_deps += [gio, controller, gst_full_dep]
 
 libaquareum = custom_target(
   'libaquareum',
@@ -240,8 +227,6 @@ libaquareum = custom_target(
   env: env,
 )
 
-z = dependency('zlib')
-
 if host_machine.system() == 'darwin'
   aquareum_deps += [dependency('appleframeworks', modules: ['CoreFoundation', 'Security'])]
 endif
@@ -253,17 +238,18 @@ if host_machine.system() == 'windows'
     '-lbcrypt',
   ], language : [ 'c', 'cpp' ])
 endif
-gio = dependency('gio-2.0')
-controller = dependency('gstreamer-controller-1.0')
+
+pkg = import('pkgconfig')
+pkg.generate(
+  name: 'aquareumdeps',
+  libraries: [aquareum_deps, c2pa_go_dep],
+  description: 'all aquareum dependencies bundled for easy inclusion'
+)
+
 aquareum = executable(
   'aquareum',
   ['cmd/aquareum/aquareum.c', libaquareum],
   dependencies: [
-    avformat,
-    avfilter,
-    gst_full_dep,
-    controller,
-    gio,
     aquareum_deps,
   ],
   link_with: [c2pa_go_dep],
