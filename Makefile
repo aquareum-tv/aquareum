@@ -110,7 +110,7 @@ ios: app
 
 .PHONY: node-all-platforms
 node-all-platforms: app
-	meson setup build
+	meson setup build --buildtype debugoptimized
 	meson compile -C build archive
 	$(MAKE) link-test
 	$(MAKE) linux-arm64
@@ -119,21 +119,21 @@ node-all-platforms: app
 .PHONY: linux-arm64
 linux-arm64:
 	rustup target add aarch64-unknown-linux-gnu
-	meson setup --cross-file util/linux-arm64-gnu.ini build-aarch64
+	meson setup --cross-file util/linux-arm64-gnu.ini --buildtype debugoptimized build-aarch64
 	meson compile -C build-aarch64 archive
 
 .PHONY: windows-amd64
 windows-amd64:
 	rustup target add x86_64-pc-windows-gnu
-	meson setup --cross-file util/windows-amd64-gnu.ini build-windows
+	meson setup --cross-file util/windows-amd64-gnu.ini --buildtype debugoptimized build-windows
 	meson compile -C build-windows archive 2>&1 | grep -v drectve
 
 .PHONY: node-all-platforms-macos
 node-all-platforms-macos: app
-	meson setup build
+	meson setup --buildtype debugoptimized build
 	meson compile -C build archive
 	rustup target add x86_64-apple-darwin
-	meson setup --cross-file util/darwin-amd64-apple.ini build-amd64
+	meson setup --buildtype debugoptimized --cross-file util/darwin-amd64-apple.ini build-amd64
 	meson compile -C build-amd64 archive
 
 # link your local version of mist for dev
