@@ -11,7 +11,7 @@ project(
     'gst-plugins-base:opus': 'enabled',
     'gst-plugins-good:matroska': 'enabled',
     'gst-plugins-bad:fdkaac': 'enabled',
-    'buildtype': 'debugoptimized',
+    'buildtype': 'debug',
   },
 )
 
