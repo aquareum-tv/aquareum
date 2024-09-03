@@ -142,7 +142,7 @@ link-mist:
 	rm -rf subprojects/mistserver
 	ln -s $$(realpath ../mistserver) ./subprojects/mistserver
 
-# link your local version of c2pa-gop for dev
+# link your local version of c2pa-go for dev
 .PHONY: link-c2pa-go
 link-c2pa-go:
 	rm -rf subprojects/c2pa_go
@@ -153,6 +153,12 @@ link-c2pa-go:
 link-gstreamer:
 	rm -rf subprojects/gstreamer-full
 	ln -s $$(realpath ../gstreamer) ./subprojects/gstreamer-full
+
+# link your local version of ffmpeg for dev
+.PHONY: link-ffmpeg
+link-ffmpeg:
+	rm -rf subprojects/FFmpeg
+	ln -s $$(realpath ../ffmpeg) ./subprojects/FFmpeg
 
 .PHONY: docker-build
 docker-build: docker-build-builder docker-build-in-container

@@ -12,6 +12,7 @@ import (
 	// _ "github.com/go-gst/go-gst/gst"
 )
 
+//#cgo LDFLAGS: -lz
 import "C"
 
 //export AquareumMain
