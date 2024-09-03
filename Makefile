@@ -32,7 +32,7 @@ app: schema install
 
 .PHONY: node
 node: schema
-	meson setup build --native=./util/linux-amd64-gnu.ini && meson compile -C build
+	meson setup build --native=./util/linux-amd64-gnu.ini && meson compile -C build aquareum
 	mv ./build/aquareum ./bin/aquareum
 
 .PHONY: schema

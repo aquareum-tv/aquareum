@@ -185,9 +185,6 @@ ffmpeg_opts = {
   'wav_muxer': 'enabled',
   'webm_muxer': 'enabled',
   'x86asm': 'enabled',
-  'zlib_decoder': 'enabled',
-  'zlib_encoder': 'enabled',
-  'zlib': 'enabled',
   'mov_muxer': 'enabled',
   'vp9_superframe_bsf': 'enabled',
   'ac3_parser': 'enabled',
@@ -253,6 +250,7 @@ if host_machine.system() == 'windows'
     '-lntdll',
     '-luserenv',
     '-lcrypt32',
+    '-lbcrypt',
   ], language : [ 'c', 'cpp' ])
 endif
 gio = dependency('gio-2.0')
