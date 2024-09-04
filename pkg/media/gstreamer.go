@@ -5,93 +5,123 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"runtime"
 	"strings"
 
+	"aquareum.tv/aquareum/pkg/log"
 	"github.com/go-gst/go-glib/glib"
 	"github.com/go-gst/go-gst/gst"
 	"golang.org/x/sync/errgroup"
 )
 
-func NormalizeAudio(ctx context.Context, input io.Reader, output io.Writer) error {
-	// Initialize GStreamer with the arguments passed to the program. Gstreamer
-	// and the bindings will automatically pop off any handled arguments leaving
-	// nothing but a pipeline string (unless other invalid args are present).
+func init() {
 	gst.Init(nil)
-	ir, iw, err := os.Pipe()
+}
+
+// Pipe with a mechanism to keep the FDs not garbage collected
+func SafePipe() (*os.File, *os.File, func(), error) {
+	r, w, err := os.Pipe()
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	return r, w, func() {
+		runtime.KeepAlive(r.Fd())
+		runtime.KeepAlive(w.Fd())
+	}, nil
+}
+
+func AddOpusToMKV(ctx context.Context, input io.Reader, output io.Writer) error {
+	ir, iw, idone, err := SafePipe()
 	if err != nil {
 		return err
 	}
-	or, ow, err := os.Pipe()
+	defer idone()
+	or, ow, odone, err := SafePipe()
 	if err != nil {
 		return err
 	}
-	// Create a main loop. This is only required when utilizing signals via the bindings.
-	// In this example, the AddWatch on the pipeline bus requires iterating on the main loop.
+	defer odone()
+
 	mainLoop := glib.NewMainLoop(glib.MainContextDefault(), false)
 
-	// Build a pipeline string from the cli arguments
 	pipelineSlice := []string{
-		fmt.Sprintf("fdsrc fd=%d", ir.Fd()),
-		"matroskademux",
-		"opusdec use-inband-fec=true",
-		"audioresample",
-		"fdkaacenc",
-		"matroskamux",
-		fmt.Sprintf("fdsink fd=%d", ow.Fd()),
+		fmt.Sprintf("fdsrc name=livestream fd=%d ! matroskademux name=demux", ir.Fd()),
+		fmt.Sprintf("matroskamux name=mux ! fdsink fd=%d", ow.Fd()),
+		"demux.audio_0 ! queue ! tee name=asplit",
+		"demux.video_0 ! queue ! mux.video_0",
+		"asplit. ! queue ! fdkaacdec ! audioresample ! opusenc ! mux.audio_1",
+		"asplit. ! queue ! mux.audio_0",
 	}
-	pipelineString := strings.Join(pipelineSlice, " ! ")
 
-	/// Let GStreamer create a pipeline from the parsed launch syntax on the cli.
-	pipeline, err := gst.NewPipelineFromString(pipelineString)
+	pipeline, err := gst.NewPipelineFromString(strings.Join(pipelineSlice, "\n"))
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(2)
+		return err
 	}
+	// demux, err := pipeline.GetElementByName("demux")
+	// if err != nil {
+	// 	return err
+	// }
+	// // Get the audiotestsrc's src-pad.
+	// demuxPad := demux.GetStaticPad("sink")
+	// if demuxPad == nil {
+	// 	return fmt.Errorf("src pad on src element was nil")
+	// }
+
+	// // Add a probe handler on the audiotestsrc's src-pad.
+	// // This handler gets called for every buffer that passes the pad we probe.
+	// demuxPad.AddProbe(gst.PadProbeTypeAllBoth, func(self *gst.Pad, info *gst.PadProbeInfo) gst.PadProbeReturn {
+	// 	// fmt.Printf("%v\n", info)
+	// 	return gst.PadProbeOK
+	// })
 
 	// Add a message handler to the pipeline bus, printing interesting information to the console.
 	pipeline.GetPipelineBus().AddWatch(func(msg *gst.Message) bool {
 		switch msg.Type() {
+
 		case gst.MessageEOS: // When end-of-stream is received flush the pipeling and stop the main loop
 			pipeline.BlockSetState(gst.StateNull)
 			mainLoop.Quit()
 		case gst.MessageError: // Error messages are always fatal
 			err := msg.ParseError()
-			fmt.Println("ERROR:", err.Error())
+			log.Log(ctx, "gstreamer error", "error", err.Error())
 			if debug := err.DebugString(); debug != "" {
-				fmt.Println("DEBUG:", debug)
+				log.Log(ctx, "gstreamer debug", "message", debug)
 			}
 			mainLoop.Quit()
 		default:
-			// All messages implement a Stringer. However, this is
-			// typically an expensive thing to do and should be avoided.
-			fmt.Println(msg)
+			log.Log(ctx, msg.String())
 		}
 		return true
 	})
 
 	// Start the pipeline
 	pipeline.SetState(gst.StatePlaying)
+
 	g, _ := errgroup.WithContext(ctx)
 
 	g.Go(func() error {
 		_, err := io.Copy(iw, input)
-		fmt.Println("input copy complete")
+		log.Log(ctx, "input copy complete", "error", err)
 		iw.Close()
 		return err
 	})
 
 	g.Go(func() error {
 		mainLoop.Run()
-		fmt.Println("main loop complete")
+		log.Log(ctx, "main loop complete")
 		ow.Close()
 		return nil
 	})
 
 	g.Go(func() error {
+		runtime.GC()
 		_, err := io.Copy(output, or)
-		fmt.Println("output copy complete")
+		log.Log(ctx, "output copy complete", "error", err)
+		// todo: if we don't do something like this, we get garbage collected and everything breaks.
 		return err
 	})
+
+	_ = fmt.Sprintf("%v %v %v %v", ir, iw, or, ow)
 
 	return g.Wait()
 }

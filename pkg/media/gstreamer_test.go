@@ -15,7 +15,7 @@ func TestNormalizeAudio(t *testing.T) {
 	ofile, err := os.CreateTemp("", "*.mkv")
 	defer os.Remove(ofile.Name())
 	require.NoError(t, err)
-	err = NormalizeAudio(context.Background(), ifile, ofile)
+	err = AddOpusToMKV(context.Background(), ifile, ofile)
 	require.NoError(t, err)
 	ofile.Close()
 	info, err := os.Stat(ofile.Name())

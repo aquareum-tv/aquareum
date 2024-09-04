@@ -32,7 +32,8 @@ app: schema install
 
 .PHONY: node
 node: schema
-	meson setup build --native=./util/linux-amd64-gnu.ini && meson compile -C build aquareum
+	$(MAKE) meson-setup
+	meson compile -C build aquareum
 	mv ./build/aquareum ./bin/aquareum
 
 .PHONY: schema
@@ -68,7 +69,7 @@ ci-android: version install check android ci-upload-android
 
 .PHONY: ci-test
 ci-test: app
-	meson setup build
+	meson setup build $(OPTS)
 	meson test -C build go-tests
 
 .PHONY: android
@@ -108,9 +109,33 @@ ios: app
 	mkdir -p .build \
 	&& curl -L -o ./.build/bundletool.jar https://github.com/google/bundletool/releases/download/1.17.0/bundletool-all-1.17.0.jar
 
+OPTS = -D "gst-plugins-base:audioresample=enabled" \
+		-D "gst-plugins-base:playback=enabled" \
+		-D "gst-plugins-base:opus=enabled" \
+		-D "gst-plugins-base:gio-typefinder=enabled" \
+		-D "gst-plugins-base:typefind=enabled" \
+		-D "gst-plugins-good:matroska=enabled" \
+		-D "gst-plugins-good:soup=enabled" \
+		-D "gst-plugins-bad:fdkaac=enabled" \
+		-D "gstreamer-full:gst-full=enabled" \
+		-D "gstreamer-full:gst-full-plugins=libgstaudioresample.a;libgstmatroska.a;libgstfdkaac.a;libgstopus.a;libgstplayback.a;libgsttypefindfunctions.a;libgstsoup.a" \
+		-D "gstreamer-full:gst-full-libraries=gstreamer-controller-1.0,gstreamer-plugins-base-1.0,gstreamer-pbutils-1.0" \
+		-D "gstreamer-full:gst-full-target-type=static_library" \
+		-D "gstreamer-full:gst-full-elements=coreelements:fdsrc,fdsink,queue,queue2,typefind,tee" \
+		-D "gstreamer-full:bad=enabled" \
+		-D "gstreamer-full:ugly=disabled" \
+		-D "gstreamer-full:tls=disabled" \
+		-D "gstreamer-full:gpl=enabled" \
+		-D "gstreamer-full:gst-full-typefind-functions="
+
+.PHONY: meson-setup
+meson-setup:
+	meson setup build $(OPTS)
+	meson configure build $(OPTS)
+
 .PHONY: node-all-platforms
 node-all-platforms: app
-	meson setup build --buildtype debugoptimized
+	meson setup build $(OPTS) --buildtype debugoptimized
 	meson compile -C build archive
 	$(MAKE) link-test
 	$(MAKE) linux-arm64
@@ -119,21 +144,21 @@ node-all-platforms: app
 .PHONY: linux-arm64
 linux-arm64:
 	rustup target add aarch64-unknown-linux-gnu
-	meson setup --cross-file util/linux-arm64-gnu.ini --buildtype debugoptimized build-aarch64
+	meson setup --cross-file util/linux-arm64-gnu.ini --buildtype debugoptimized build-aarch64 $(OPTS)
 	meson compile -C build-aarch64 archive
 
 .PHONY: windows-amd64
 windows-amd64:
 	rustup target add x86_64-pc-windows-gnu
-	meson setup --cross-file util/windows-amd64-gnu.ini --buildtype debugoptimized build-windows
+	meson setup --cross-file util/windows-amd64-gnu.ini --buildtype debugoptimized build-windows $(OPTS)
 	meson compile -C build-windows archive 2>&1 | grep -v drectve
 
 .PHONY: node-all-platforms-macos
 node-all-platforms-macos: app
-	meson setup --buildtype debugoptimized build
+	meson setup --buildtype debugoptimized build $(OPTS)
 	meson compile -C build archive
 	rustup target add x86_64-apple-darwin
-	meson setup --buildtype debugoptimized --cross-file util/darwin-amd64-apple.ini build-amd64
+	meson setup --buildtype debugoptimized --cross-file util/darwin-amd64-apple.ini build-amd64 $(OPTS)
 	meson compile -C build-amd64 archive
 
 # link your local version of mist for dev

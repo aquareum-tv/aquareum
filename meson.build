@@ -7,10 +7,6 @@ project(
     'default_library': 'static',
     'auto_features': 'disabled',
     'force_fallback_for': 'glib-2.0,gobject-2.0,gio-2.0,gio-unix-2.0,fdk-aac,zlib,libffi,pcre2,intl',
-    'gst-plugins-base:audioresample': 'enabled',
-    'gst-plugins-base:opus': 'enabled',
-    'gst-plugins-good:matroska': 'enabled',
-    'gst-plugins-bad:fdkaac': 'enabled',
     'buildtype': 'debug',
   },
 )
@@ -190,26 +186,19 @@ aquareum_deps += [avformat, avfilter]
 
 gstreamer_proj = subproject(
   'gstreamer-full',
-  default_options: {
-    'gst-full': 'enabled',
-    'gst-full-plugins': 'libgstaudioresample.a;libgstmatroska.a;libgstfdkaac.a;libgstopus.a',
-    'gst-full-libraries': 'gstreamer-controller-1.0',
-    'gst-full-target-type': 'static_library',
-    'bad': 'enabled',
-    'ugly': 'disabled',
-    'tls': 'disabled',
-    'gpl': 'enabled',
-    'force_fallback_for': 'glib,gio',
-    'gst-full-elements': 'coreelements:fdsrc,fdsink',
-    # 'gst-full-typefind-functions': 'typefindfunctions:wav,flv:'
-    # 'gst-full-device-providers': 'alsa:alsadeviceprovider:'
-    # 'gst-full-dynamic-types': 'pbtypes:video_multiview_flagset:'
-  },
+  default_options: {},
 )
-gio = dependency('gio-2.0')
-controller = dependency('gstreamer-controller-1.0')
+
 gst_full_dep = gstreamer_proj.get_variable('gst_full_dep')
-aquareum_deps += [gio, controller, gst_full_dep]
+aquareum_deps += [
+  gst_full_dep,
+  dependency('gio-2.0'),
+  dependency('gstreamer-controller-1.0'),
+  dependency('gstreamer-pbutils-1.0'),
+  dependency('gstplayback'),
+  dependency('gstsoup'),
+  dependency('libsoup-gnome-2.4'),
+]
 
 libaquareum = custom_target(
   'libaquareum',

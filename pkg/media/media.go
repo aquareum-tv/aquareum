@@ -113,10 +113,11 @@ func (mm *MediaManager) PublishSegment(ctx context.Context, user, file string) {
 
 func MuxToMP4(ctx context.Context, input io.Reader, output io.Writer) error {
 	tc := ffmpeg.NewTranscoder()
-	ir, iw, err := os.Pipe()
+	ir, iw, idone, err := SafePipe()
 	if err != nil {
 		return fmt.Errorf("error opening pipe: %w", err)
 	}
+	defer idone()
 	dname, err := os.MkdirTemp("", "aquareum-muxing")
 	if err != nil {
 		return fmt.Errorf("error making temp directory: %w", err)
@@ -184,10 +185,11 @@ func MuxToMP4(ctx context.Context, input io.Reader, output io.Writer) error {
 func SegmentToHTTP(ctx context.Context, input io.Reader, prefix string) error {
 	tc := ffmpeg.NewTranscoder()
 	defer tc.StopTranscoder()
-	ir, iw, err := os.Pipe()
+	ir, iw, idone, err := SafePipe()
 	if err != nil {
 		return fmt.Errorf("error opening pipe: %w", err)
 	}
+	defer idone()
 	out := []ffmpeg.TranscodeOptions{
 		{
 			Oname: fmt.Sprintf("%s/%%d.mkv", prefix),
@@ -275,7 +277,7 @@ func (mm *MediaManager) HandleMKVStream(ctx context.Context, user, uu string, r 
 	if !ok {
 		return fmt.Errorf("uuid not found: %s", uu)
 	}
-	_, err := io.Copy(w, r)
+	err := AddOpusToMKV(ctx, r, w)
 	return err
 }
 
