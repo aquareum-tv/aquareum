@@ -10,7 +10,7 @@ import (
 )
 
 func TestNormalizeAudio(t *testing.T) {
-	ifile, err := os.Open(getFixture("sample-stream-audio.mkv"))
+	ifile, err := os.Open(getFixture("sample-stream.mkv"))
 	require.NoError(t, err)
 	ofile, err := os.CreateTemp("", "*.mkv")
 	defer os.Remove(ofile.Name())

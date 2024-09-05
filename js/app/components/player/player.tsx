@@ -13,10 +13,7 @@ export function Player(props: { src: string }) {
     if (!videoRef.current) {
       return;
     }
-    const client = new WHEPClient(
-      `${EXPO_PUBLIC_AQUAREUM_URL}/api/webrtc/${props.src}`,
-      videoRef.current,
-    );
+    const client = new WHEPClient(`/api/webrtc/${props.src}`, videoRef.current);
   }, [videoRef.current]);
   return (
     <View f={1} backgroundColor="#111">

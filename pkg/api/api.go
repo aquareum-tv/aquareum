@@ -70,7 +70,11 @@ func (fs AppHostingFS) Open(name string) (http.File, error) {
 	if err2 == nil {
 		return file, nil
 	}
-	return nil, err1
+	if !errors.Is(err2, os.ErrNotExist) {
+		return nil, err2
+	}
+
+	return fs.FileSystem.Open("index.html")
 }
 
 func (a *AquareumAPI) Handler(ctx context.Context) (http.Handler, error) {
