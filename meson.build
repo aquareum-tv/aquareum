@@ -196,8 +196,6 @@ aquareum_deps += [
   dependency('gstreamer-controller-1.0'),
   dependency('gstreamer-pbutils-1.0'),
   dependency('gstplayback'),
-  dependency('gstsoup'),
-  dependency('libsoup-gnome-2.4'),
 ]
 
 libaquareum = custom_target(

@@ -115,10 +115,9 @@ OPTS = -D "gst-plugins-base:audioresample=enabled" \
 		-D "gst-plugins-base:gio-typefinder=enabled" \
 		-D "gst-plugins-base:typefind=enabled" \
 		-D "gst-plugins-good:matroska=enabled" \
-		-D "gst-plugins-good:soup=enabled" \
 		-D "gst-plugins-bad:fdkaac=enabled" \
 		-D "gstreamer-full:gst-full=enabled" \
-		-D "gstreamer-full:gst-full-plugins=libgstaudioresample.a;libgstmatroska.a;libgstfdkaac.a;libgstopus.a;libgstplayback.a;libgsttypefindfunctions.a;libgstsoup.a" \
+		-D "gstreamer-full:gst-full-plugins=libgstaudioresample.a;libgstmatroska.a;libgstfdkaac.a;libgstopus.a;libgstplayback.a;libgsttypefindfunctions.a" \
 		-D "gstreamer-full:gst-full-libraries=gstreamer-controller-1.0,gstreamer-plugins-base-1.0,gstreamer-pbutils-1.0" \
 		-D "gstreamer-full:gst-full-target-type=static_library" \
 		-D "gstreamer-full:gst-full-elements=coreelements:fdsrc,fdsink,queue,queue2,typefind,tee" \
