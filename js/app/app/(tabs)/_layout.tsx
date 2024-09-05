@@ -29,6 +29,14 @@ export default function TabLayout() {
           headerShown: false,
         }}
       />
+      <Tabs.Screen
+        name="stream"
+        options={{
+          title: "Aquareum Stream",
+          tabBarIcon: ({ color }) => <Atom color={color} />,
+          headerShown: false,
+        }}
+      />
     </Tabs>
   );
 }

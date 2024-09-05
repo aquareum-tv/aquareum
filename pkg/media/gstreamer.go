@@ -49,7 +49,7 @@ func AddOpusToMKV(ctx context.Context, input io.Reader, output io.Writer) error 
 		fmt.Sprintf("matroskamux name=mux ! fdsink fd=%d", ow.Fd()),
 		"demux.audio_0 ! queue ! tee name=asplit",
 		"demux.video_0 ! queue ! mux.video_0",
-		"asplit. ! queue ! fdkaacdec ! audioresample ! opusenc ! mux.audio_1",
+		"asplit. ! queue ! fdkaacdec ! audioresample ! opusenc inband-fec=true perfect-timestamp=true bitrate=128000 ! mux.audio_1",
 		"asplit. ! queue ! mux.audio_0",
 	}
 

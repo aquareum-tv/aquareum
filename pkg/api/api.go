@@ -9,7 +9,9 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/NYTimes/gziphandler"
@@ -23,6 +25,7 @@ import (
 	apierrors "aquareum.tv/aquareum/pkg/errors"
 	"aquareum.tv/aquareum/pkg/log"
 	"aquareum.tv/aquareum/pkg/media"
+	"aquareum.tv/aquareum/pkg/mist/mistconfig"
 	"aquareum.tv/aquareum/pkg/model"
 	"aquareum.tv/aquareum/pkg/notifications"
 	v0 "aquareum.tv/aquareum/pkg/schema/v0"
@@ -83,6 +86,9 @@ func (a *AquareumAPI) Handler(ctx context.Context) (http.Handler, error) {
 	router.HandlerFunc("GET", "/app-updates", a.HandleAppUpdates(ctx))
 	// new ones
 	apiRouter.HandlerFunc("GET", "/api/manifest", a.HandleAppUpdates(ctx))
+	apiRouter.POST("/api/webrtc/:stream", a.WebRTCHandler(ctx))
+	apiRouter.OPTIONS("/api/webrtc/:stream", a.WebRTCHandler(ctx))
+	apiRouter.DELETE("/api/webrtc/:stream", a.WebRTCHandler(ctx))
 	apiRouter.NotFound = a.HandleAPI404(ctx)
 	router.Handler("GET", "/api/*resource", apiRouter)
 	router.Handler("POST", "/api/*resource", apiRouter)
@@ -96,6 +102,56 @@ func (a *AquareumAPI) Handler(ctx context.Context) (http.Handler, error) {
 	handler = sloghttp.New(slog.Default())(handler)
 
 	return handler, nil
+}
+
+func copyHeader(dst, src http.Header) {
+	for k, vv := range src {
+		// we'll handle CORS ourselves, thanks
+		if strings.HasPrefix(k, "Access-Control") {
+			continue
+		}
+		for _, v := range vv {
+			dst.Add(k, v)
+		}
+	}
+}
+
+func (a *AquareumAPI) WebRTCHandler(ctx context.Context) httprouter.Handle {
+	return func(w http.ResponseWriter, req *http.Request, params httprouter.Params) {
+		if !a.CLI.HasMist() {
+			apierrors.WriteHTTPNotImplemented(w, "Playback only on the Linux version for now", nil)
+			return
+		}
+		stream := params.ByName("stream")
+		if stream == "" {
+			apierrors.WriteHTTPBadRequest(w, "missing stream in request", nil)
+			return
+		}
+
+		// path := strings.TrimPrefix(req.URL.EscapedPath(), "/api")
+
+		client := &http.Client{}
+		req.URL = &url.URL{
+			Scheme: "http",
+			Host:   fmt.Sprintf("127.0.0.1:%d", a.CLI.MistHTTPPort),
+			Path:   fmt.Sprintf("/webrtc/%s+%s", mistconfig.STREAM_NAME, stream),
+		}
+
+		//http: Request.RequestURI can't be set in client requests.
+		//http://golang.org/src/pkg/net/http/client.go
+		req.RequestURI = ""
+
+		resp, err := client.Do(req)
+		if err != nil {
+			apierrors.WriteHTTPInternalServerError(w, "error connecting to mist", err)
+			return
+		}
+		defer resp.Body.Close()
+
+		copyHeader(w.Header(), resp.Header)
+		w.WriteHeader(resp.StatusCode)
+		io.Copy(w, resp.Body)
+	}
 }
 
 func (a *AquareumAPI) FileHandler(ctx context.Context, fs http.Handler) http.HandlerFunc {
