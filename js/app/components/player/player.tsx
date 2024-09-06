@@ -1,6 +1,3 @@
-// import * as Popover from "@radix-ui/react-popover";
-// import { ClipPayload } from "livepeer/dist/models/components";
-// import { CheckIcon, ChevronDownIcon, XIcon } from "lucide-react";
 import React, {
   ForwardedRef,
   forwardRef,
@@ -12,7 +9,6 @@ import React, {
 } from "react";
 import { Button, Text, View, XStack } from "tamagui";
 import WHEPClient from "./webrtc";
-// import { createClip } from "./actions";
 import { EXPO_PUBLIC_AQUAREUM_URL } from "constants/env";
 import Hls from "hls.js";
 import { Circle, CheckCircle } from "@tamagui/lucide-icons";
@@ -109,6 +105,9 @@ export function WebRTCPlayer(props: { src: string }) {
       `${EXPO_PUBLIC_AQUAREUM_URL}/api/webrtc/${props.src}`,
       videoRef.current,
     );
+    return () => {
+      client.close();
+    };
   }, [videoRef.current]);
   return <VideoElement ref={videoRef} />;
 }

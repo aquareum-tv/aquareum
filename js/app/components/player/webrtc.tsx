@@ -76,6 +76,10 @@ export default class WHEPClient {
       negotiateConnectionWithClientOffer(this.peerConnection, this.endpoint);
     });
   }
+
+  close() {
+    this.peerConnection.close();
+  }
 }
 
 /**
