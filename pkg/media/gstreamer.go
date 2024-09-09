@@ -74,20 +74,26 @@ func AddOpusToMKV(ctx context.Context, input io.Reader, output io.Writer) error 
 	// 	return gst.PadProbeOK
 	// })
 
+	ctx, cancel := context.WithCancel(ctx)
+	go func() {
+		<-ctx.Done()
+		pipeline.BlockSetState(gst.StateNull)
+		mainLoop.Quit()
+	}()
+
 	// Add a message handler to the pipeline bus, printing interesting information to the console.
 	pipeline.GetPipelineBus().AddWatch(func(msg *gst.Message) bool {
 		switch msg.Type() {
 
 		case gst.MessageEOS: // When end-of-stream is received flush the pipeling and stop the main loop
-			pipeline.BlockSetState(gst.StateNull)
-			mainLoop.Quit()
+			cancel()
 		case gst.MessageError: // Error messages are always fatal
 			err := msg.ParseError()
 			log.Log(ctx, "gstreamer error", "error", err.Error())
 			if debug := err.DebugString(); debug != "" {
 				log.Log(ctx, "gstreamer debug", "message", debug)
 			}
-			mainLoop.Quit()
+			cancel()
 		default:
 			log.Log(ctx, msg.String())
 		}
@@ -117,11 +123,8 @@ func AddOpusToMKV(ctx context.Context, input io.Reader, output io.Writer) error 
 		runtime.GC()
 		_, err := io.Copy(output, or)
 		log.Log(ctx, "output copy complete", "error", err)
-		// todo: if we don't do something like this, we get garbage collected and everything breaks.
 		return err
 	})
-
-	_ = fmt.Sprintf("%v %v %v %v", ir, iw, or, ow)
 
 	return g.Wait()
 }
