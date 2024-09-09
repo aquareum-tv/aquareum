@@ -14,7 +14,7 @@ import { Circle, CheckCircle } from "@tamagui/lucide-icons";
 import useAquareumNode from "hooks/useAquareumNode";
 
 export function Player(props: { src: string }) {
-  const [proto, setProto] = useState("webrtc");
+  const [proto, setProto] = useState("hls");
   let p;
   if (proto === "webrtc") {
     p = <WebRTCPlayer src={props.src} />;
