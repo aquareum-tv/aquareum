@@ -2,6 +2,8 @@ module aquareum.tv/aquareum
 
 go 1.22.2
 
+replace github.com/livepeer/lpms => github.com/aquareum-tv/lpms v0.0.0-20240828210246-5ac9b407751e
+
 require (
 	firebase.google.com/go/v4 v4.14.1
 	git.aquareum.tv/aquareum-tv/c2pa-go v0.0.0-20240827194057-dc4fd1d2c425
@@ -10,6 +12,8 @@ require (
 	github.com/dunglas/httpsfv v1.0.2
 	github.com/ethereum/go-ethereum v1.14.7
 	github.com/go-git/go-git/v5 v5.12.0
+	github.com/go-gst/go-glib v1.2.1
+	github.com/go-gst/go-gst v1.2.1
 	github.com/golang/glog v1.2.0
 	github.com/google/uuid v1.6.0
 	github.com/julienschmidt/httprouter v1.3.0
@@ -90,6 +94,7 @@ require (
 	github.com/jstemmer/go-junit-report v1.0.0 // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
 	github.com/livepeer/m3u8 v0.11.1 // indirect
+	github.com/mattn/go-pointer v0.0.1 // indirect
 	github.com/mitchellh/gox v1.0.1 // indirect
 	github.com/mitchellh/iochan v1.0.0 // indirect
 	github.com/mmcloughlin/addchain v0.4.0 // indirect

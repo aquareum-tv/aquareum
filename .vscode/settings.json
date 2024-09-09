@@ -1,6 +1,7 @@
 {
   "workbench.colorCustomizations": {
-    "statusBar.background": "#83447f"
+    "statusBar.background": "#83447f",
+    "activityBar.background": "#83447f"
   },
   "files.associations": {
     "mistserver.h": "c",

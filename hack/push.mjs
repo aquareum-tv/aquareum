@@ -52,7 +52,7 @@ const blast = async (body) => {
   console.log(JSON.stringify(notification.notification, null, 2));
   // console.log("launching in 5 sec")
   // await delay(5000)
-  const res = await admin.messaging().sendMulticast(notification);
+  const res = await admin.messaging().sendEachForMulticast(notification);
   console.log(JSON.stringify(res));
 };
 export default blast;

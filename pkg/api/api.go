@@ -9,7 +9,9 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/NYTimes/gziphandler"
@@ -23,6 +25,7 @@ import (
 	apierrors "aquareum.tv/aquareum/pkg/errors"
 	"aquareum.tv/aquareum/pkg/log"
 	"aquareum.tv/aquareum/pkg/media"
+	"aquareum.tv/aquareum/pkg/mist/mistconfig"
 	"aquareum.tv/aquareum/pkg/model"
 	"aquareum.tv/aquareum/pkg/notifications"
 	v0 "aquareum.tv/aquareum/pkg/schema/v0"
@@ -67,7 +70,11 @@ func (fs AppHostingFS) Open(name string) (http.File, error) {
 	if err2 == nil {
 		return file, nil
 	}
-	return nil, err1
+	if !errors.Is(err2, os.ErrNotExist) {
+		return nil, err2
+	}
+
+	return fs.FileSystem.Open("index.html")
 }
 
 func (a *AquareumAPI) Handler(ctx context.Context) (http.Handler, error) {
@@ -83,6 +90,10 @@ func (a *AquareumAPI) Handler(ctx context.Context) (http.Handler, error) {
 	router.HandlerFunc("GET", "/app-updates", a.HandleAppUpdates(ctx))
 	// new ones
 	apiRouter.HandlerFunc("GET", "/api/manifest", a.HandleAppUpdates(ctx))
+	apiRouter.POST("/api/webrtc/:stream", a.MistProxyHandler(ctx, "/webrtc/%s"))
+	apiRouter.OPTIONS("/api/webrtc/:stream", a.MistProxyHandler(ctx, "/webrtc/%s"))
+	apiRouter.DELETE("/api/webrtc/:stream", a.MistProxyHandler(ctx, "/webrtc/%s"))
+	apiRouter.GET("/api/hls/:stream/*resource", a.MistProxyHandler(ctx, "/hls/%s"))
 	apiRouter.NotFound = a.HandleAPI404(ctx)
 	router.Handler("GET", "/api/*resource", apiRouter)
 	router.Handler("POST", "/api/*resource", apiRouter)
@@ -96,6 +107,61 @@ func (a *AquareumAPI) Handler(ctx context.Context) (http.Handler, error) {
 	handler = sloghttp.New(slog.Default())(handler)
 
 	return handler, nil
+}
+
+func copyHeader(dst, src http.Header) {
+	for k, vv := range src {
+		// we'll handle CORS ourselves, thanks
+		if strings.HasPrefix(k, "Access-Control") {
+			continue
+		}
+		for _, v := range vv {
+			dst.Add(k, v)
+		}
+	}
+}
+
+func (a *AquareumAPI) MistProxyHandler(ctx context.Context, tmpl string) httprouter.Handle {
+	return func(w http.ResponseWriter, req *http.Request, params httprouter.Params) {
+		if !a.CLI.HasMist() {
+			apierrors.WriteHTTPNotImplemented(w, "Playback only on the Linux version for now", nil)
+			return
+		}
+		stream := params.ByName("stream")
+		if stream == "" {
+			apierrors.WriteHTTPBadRequest(w, "missing stream in request", nil)
+			return
+		}
+
+		fullstream := fmt.Sprintf("%s+%s", mistconfig.STREAM_NAME, stream)
+		prefix := fmt.Sprintf(tmpl, fullstream)
+		resource := params.ByName("resource")
+
+		// path := strings.TrimPrefix(req.URL.EscapedPath(), "/api")
+
+		client := &http.Client{}
+		req.URL = &url.URL{
+			Scheme:   "http",
+			Host:     fmt.Sprintf("127.0.0.1:%d", a.CLI.MistHTTPPort),
+			Path:     fmt.Sprintf("%s%s", prefix, resource),
+			RawQuery: req.URL.RawQuery,
+		}
+
+		//http: Request.RequestURI can't be set in client requests.
+		//http://golang.org/src/pkg/net/http/client.go
+		req.RequestURI = ""
+
+		resp, err := client.Do(req)
+		if err != nil {
+			apierrors.WriteHTTPInternalServerError(w, "error connecting to mist", err)
+			return
+		}
+		defer resp.Body.Close()
+
+		copyHeader(w.Header(), resp.Header)
+		w.WriteHeader(resp.StatusCode)
+		io.Copy(w, resp.Body)
+	}
 }
 
 func (a *AquareumAPI) FileHandler(ctx context.Context, fs http.Handler) http.HandlerFunc {

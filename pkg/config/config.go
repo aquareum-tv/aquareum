@@ -11,6 +11,7 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 
@@ -198,4 +199,8 @@ func (cli *CLI) DataDirFlag(fs *flag.FlagSet, dest *string, name, defaultValue, 
 		*dest = s
 		return nil
 	})
+}
+
+func (cli *CLI) HasMist() bool {
+	return runtime.GOOS == "linux"
 }

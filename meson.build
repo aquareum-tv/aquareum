@@ -2,7 +2,13 @@ project(
   'aquareum',
   'c',
   'cpp',
-  default_options: ['cpp_std=c++98', 'default_library=static'],
+  default_options: {
+    'cpp_std': 'c++11',
+    'default_library': 'static',
+    'auto_features': 'disabled',
+    'force_fallback_for': 'glib-2.0,gobject-2.0,gio-2.0,gio-unix-2.0,fdk-aac,zlib,libffi,pcre2,intl',
+    'buildtype': 'debug',
+  },
 )
 
 fs = import('fs')
@@ -35,10 +41,11 @@ aquareum_go = custom_target(
   command: ['cp', '@INPUT@', '@OUTPUT@'],
 )
 
+# todo: teach meson to automatically populate this CPATH thing for go
 env = {
-  'PKG_CONFIG_PATH': meson.current_build_dir() + '/meson-private',
-  'CPATH': meson.current_source_dir() + '/subprojects/ffmpeg' + ':' + meson.current_build_dir() + '/subprojects/ffmpeg',
+  'PKG_CONFIG_PATH': meson.current_build_dir() + '/meson-uninstalled',
 }
+
 GOOS = meson.get_external_property('GOOS', host_machine.system())
 GOARCH = meson.get_external_property('GOARCH', host_machine.cpu())
 if GOARCH == 'x86_64'
@@ -79,23 +86,117 @@ if host_machine.system() == 'linux'
   aquareum_deps += mistserver
 endif
 
+ffmpeg_opts = {
+  'aac_adtstoasc_bsf': 'enabled',
+  'aac_decoder': 'enabled',
+  'aac_latm_parser': 'enabled',
+  'aac_parser': 'enabled',
+  'aformat_filter': 'enabled',
+  'aresample_filter': 'enabled',
+  'asetnsamples_filter': 'enabled',
+  'auto_features': 'enabled',
+  'concat_demuxer': 'enabled',
+  'concat_filter': 'enabled',
+  'concat_protocol': 'enabled',
+  'concatf_protocol': 'enabled',
+  'cuda': 'enabled',
+  'extract_extradata_bsf': 'enabled',
+  'fd_protocol': 'enabled',
+  'fifo_muxer': 'enabled',
+  'file_protocol': 'enabled',
+  'flac_decoder': 'enabled',
+  'flac_demuxer': 'enabled',
+  'flac_muxer': 'enabled',
+  'flac_parser': 'enabled',
+  'flv_demuxer': 'enabled',
+  'format_filter': 'enabled',
+  'fps_filter': 'enabled',
+  'gpl': 'enabled',
+  'h264_cuvid_decoder': 'enabled',
+  'h264_decoder': 'enabled',
+  'h264_metadata_bsf': 'enabled',
+  'h264_mp4toannexb_bsf': 'enabled',
+  'h264_parser': 'enabled',
+  'h264_redundant_pps_bsf': 'enabled',
+  'hevc_cuvid_decoder': 'enabled',
+  'hevc_mp4toannexb_bsf': 'enabled',
+  'hevc_muxer': 'enabled',
+  'hevc_parser': 'enabled',
+  'hls_muxer': 'enabled',
+  'http_protocol': 'enabled',
+  'hwdownload_filter': 'enabled',
+  'hwupload_cuda_filter': 'enabled',
+  'image2_demuxer': 'enabled',
+  'libxcb': 'enabled',
+  'matroska_audio_muxer': 'enabled',
+  'matroska_demuxer': 'enabled',
+  'matroska_muxer': 'enabled',
+  'mov_demuxer': 'enabled',
+  'mp3_decoder': 'enabled',
+  'mp3_demuxer': 'enabled',
+  'mp3_muxer': 'enabled',
+  'mp4_muxer': 'enabled',
+  'mpegaudio_parser': 'enabled',
+  'mpegts_demuxer': 'enabled',
+  'mpegts_muxer': 'enabled',
+  'network': 'enabled',
+  'null_muxer': 'enabled',
+  'opus_decoder': 'enabled',
+  'opus_parser': 'enabled',
+  'pipe_protocol': 'enabled',
+  'png_decoder': 'enabled',
+  'png_parser': 'enabled',
+  'rtmp_protocol': 'enabled',
+  'scale_cuda_filter': 'enabled',
+  'scale_filter': 'enabled',
+  'segment_muxer': 'enabled',
+  'stream_segment_muxer': 'enabled',
+  'select_filter': 'enabled',
+  'signature_cuda_filter': 'enabled',
+  'signature_filter': 'enabled',
+  'tcp_protocol': 'enabled',
+  'vorbis_decoder': 'enabled',
+  'vorbis_parser': 'enabled',
+  'vp8_cuvid_decoder': 'enabled',
+  'vp8_parser': 'enabled',
+  'vp9_cuvid_decoder': 'enabled',
+  'vp9_parser': 'enabled',
+  'wav_demuxer': 'enabled',
+  'wav_muxer': 'enabled',
+  'webm_muxer': 'enabled',
+  'x86asm': 'enabled',
+  'mov_muxer': 'enabled',
+  'vp9_superframe_bsf': 'enabled',
+  'ac3_parser': 'enabled',
+  'pgs_frame_merge_bsf': 'enabled',
+}
+
+if host_machine.system() != 'windows'
+  ffmpeg_opts += {'nanosleep': 'enabled'}
+endif
+
 ffmpeg_proj = subproject(
-  'ffmpeg',
+  'FFmpeg',
   # vvc seems to have problems building as a submodule?
-  default_options: {
-    'vvc_decoder': 'disabled',
-    'vvc_demuxer': 'disabled',
-    'vvc_metadata_bsf': 'disabled',
-    'vvc_mp4toannexb_bsf': 'disabled',
-    'vvc_muxer': 'disabled',
-    'vvc_parser': 'disabled',
-    'signature_cuda_filter': 'enabled',
-    'signature_filter': 'enabled',
-    'gpl': 'enabled',
-  },
+  default_options: ffmpeg_opts,
 )
 avformat = ffmpeg_proj.get_variable('libavformat_dep')
 avfilter = ffmpeg_proj.get_variable('libavfilter_dep')
+aquareum_deps += [avformat, avfilter]
+
+gstreamer_proj = subproject(
+  'gstreamer-full',
+  default_options: {},
+)
+
+gst_full_dep = gstreamer_proj.get_variable('gst_full_dep')
+aquareum_deps += [
+  gst_full_dep,
+  dependency('gio-2.0'),
+  dependency('gstreamer-controller-1.0'),
+  dependency('gstreamer-pbutils-1.0'),
+  dependency('gstplayback'),
+]
 
 libaquareum = custom_target(
   'libaquareum',
@@ -121,12 +222,23 @@ if host_machine.system() == 'windows'
     '-lntdll',
     '-luserenv',
     '-lcrypt32',
+    '-lbcrypt',
   ], language : [ 'c', 'cpp' ])
 endif
+
+pkg = import('pkgconfig')
+pkg.generate(
+  name: 'aquareumdeps',
+  libraries: [aquareum_deps, c2pa_go_dep],
+  description: 'all aquareum dependencies bundled for easy inclusion'
+)
+
 aquareum = executable(
   'aquareum',
   ['cmd/aquareum/aquareum.c', libaquareum],
-  dependencies: [avformat, avfilter, aquareum_deps],
+  dependencies: [
+    aquareum_deps,
+  ],
   link_with: [c2pa_go_dep],
 )
 

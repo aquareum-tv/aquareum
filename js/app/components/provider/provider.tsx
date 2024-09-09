@@ -6,6 +6,7 @@ import { WagmiProvider } from "wagmi";
 import { mainnet, polygon, optimism, arbitrum, base } from "wagmi/chains";
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { View, Text } from "tamagui";
+import SharedProvider from "./provider.shared";
 
 const queryClient = new QueryClient();
 
@@ -19,25 +20,27 @@ const config = getDefaultConfig({
 
 export default function Provider({ children }: { children: React.ReactNode }) {
   return (
-    <WagmiProvider config={config}>
-      <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider coolMode={true}>
-          {/* RainbowKitProvider hides our children unless we do this...? */}
-          <View
-            id="rainbowkit-interior" // Also this......?????
-            f={1}
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: "100vw",
-              height: "100vh",
-            }}
-          >
-            {children}
-          </View>
-        </RainbowKitProvider>
-      </QueryClientProvider>
-    </WagmiProvider>
+    <SharedProvider>
+      <WagmiProvider config={config}>
+        <QueryClientProvider client={queryClient}>
+          <RainbowKitProvider coolMode={true}>
+            {/* RainbowKitProvider hides our children unless we do this...? */}
+            <View
+              id="rainbowkit-interior" // Also this......?????
+              f={1}
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "100vw",
+                height: "100vh",
+              }}
+            >
+              {children}
+            </View>
+          </RainbowKitProvider>
+        </QueryClientProvider>
+      </WagmiProvider>
+    </SharedProvider>
   );
 }

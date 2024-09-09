@@ -7920,6 +7920,7 @@ __metadata:
     expo-system-ui: "npm:~3.0.7"
     expo-updates: "npm:~0.25.20"
     expo-web-browser: "npm:~13.0.3"
+    hls.js: "npm:^1.5.15"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
     react-native: "npm:0.74.3"
@@ -12241,6 +12242,13 @@ __metadata:
   version: 1.0.8
   resolution: "hey-listen@npm:1.0.8"
   checksum: 10/744b5f4c18c7cfb82b22bd22e1d300a9ac4eafe05a22e58fb87e48addfca8be00604d9aa006434ea02f9530990eb4b393ddb28659e2ab7f833ce873e32eb809c
+  languageName: node
+  linkType: hard
+
+"hls.js@npm:^1.5.15":
+  version: 1.5.15
+  resolution: "hls.js@npm:1.5.15"
+  checksum: 10/58dd5c70e233a3d66ebba9f55bfbe6673ac9d941d391afd896d44e7a141cba931fd25c392133c13f65fbd82e85e1575ada68a2722d1da38b6ad7b9b6a93a6a6b
   languageName: node
   linkType: hard
 

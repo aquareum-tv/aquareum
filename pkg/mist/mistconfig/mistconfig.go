@@ -32,10 +32,6 @@ func Generate(cli *config.CLI) ([]byte, error) {
 				"password": md5.Sum([]byte("aquareum")),
 			},
 		},
-		"autopushes": [][]any{{
-			fmt.Sprintf("%s+", STREAM_NAME),
-			fmt.Sprintf("%s$wildcard/$currentMediaTime.ts?split=1&video=maxbps&audio=AAC&append=1", config.AQUAREUM_SCHEME_PREFIX),
-		}},
 		"bandwidth": map[string]any{
 			"exceptions": []string{
 				"::1",
@@ -43,13 +39,6 @@ func Generate(cli *config.CLI) ([]byte, error) {
 				"10.0.0.0/8",
 				"192.168.0.0/16",
 				"172.16.0.0/12",
-			},
-		},
-		"extwriters": [][]any{
-			{
-				"aquareum",
-				fmt.Sprintf("%s slurp-file --url=%s --file", exec, cli.OwnInternalURL()),
-				[]string{"aquareum"},
 			},
 		},
 		"config": map[string]any{
@@ -101,7 +90,7 @@ func Generate(cli *config.CLI) ([]byte, error) {
 			STREAM_NAME: {
 				"name":          STREAM_NAME,
 				"segmentsize":   1,
-				"source":        "push://",
+				"source":        fmt.Sprintf("mkv-exec:%s stream $wildcard", exec),
 				"stop_sessions": false,
 			},
 		},

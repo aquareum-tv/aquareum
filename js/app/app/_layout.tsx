@@ -21,8 +21,7 @@ import {
 } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { SplashScreen, Stack } from "expo-router";
-import { Provider } from "./Provider";
-import "./updates";
+import { Provider } from "components";
 import { Helmet } from "react-native-helmet-async";
 import { Settings } from "@tamagui/lucide-icons";
 
@@ -85,11 +84,8 @@ function RootLayoutNav() {
               title: "",
               headerShown: true,
               headerRight: () => {
-                if (isWeb) {
-                  return <View />;
-                }
                 return (
-                  <Link href="/options" asChild>
+                  <Link href="/settings" asChild>
                     <Button icon={<Settings size="$2" />}></Button>
                   </Link>
                 );
@@ -104,9 +100,15 @@ function RootLayoutNav() {
             }}
           />
           <Stack.Screen
-            name="options"
+            name="embed/[stream]"
             options={{
-              title: "Options",
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="settings"
+            options={{
+              title: "Settings",
               presentation: "modal",
               animation: "slide_from_right",
               gestureEnabled: true,

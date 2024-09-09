@@ -1,16 +1,14 @@
 package cmd
 
 import (
-	"bufio"
 	"context"
 	"flag"
 	"fmt"
-	"net/http"
 	"os"
 	"os/signal"
 	"path/filepath"
 	"runtime"
-	"strings"
+	"runtime/pprof"
 	"syscall"
 
 	"aquareum.tv/aquareum/pkg/crypto/signers/eip712"
@@ -22,7 +20,8 @@ import (
 	"aquareum.tv/aquareum/pkg/api"
 	"aquareum.tv/aquareum/pkg/config"
 	"aquareum.tv/aquareum/pkg/model"
-	"github.com/peterbourgon/ff/v3"
+	_ "github.com/go-gst/go-glib/glib"
+	_ "github.com/go-gst/go-gst/gst"
 )
 
 // Additional jobs that can be injected by platforms
@@ -30,32 +29,12 @@ type jobFunc func(ctx context.Context, cli *config.CLI) error
 
 // parse the CLI and fire up an aquareum node!
 func start(build *config.BuildFlags, platformJobs []jobFunc) error {
-	if len(os.Args) > 1 && os.Args[1] == "slurp-file" {
-		fs := flag.NewFlagSet("aquareum-slurp-file", flag.ExitOnError)
-		inurl := fs.String("url", "", "Base URL to send slurped files to")
-		fname := fs.String("file", "", "Name of this file we're uploading")
-		ff.Parse(
-			fs, os.Args[2:],
-			ff.WithEnvVarPrefix("AQ"),
-		)
-		*fname = strings.TrimPrefix(*fname, config.AQUAREUM_SCHEME_PREFIX)
-
-		fullURL := fmt.Sprintf("%s/segment/%s", *inurl, *fname)
-
-		reader := bufio.NewReader(os.Stdin)
-		req, err := http.NewRequest("POST", fullURL, reader)
-		if err != nil {
-			panic(err)
+	if len(os.Args) > 1 && os.Args[1] == "stream" {
+		if len(os.Args) != 3 {
+			fmt.Println("usage: aquareum stream [user]")
+			os.Exit(1)
 		}
-		client := &http.Client{}
-		resp, err := client.Do(req)
-		if err != nil {
-			panic(err)
-		}
-		if resp.StatusCode != 200 {
-			fmt.Printf("http %s\n", resp.Status)
-		}
-		os.Exit(0)
+		return Stream(os.Args[2])
 	}
 
 	defaultDataDir, err := config.DefaultDataDir()
@@ -178,10 +157,13 @@ func start(build *config.BuildFlags, platformJobs []jobFunc) error {
 
 func handleSignals(ctx context.Context) error {
 	c := make(chan os.Signal, 1)
-	signal.Notify(c, syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT)
+	signal.Notify(c, syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT, syscall.SIGABRT)
 	for {
 		select {
 		case s := <-c:
+			if s == syscall.SIGABRT {
+				pprof.Lookup("goroutine").WriteTo(os.Stderr, 2)
+			}
 			log.Log(ctx, "caught signal, attempting clean shutdown", "signal", s)
 			return fmt.Errorf("caught signal=%v", s)
 		case <-ctx.Done():
