@@ -19,6 +19,7 @@ builder:
 
 builder-rebuild:
   stage: build
+  interruptible: true
   image:
     name: curlimages/curl:latest
     entrypoint: [""]
@@ -93,6 +94,7 @@ build-docker-arm64:
 
 build-docker-manifest:
   stage: build
+  interruptible: true
   image:
     name: curlimages/curl:latest
     entrypoint: [""]
@@ -141,6 +143,7 @@ build-mac:
       && pip3 install meson
       && make ci-macos -j16
       && make test
+
 release:
   stage: build
   interruptible: true
