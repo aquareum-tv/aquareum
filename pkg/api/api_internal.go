@@ -44,7 +44,6 @@ func init() {
 	}
 	secretUUID = uu.String()
 
-	// Compile the regular expression
 	mkvRE = regexp.MustCompile(`^\d+\.mkv$`)
 
 }
