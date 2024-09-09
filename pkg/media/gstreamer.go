@@ -75,6 +75,7 @@ func AddOpusToMKV(ctx context.Context, input io.Reader, output io.Writer) error 
 	// })
 
 	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
 	go func() {
 		<-ctx.Done()
 		pipeline.BlockSetState(gst.StateNull)
