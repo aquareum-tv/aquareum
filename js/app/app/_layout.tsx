@@ -100,6 +100,12 @@ function RootLayoutNav() {
             }}
           />
           <Stack.Screen
+            name="embed/[stream]"
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
             name="settings"
             options={{
               title: "Settings",
