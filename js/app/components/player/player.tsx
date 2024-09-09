@@ -9,9 +9,9 @@ import React, {
 } from "react";
 import { Button, Text, View, XStack } from "tamagui";
 import WHEPClient from "./webrtc";
-import { EXPO_PUBLIC_AQUAREUM_URL } from "constants/env";
 import Hls from "hls.js";
 import { Circle, CheckCircle } from "@tamagui/lucide-icons";
+import useAquareumNode from "hooks/useAquareumNode";
 
 export function Player(props: { src: string }) {
   const [proto, setProto] = useState("webrtc");
@@ -64,11 +64,12 @@ const PickerButton = (props: {
 
 export function HLSPlayer(props: { src: string }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const { url } = useAquareumNode();
   useEffect(() => {
     if (!videoRef.current) {
       return;
     }
-    const index = `${EXPO_PUBLIC_AQUAREUM_URL}/api/hls/${props.src}/index.m3u8`;
+    const index = `${url}/api/hls/${props.src}/index.m3u8`;
     if (Hls.isSupported()) {
       var hls = new Hls();
       hls.loadSource(index);
@@ -97,12 +98,13 @@ export function HLSPlayer(props: { src: string }) {
 
 export function WebRTCPlayer(props: { src: string }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const { url } = useAquareumNode();
   useEffect(() => {
     if (!videoRef.current) {
       return;
     }
     const client = new WHEPClient(
-      `${EXPO_PUBLIC_AQUAREUM_URL}/api/webrtc/${props.src}`,
+      `${url}/api/webrtc/${props.src}`,
       videoRef.current,
     );
     return () => {

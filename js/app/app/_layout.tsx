@@ -84,9 +84,6 @@ function RootLayoutNav() {
               title: "",
               headerShown: true,
               headerRight: () => {
-                // if (isWeb) {
-                //   return <View />;
-                // }
                 return (
                   <Link href="/settings" asChild>
                     <Button icon={<Settings size="$2" />}></Button>

@@ -113,25 +113,29 @@ export async function negotiateConnectionWithClientOffer(
    * As long as the connection is open, attempt to...
    */
   while (peerConnection.connectionState !== "closed") {
-    /**
-     * This response contains the server's SDP offer.
-     * This specifies how the client should communicate,
-     * and what kind of media client and server have negotiated to exchange.
-     */
-    let response = await postSDPOffer(endpoint, ofr.sdp);
-    if (response.status === 201) {
-      let answerSDP = await response.text();
-      await peerConnection.setRemoteDescription(
-        new RTCSessionDescription({ type: "answer", sdp: answerSDP }),
-      );
-      return response.headers.get("Location");
-    } else if (response.status === 405) {
-      console.log(
-        "Remember to update the URL passed into the WHIP or WHEP client",
-      );
-    } else {
-      const errorMessage = await response.text();
-      console.error(errorMessage);
+    try {
+      /**
+       * This response contains the server's SDP offer.
+       * This specifies how the client should communicate,
+       * and what kind of media client and server have negotiated to exchange.
+       */
+      let response = await postSDPOffer(endpoint, ofr.sdp);
+      if (response.status === 201) {
+        let answerSDP = await response.text();
+        await peerConnection.setRemoteDescription(
+          new RTCSessionDescription({ type: "answer", sdp: answerSDP }),
+        );
+        return response.headers.get("Location");
+      } else if (response.status === 405) {
+        console.log(
+          "Remember to update the URL passed into the WHIP or WHEP client",
+        );
+      } else {
+        const errorMessage = await response.text();
+        console.error(errorMessage);
+      }
+    } catch (e) {
+      console.error(e);
     }
 
     /** Limit reconnection attempts to at-most once every 5 seconds */
@@ -162,6 +166,9 @@ async function waitToCompleteICEGathering(peerConnection: RTCPeerConnection) {
   return new Promise<RTCSessionDescription | null>((resolve) => {
     /** Wait at most 1 second for ICE gathering. */
     setTimeout(function () {
+      if (peerConnection.connectionState === "closed") {
+        return;
+      }
       resolve(peerConnection.localDescription);
     }, 1000);
     peerConnection.onicegatheringstatechange = (ev) =>
