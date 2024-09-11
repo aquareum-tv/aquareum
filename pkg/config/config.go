@@ -58,6 +58,13 @@ type CLI struct {
 	TAURL                  string
 	TLSCertPath            string
 	TLSKeyPath             string
+	PKCS11ModulePath       string
+	PKCS11Pin              string
+	PKCS11TokenSlot        string
+	PKCS11TokenLabel       string
+	PKCS11TokenSerial      string
+	PKCS11KeypairLabel     string
+	PKCS11KeypairID        string
 
 	dataDirFlags []*string
 }

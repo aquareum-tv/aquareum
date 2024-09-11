@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"crypto"
 	"flag"
 	"fmt"
 	"os"
@@ -9,17 +10,21 @@ import (
 	"path/filepath"
 	"runtime"
 	"runtime/pprof"
+	"strconv"
 	"syscall"
 
+	"aquareum.tv/aquareum/pkg/crypto/signers"
 	"aquareum.tv/aquareum/pkg/crypto/signers/eip712"
 	"aquareum.tv/aquareum/pkg/log"
 	"aquareum.tv/aquareum/pkg/media"
 	"aquareum.tv/aquareum/pkg/notifications"
 	v0 "aquareum.tv/aquareum/pkg/schema/v0"
+	"golang.org/x/term"
 
 	"aquareum.tv/aquareum/pkg/api"
 	"aquareum.tv/aquareum/pkg/config"
 	"aquareum.tv/aquareum/pkg/model"
+	"github.com/ThalesGroup/crypto11"
 	_ "github.com/go-gst/go-glib/glib"
 	_ "github.com/go-gst/go-gst/gst"
 )
@@ -60,6 +65,13 @@ func start(build *config.BuildFlags, platformJobs []jobFunc) error {
 	fs.StringVar(&cli.EthAccountAddr, "eth-account-addr", "", "ethereum account address to use (if keystore contains more than one)")
 	fs.StringVar(&cli.EthPassword, "eth-password", "", "password for encrypting keystore")
 	fs.StringVar(&cli.TAURL, "ta-url", "http://timestamp.digicert.com", "timestamp authority server for signing")
+	fs.StringVar(&cli.PKCS11ModulePath, "pkcs11-module-path", "", "path to a PKCS11 module for HSM signing, for example /usr/lib/x86_64-linux-gnu/opensc-pkcs11.so")
+	fs.StringVar(&cli.PKCS11Pin, "pkcs11-pin", "", "PIN for logging into PKCS11 token. if not provided, will be prompted interactively")
+	fs.StringVar(&cli.PKCS11TokenSlot, "pkcs11-token-slot", "", "slot number of PKCS11 token (only use one of slot, label, or serial)")
+	fs.StringVar(&cli.PKCS11TokenLabel, "pkcs11-token-label", "", "label of PKCS11 token (only use one of slot, label, or serial)")
+	fs.StringVar(&cli.PKCS11TokenSerial, "pkcs11-token-serial", "", "serial number of PKCS11 token (only use one of slot, label, or serial)")
+	fs.StringVar(&cli.PKCS11KeypairLabel, "pkcs11-keypair-label", "", "label of signing keypair on PKCS11 token")
+	fs.StringVar(&cli.PKCS11KeypairID, "pkcs11-keypair-id", "", "id of signing keypair on PKCS11 token")
 	version := fs.Bool("version", false, "print version and exit")
 
 	if runtime.GOOS == "linux" {
@@ -93,7 +105,7 @@ func start(build *config.BuildFlags, platformJobs []jobFunc) error {
 	if err != nil {
 		return err
 	}
-	signer, err := eip712.MakeEIP712Signer(ctx, &eip712.EIP712SignerOptions{
+	eip712signer, err := eip712.MakeEIP712Signer(ctx, &eip712.EIP712SignerOptions{
 		Schema:              schema,
 		EthKeystorePath:     cli.EthKeystorePath,
 		EthAccountAddr:      cli.EthAccountAddr,
@@ -101,6 +113,77 @@ func start(build *config.BuildFlags, platformJobs []jobFunc) error {
 	})
 	if err != nil {
 		return err
+	}
+	var signer crypto.Signer = eip712signer
+	if cli.PKCS11ModulePath != "" {
+		conf := &crypto11.Config{
+			Path: cli.PKCS11ModulePath,
+		}
+		count := 0
+		for _, val := range []string{cli.PKCS11TokenSlot, cli.PKCS11TokenLabel, cli.PKCS11TokenSerial} {
+			if val != "" {
+				count += 1
+			}
+		}
+		if count != 1 {
+			return fmt.Errorf("need exactly one of pkcs11-token-slot, pkcs11-token-label, or pkcs11-token-serial (got %d)", count)
+		}
+		if cli.PKCS11TokenSlot != "" {
+			num, err := strconv.ParseInt(cli.PKCS11TokenSlot, 10, 16)
+			if err != nil {
+				return fmt.Errorf("error parsing pkcs11-slot: %w", err)
+			}
+			numint := int(num)
+			// why does crypto11 want this as a reference? odd.
+			conf.SlotNumber = &numint
+		}
+		if cli.PKCS11TokenLabel != "" {
+			conf.TokenLabel = cli.PKCS11TokenLabel
+		}
+		if cli.PKCS11TokenSerial != "" {
+			conf.TokenSerial = cli.PKCS11TokenSerial
+		}
+		pin := cli.PKCS11Pin
+		if pin == "" {
+			fmt.Printf("Please enter PKCS11 PIN: ")
+			password, err := term.ReadPassword(int(os.Stdin.Fd()))
+			fmt.Println("")
+			if err != nil {
+				return fmt.Errorf("error reading PKCS11 password: %w", err)
+			}
+			pin = string(password)
+		}
+		conf.Pin = pin
+
+		sc, err := crypto11.Configure(conf)
+		if err != nil {
+			return fmt.Errorf("error initalizing PKCS11 HSM: %w", err)
+		}
+		var id []byte = nil
+		var label []byte = nil
+		if cli.PKCS11KeypairID != "" {
+			num, err := strconv.ParseInt(cli.PKCS11KeypairID, 10, 8)
+			if err != nil {
+				return fmt.Errorf("error parsing pkcs11-keypair-id: %w", err)
+			}
+			id = []byte{byte(num)}
+		}
+		if cli.PKCS11KeypairLabel != "" {
+			label = []byte(cli.PKCS11KeypairLabel)
+		}
+		hwsigner, err := sc.FindKeyPair(id, label)
+		if err != nil {
+			return fmt.Errorf("error finding keypair on PKCS11 token: %w", err)
+		}
+		if hwsigner == nil {
+			return fmt.Errorf("keypair on token not found (tried id='%s' label='%s')", cli.PKCS11KeypairID, cli.PKCS11KeypairLabel)
+		}
+		addr, err := signers.HexAddrFromSigner(hwsigner)
+		if err != nil {
+			return fmt.Errorf("error getting ethereum address for hardware keypair: %w", err)
+		}
+		log.Log(ctx, "successfully initialized hardware signer", "address", addr)
+		signer = hwsigner
 	}
 	mm, err := media.MakeMediaManager(ctx, &cli, signer)
 	if err != nil {
@@ -117,7 +200,7 @@ func start(build *config.BuildFlags, platformJobs []jobFunc) error {
 			return err
 		}
 	}
-	a, err := api.MakeAquareumAPI(&cli, mod, signer, noter, mm)
+	a, err := api.MakeAquareumAPI(&cli, mod, eip712signer, noter, mm)
 	if err != nil {
 		return err
 	}

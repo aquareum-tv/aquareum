@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"crypto"
+	"crypto/ecdsa"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -13,7 +14,7 @@ import (
 	"time"
 
 	"aquareum.tv/aquareum/pkg/config"
-	"aquareum.tv/aquareum/pkg/crypto/signers/eip712"
+	"aquareum.tv/aquareum/pkg/crypto/signers"
 	"aquareum.tv/aquareum/pkg/log"
 	"github.com/google/uuid"
 	"github.com/livepeer/lpms/ffmpeg"
@@ -36,31 +37,32 @@ type MediaManager struct {
 	mkvsubsmut sync.Mutex
 }
 
-func MakeMediaManager(ctx context.Context, cli *config.CLI, signer *eip712.EIP712Signer) (*MediaManager, error) {
-	exists, err := cli.DataFileExists([]string{CERT_FILE})
+func MakeMediaManager(ctx context.Context, cli *config.CLI, signer crypto.Signer) (*MediaManager, error) {
+	hex := signers.HexAddr(signer.Public().(*ecdsa.PublicKey))
+	exists, err := cli.DataFileExists([]string{hex, CERT_FILE})
 	if err != nil {
 		return nil, err
 	}
 	if !exists {
-		cert, err := signer.GenerateCert()
+		cert, err := signers.GenerateES256KCert(signer)
 		if err != nil {
 			return nil, err
 		}
 		r := bytes.NewReader(cert)
-		err = cli.DataFileWrite([]string{CERT_FILE}, r, false)
+		err = cli.DataFileWrite([]string{hex, CERT_FILE}, r, false)
 		if err != nil {
 			return nil, err
 		}
-		log.Log(ctx, "wrote new media signing certificate", "file", CERT_FILE)
+		log.Log(ctx, "wrote new media signing certificate", "file", filepath.Join(hex, CERT_FILE))
 	}
 	buf := bytes.Buffer{}
-	cli.DataFileRead([]string{CERT_FILE}, &buf)
+	cli.DataFileRead([]string{hex, CERT_FILE}, &buf)
 	cert := buf.Bytes()
 	return &MediaManager{
 		cli:     cli,
 		signer:  signer,
 		cert:    cert,
-		user:    signer.Hex(),
+		user:    hex,
 		mp4subs: map[string][]chan string{},
 		mkvsubs: map[string]io.Writer{},
 	}, nil
