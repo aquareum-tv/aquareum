@@ -4,10 +4,13 @@ go 1.22.2
 
 replace github.com/livepeer/lpms => github.com/aquareum-tv/lpms v0.0.0-20240828210246-5ac9b407751e
 
+replace github.com/ThalesGroup/crypto11 => github.com/aquareum-tv/crypto11 v0.0.0-20240821184406-43336abc768f
+
 require (
 	firebase.google.com/go/v4 v4.14.1
 	git.aquareum.tv/aquareum-tv/c2pa-go v0.0.0-20240827194057-dc4fd1d2c425
 	github.com/NYTimes/gziphandler v1.1.1
+	github.com/ThalesGroup/crypto11 v0.0.0-00010101000000-000000000000
 	github.com/decred/dcrd/dcrec/secp256k1 v1.0.4
 	github.com/dunglas/httpsfv v1.0.2
 	github.com/ethereum/go-ethereum v1.14.7
@@ -28,6 +31,7 @@ require (
 	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56
 	golang.org/x/net v0.27.0
 	golang.org/x/sync v0.7.0
+	golang.org/x/term v0.22.0
 	google.golang.org/api v0.189.0
 	gorm.io/driver/sqlite v1.5.5
 )
@@ -95,16 +99,19 @@ require (
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
 	github.com/livepeer/m3u8 v0.11.1 // indirect
 	github.com/mattn/go-pointer v0.0.1 // indirect
+	github.com/miekg/pkcs11 v1.1.1 // indirect
 	github.com/mitchellh/gox v1.0.1 // indirect
 	github.com/mitchellh/iochan v1.0.0 // indirect
 	github.com/mmcloughlin/addchain v0.4.0 // indirect
 	github.com/pjbgf/sha1cd v0.3.0 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/sergi/go-diff v1.3.2-0.20230802210424-5b0b94c5c0d3 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/skeema/knownhosts v1.2.2 // indirect
 	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/supranational/blst v0.3.11 // indirect
+	github.com/thales-e-security/pool v0.0.2 // indirect
 	github.com/urfave/cli/v2 v2.25.7 // indirect
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
