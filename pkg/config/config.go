@@ -65,6 +65,7 @@ type CLI struct {
 	PKCS11TokenSerial      string
 	PKCS11KeypairLabel     string
 	PKCS11KeypairID        string
+	StreamerName           string
 
 	dataDirFlags []*string
 }

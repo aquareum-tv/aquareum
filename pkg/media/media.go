@@ -13,6 +13,7 @@ import (
 	"sync"
 	"time"
 
+	"aquareum.tv/aquareum/pkg/aqtime"
 	"aquareum.tv/aquareum/pkg/config"
 	"aquareum.tv/aquareum/pkg/crypto/signers"
 	"aquareum.tv/aquareum/pkg/log"
@@ -283,23 +284,64 @@ func (mm *MediaManager) HandleMKVStream(ctx context.Context, user, uu string, r 
 	return err
 }
 
-func (mm *MediaManager) SignMP4(ctx context.Context, input io.ReadSeeker, output io.ReadWriteSeeker, now int64) error {
-	manifestBs := []byte(fmt.Sprintf(`
-		{
-			"title": "Livestream Segment at %s",
-			"assertions": [
-				{
-					"label": "c2pa.actions",
-					"data": {"actions": [
-						{ "action": "c2pa.created" },
-						{ "action": "c2pa.published" }
-					]}
-				}
-			]
-		}
-	`, time.UnixMilli(now).UTC().Format("2006-01-02T15:04:05.999Z")))
+type obj map[string]any
+
+func (mm *MediaManager) SignMP4(ctx context.Context, input io.ReadSeeker, output io.ReadWriteSeeker, start int64) error {
+	end := time.Now().UnixMilli()
+	// manifestBs := []byte(fmt.Sprintf(`
+	// 	{
+	// 		"title": "Livestream Segment at %s",
+	// 		"assertions": [
+	// 			{
+	// 				"label": "c2pa.actions",
+	// 				"data": {
+	// 					"actions": [
+	// 						{ "action": "c2pa.created" },
+	// 						{ "action": "c2pa.published" }
+	// 					]
+	// 				}
+	// 			}
+	// 		]
+	// 	}
+	// `, time.UnixMilli(now).UTC().Format("2006-01-02T15:04:05.999Z")))
+	mani := obj{
+		"title": fmt.Sprintf("Livestream Segment at %s", aqtime.FormatMillis(start)),
+		"assertions": []obj{
+			{
+				"label": "c2pa.actions",
+				"data": obj{
+					"actions": []obj{
+						{"action": "c2pa.created"},
+						{"action": "c2pa.published"},
+					},
+				},
+			},
+			{
+				"label": "stds.metadata",
+				"data": obj{
+					"@context": obj{
+						"s": "http://schema.org/",
+					},
+					"@type": "s:VideoObject",
+					"s:creator": []obj{
+						{
+							"@type":     "s:Person",
+							"s:name":    mm.cli.StreamerName,
+							"s:address": mm.user,
+						},
+					},
+					"s:startTime": aqtime.FormatMillis(start),
+					"s:endTime":   aqtime.FormatMillis(end),
+				},
+			},
+		},
+	}
+	manifestBs, err := json.Marshal(mani)
+	if err != nil {
+		return err
+	}
 	var manifest c2pa.ManifestDefinition
-	err := json.Unmarshal(manifestBs, &manifest)
+	err = json.Unmarshal(manifestBs, &manifest)
 	if err != nil {
 		return err
 	}
