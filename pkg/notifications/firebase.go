@@ -1,6 +1,7 @@
 package notifications
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 
@@ -25,9 +26,16 @@ type GoogleCredential struct {
 	ProjectID string `json:"project_id"`
 }
 
-func MakeFirebaseNotifier(ctx context.Context, serviceAccountJSON string) (FirebaseNotifier, error) {
+func MakeFirebaseNotifier(ctx context.Context, serviceAccountJSONb64 string) (FirebaseNotifier, error) {
+	// string can optionally be base64-encoded
+	serviceAccountJSON := serviceAccountJSONb64
+	dec, err := base64.StdEncoding.DecodeString(serviceAccountJSONb64)
+	if err == nil {
+		// succeeded, cool! use that.
+		serviceAccountJSON = string(dec)
+	}
 	var cred GoogleCredential
-	err := json.Unmarshal([]byte(serviceAccountJSON), &cred)
+	err = json.Unmarshal([]byte(serviceAccountJSON), &cred)
 	if err != nil {
 		return nil, fmt.Errorf("error trying to discover project_id: %w", err)
 	}
