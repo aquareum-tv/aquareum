@@ -26,6 +26,11 @@ version:
 install:
 	yarn install --inline-builds
 
+.PHONY: app-and-node
+app-and-node:
+	$(MAKE) app
+	$(MAKE) node
+
 .PHONY: app
 app: schema install
 	yarn run build
@@ -194,7 +199,7 @@ docker-build-builder:
 
 .PHONY: docker-build-builder
 docker-build-in-container:
-	docker run -v $$(pwd):$$(pwd) -w $$(pwd) --rm -it aqrm.io/aquareum-tv/aquareum:builder make android
+	docker run -v $$(pwd):$$(pwd) -w $$(pwd) --rm -it aqrm.io/aquareum-tv/aquareum:builder make app-and-node
 
 .PHONY: docker-release
 docker-release:
