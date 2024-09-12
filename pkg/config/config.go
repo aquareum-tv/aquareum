@@ -15,6 +15,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/peterbourgon/ff/v3"
 	"golang.org/x/exp/rand"
 )
@@ -66,6 +67,7 @@ type CLI struct {
 	PKCS11KeypairLabel     string
 	PKCS11KeypairID        string
 	StreamerName           string
+	AllowedStreams         []common.Address
 
 	dataDirFlags []*string
 }
@@ -211,4 +213,20 @@ func (cli *CLI) DataDirFlag(fs *flag.FlagSet, dest *string, name, defaultValue, 
 
 func (cli *CLI) HasMist() bool {
 	return runtime.GOOS == "linux"
+}
+
+// type for comma-separated ethereum addresses
+func (cli *CLI) AddressSliceFlag(fs *flag.FlagSet, dest *[]common.Address, name, defaultValue, usage string) {
+	*dest = []common.Address{}
+	usage = fmt.Sprintf(`%s (default: "%s")`, usage, *dest)
+	fs.Func(name, usage, func(s string) error {
+		if s == "" {
+			return nil
+		}
+		strs := strings.Split(s, ",")
+		for _, str := range strs {
+			*dest = append(*dest, common.HexToAddress(str))
+		}
+		return nil
+	})
 }

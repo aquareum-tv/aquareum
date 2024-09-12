@@ -8,7 +8,7 @@ replace github.com/ThalesGroup/crypto11 => github.com/aquareum-tv/crypto11 v0.0.
 
 require (
 	firebase.google.com/go/v4 v4.14.1
-	git.aquareum.tv/aquareum-tv/c2pa-go v0.0.0-20240827194057-dc4fd1d2c425
+	git.aquareum.tv/aquareum-tv/c2pa-go v0.0.0-20240912215712-1d2a5e431869
 	github.com/NYTimes/gziphandler v1.1.1
 	github.com/ThalesGroup/crypto11 v0.0.0-00010101000000-000000000000
 	github.com/decred/dcrd/dcrec/secp256k1 v1.0.4

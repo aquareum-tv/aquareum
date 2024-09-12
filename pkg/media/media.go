@@ -17,6 +17,7 @@ import (
 	"aquareum.tv/aquareum/pkg/config"
 	"aquareum.tv/aquareum/pkg/crypto/signers"
 	"aquareum.tv/aquareum/pkg/log"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/google/uuid"
 	"github.com/livepeer/lpms/ffmpeg"
 	"golang.org/x/sync/errgroup"
@@ -364,4 +365,23 @@ func (mm *MediaManager) SignMP4(ctx context.Context, input io.ReadSeeker, output
 		return err
 	}
 	return nil
+}
+
+func (mm *MediaManager) ValidateMP4(ctx context.Context, input io.ReadSeeker) error {
+	reader, err := c2pa.FromStream(input, "video/mp4")
+	if err != nil {
+		return err
+	}
+	reader.GetActiveManifest()
+	certs := reader.GetProvenanceCertChain()
+	addr, err := signers.ParseES256KCert([]byte(certs))
+	if err != nil {
+		return err
+	}
+	for _, a := range mm.cli.AllowedStreams {
+		if a.Cmp(*addr) == 0 {
+			return nil
+		}
+	}
+	return fmt.Errorf("got valid segment, but address is not allowed: %s", hexutil.Encode(addr.Bytes()))
 }
