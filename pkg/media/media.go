@@ -19,6 +19,7 @@ import (
 	"aquareum.tv/aquareum/pkg/config"
 	"aquareum.tv/aquareum/pkg/crypto/signers"
 	"aquareum.tv/aquareum/pkg/log"
+	"aquareum.tv/aquareum/pkg/replication"
 	"github.com/google/uuid"
 	"github.com/livepeer/lpms/ffmpeg"
 	"golang.org/x/sync/errgroup"
@@ -44,9 +45,10 @@ type MediaManager struct {
 	mp4subsmut sync.Mutex
 	mkvsubs    map[string]io.Writer
 	mkvsubsmut sync.Mutex
+	replicator replication.Replicator
 }
 
-func MakeMediaManager(ctx context.Context, cli *config.CLI, signer crypto.Signer) (*MediaManager, error) {
+func MakeMediaManager(ctx context.Context, cli *config.CLI, signer crypto.Signer, rep replication.Replicator) (*MediaManager, error) {
 	hex := signers.HexAddr(signer.Public().(*ecdsa.PublicKey))
 	exists, err := cli.DataFileExists([]string{hex, CERT_FILE})
 	if err != nil {
@@ -68,12 +70,13 @@ func MakeMediaManager(ctx context.Context, cli *config.CLI, signer crypto.Signer
 	cli.DataFileRead([]string{hex, CERT_FILE}, &buf)
 	cert := buf.Bytes()
 	return &MediaManager{
-		cli:     cli,
-		signer:  signer,
-		cert:    cert,
-		user:    hex,
-		mp4subs: map[string][]chan string{},
-		mkvsubs: map[string]io.Writer{},
+		cli:        cli,
+		signer:     signer,
+		cert:       cert,
+		user:       hex,
+		mp4subs:    map[string][]chan string{},
+		mkvsubs:    map[string]io.Writer{},
+		replicator: rep,
 	}, nil
 }
 
@@ -470,6 +473,7 @@ func (mm *MediaManager) ValidateMP4(ctx context.Context, input io.Reader) error 
 		return err
 	}
 	defer fd.Close()
+	go mm.replicator.NewSegment(ctx, buf)
 	r = bytes.NewReader(buf)
 	io.Copy(fd, r)
 	base := filepath.Base(fd.Name())

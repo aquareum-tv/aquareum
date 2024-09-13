@@ -106,7 +106,6 @@ func (a *AquareumAPI) InternalHandler(ctx context.Context) (http.Handler, error)
 			errors.WriteHTTPBadRequest(w, "badly formatted request", err)
 			return
 		}
-		log.Log(ctx, "serving segment", "fullpath", fullpath)
 		http.ServeFile(w, r, fullpath)
 	})
 

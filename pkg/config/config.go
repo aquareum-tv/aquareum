@@ -54,6 +54,7 @@ type CLI struct {
 	HttpInternalAddr       string
 	HttpsAddr              string
 	Insecure               bool
+	NoMist                 bool
 	MistAdminPort          int
 	MistHTTPPort           int
 	MistRTMPPort           int
@@ -70,6 +71,7 @@ type CLI struct {
 	PKCS11KeypairID        string
 	StreamerName           string
 	AllowedStreams         []aqpub.Pub
+	Peers                  []string
 
 	dataDirFlags []*string
 }
@@ -113,22 +115,30 @@ func RandomTrailer(length int) string {
 	return string(res)
 }
 
-func DefaultDataDir() (string, error) {
+func DefaultDataDir() string {
 	home, err := os.UserHomeDir()
 	if err != nil {
-		return "", fmt.Errorf("error finding default data dir: %w", err)
+		// not fatal unless the user doesn't set one later
+		return ""
 	}
-	return filepath.Join(home, ".aquareum"), nil
+	return filepath.Join(home, ".aquareum")
 }
 
-func (cli *CLI) Parse(fs *flag.FlagSet, args []string) {
-	ff.Parse(
+func (cli *CLI) Parse(fs *flag.FlagSet, args []string) error {
+	err := ff.Parse(
 		fs, os.Args[1:],
 		ff.WithEnvVarPrefix("AQ"),
 	)
+	if err != nil {
+		return err
+	}
+	if cli.DataDir == "" {
+		return fmt.Errorf("could not determine default data dir (no $HOME) and none provided, please set --data-dir")
+	}
 	for _, dest := range cli.dataDirFlags {
 		*dest = strings.Replace(*dest, AQ_DATA_DIR, cli.DataDir, 1)
 	}
+	return nil
 }
 
 func (cli *CLI) dataFilePath(fpath []string) string {
@@ -259,6 +269,19 @@ func (cli *CLI) AddressSliceFlag(fs *flag.FlagSet, dest *[]aqpub.Pub, name, defa
 			}
 			*dest = append(*dest, pub)
 		}
+		return nil
+	})
+}
+
+func (cli *CLI) StringSliceFlag(fs *flag.FlagSet, dest *[]string, name, defaultValue, usage string) {
+	*dest = []string{}
+	usage = fmt.Sprintf(`%s (default: "%s")`, usage, *dest)
+	fs.Func(name, usage, func(s string) error {
+		if s == "" {
+			return nil
+		}
+		strs := strings.Split(s, ",")
+		*dest = append(*dest, strs...)
 		return nil
 	})
 }

@@ -13,11 +13,14 @@ import (
 	"strconv"
 	"syscall"
 
+	"aquareum.tv/aquareum/pkg/aqhttp"
 	"aquareum.tv/aquareum/pkg/crypto/signers"
 	"aquareum.tv/aquareum/pkg/crypto/signers/eip712"
 	"aquareum.tv/aquareum/pkg/log"
 	"aquareum.tv/aquareum/pkg/media"
 	"aquareum.tv/aquareum/pkg/notifications"
+	"aquareum.tv/aquareum/pkg/replication"
+	"aquareum.tv/aquareum/pkg/replication/boring"
 	v0 "aquareum.tv/aquareum/pkg/schema/v0"
 	"golang.org/x/term"
 
@@ -42,14 +45,9 @@ func start(build *config.BuildFlags, platformJobs []jobFunc) error {
 		return Stream(os.Args[2])
 	}
 
-	defaultDataDir, err := config.DefaultDataDir()
-	if err != nil {
-		return err
-	}
-
 	fs := flag.NewFlagSet("aquareum", flag.ExitOnError)
 	cli := config.CLI{Build: build}
-	fs.StringVar(&cli.DataDir, "data-dir", defaultDataDir, "directory for keeping all aquareum data")
+	fs.StringVar(&cli.DataDir, "data-dir", config.DefaultDataDir(), "directory for keeping all aquareum data")
 	fs.StringVar(&cli.HttpAddr, "http-addr", ":8080", "Public HTTP address")
 	fs.StringVar(&cli.HttpInternalAddr, "http-internal-addr", "127.0.0.1:9090", "Private, admin-only HTTP address")
 	fs.StringVar(&cli.HttpsAddr, "https-addr", ":8443", "Public HTTPS address")
@@ -74,18 +72,23 @@ func start(build *config.BuildFlags, platformJobs []jobFunc) error {
 	fs.StringVar(&cli.PKCS11KeypairID, "pkcs11-keypair-id", "", "id of signing keypair on PKCS11 token")
 	fs.StringVar(&cli.StreamerName, "streamer-name", "", "name of the person streaming from this aquareum node")
 	cli.AddressSliceFlag(fs, &cli.AllowedStreams, "allowed-streams", "", "comma-separated list of addresses that this node will replicate")
+	cli.StringSliceFlag(fs, &cli.Peers, "peers", "", "other aquareum nodes to replicate to")
 
 	version := fs.Bool("version", false, "print version and exit")
 
 	if runtime.GOOS == "linux" {
+		fs.BoolVar(&cli.NoMist, "no-mist", false, "Disable MistServer")
 		fs.IntVar(&cli.MistAdminPort, "mist-admin-port", 14242, "MistServer admin port (internal use only)")
 		fs.IntVar(&cli.MistRTMPPort, "mist-rtmp-port", 11935, "MistServer RTMP port (internal use only)")
 		fs.IntVar(&cli.MistHTTPPort, "mist-http-port", 18080, "MistServer HTTP port (internal use only)")
 	}
 
-	cli.Parse(
+	err := cli.Parse(
 		fs, os.Args[1:],
 	)
+	if err != nil {
+		return err
+	}
 
 	ctx := context.Background()
 
@@ -99,6 +102,8 @@ func start(build *config.BuildFlags, platformJobs []jobFunc) error {
 	if *version {
 		return nil
 	}
+
+	aqhttp.UserAgent = fmt.Sprintf("aquareum/%s", build.Version)
 
 	err = os.MkdirAll(cli.DataDir, os.ModePerm)
 	if err != nil {
@@ -188,7 +193,8 @@ func start(build *config.BuildFlags, platformJobs []jobFunc) error {
 		log.Log(ctx, "successfully initialized hardware signer", "address", addr)
 		signer = hwsigner
 	}
-	mm, err := media.MakeMediaManager(ctx, &cli, signer)
+	var rep replication.Replicator = &boring.BoringReplicator{Peers: cli.Peers}
+	mm, err := media.MakeMediaManager(ctx, &cli, signer, rep)
 	if err != nil {
 		return err
 	}
