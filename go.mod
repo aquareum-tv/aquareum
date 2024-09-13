@@ -24,6 +24,7 @@ require (
 	github.com/lmittmann/tint v1.0.4
 	github.com/orandin/slog-gorm v1.3.2
 	github.com/peterbourgon/ff/v3 v3.3.1
+	github.com/piprate/json-gold v0.5.0
 	github.com/rs/cors v1.7.0
 	github.com/samber/slog-http v1.4.0
 	github.com/stretchr/testify v1.9.0
@@ -105,6 +106,7 @@ require (
 	github.com/mmcloughlin/addchain v0.4.0 // indirect
 	github.com/pjbgf/sha1cd v0.3.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
+	github.com/pquerna/cachecontrol v0.0.0-20180517163645-1555304b9b35 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/sergi/go-diff v1.3.2-0.20230802210424-5b0b94c5c0d3 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect

@@ -15,7 +15,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
+	"aquareum.tv/aquareum/pkg/crypto/aqpub"
 	"github.com/peterbourgon/ff/v3"
 	"golang.org/x/exp/rand"
 )
@@ -67,7 +67,7 @@ type CLI struct {
 	PKCS11KeypairLabel     string
 	PKCS11KeypairID        string
 	StreamerName           string
-	AllowedStreams         []common.Address
+	AllowedStreams         []aqpub.Pub
 
 	dataDirFlags []*string
 }
@@ -216,8 +216,8 @@ func (cli *CLI) HasMist() bool {
 }
 
 // type for comma-separated ethereum addresses
-func (cli *CLI) AddressSliceFlag(fs *flag.FlagSet, dest *[]common.Address, name, defaultValue, usage string) {
-	*dest = []common.Address{}
+func (cli *CLI) AddressSliceFlag(fs *flag.FlagSet, dest *[]aqpub.Pub, name, defaultValue, usage string) {
+	*dest = []aqpub.Pub{}
 	usage = fmt.Sprintf(`%s (default: "%s")`, usage, *dest)
 	fs.Func(name, usage, func(s string) error {
 		if s == "" {
@@ -225,7 +225,11 @@ func (cli *CLI) AddressSliceFlag(fs *flag.FlagSet, dest *[]common.Address, name,
 		}
 		strs := strings.Split(s, ",")
 		for _, str := range strs {
-			*dest = append(*dest, common.HexToAddress(str))
+			pub, err := aqpub.FromHexString(str)
+			if err != nil {
+				return err
+			}
+			*dest = append(*dest, pub)
 		}
 		return nil
 	})

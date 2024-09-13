@@ -6,6 +6,7 @@ import (
 	"crypto"
 	"crypto/ecdsa"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -17,16 +18,21 @@ import (
 	"aquareum.tv/aquareum/pkg/config"
 	"aquareum.tv/aquareum/pkg/crypto/signers"
 	"aquareum.tv/aquareum/pkg/log"
-	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/google/uuid"
 	"github.com/livepeer/lpms/ffmpeg"
 	"golang.org/x/sync/errgroup"
 
 	"git.aquareum.tv/aquareum-tv/c2pa-go/pkg/c2pa"
+	"git.aquareum.tv/aquareum-tv/c2pa-go/pkg/c2pa/generated/manifeststore"
+	"github.com/piprate/json-gold/ld"
 )
 
 const CERT_FILE = "cert.pem"
 const SEGMENTS_DIR = "segments"
+const STDS_METADATA = "stds.metadata"
+const SCHEMA_ORG_VIDEO_OBJECT = "http://schema.org/VideoObject"
+const SCHEMA_ORG_START_TIME = "http://schema.org/startTime"
+const SCHEMA_ORG_END_TIME = "http://schema.org/endTime"
 
 type MediaManager struct {
 	cli        *config.CLI
@@ -367,21 +373,114 @@ func (mm *MediaManager) SignMP4(ctx context.Context, input io.ReadSeeker, output
 	return nil
 }
 
-func (mm *MediaManager) ValidateMP4(ctx context.Context, input io.ReadSeeker) error {
-	reader, err := c2pa.FromStream(input, "video/mp4")
-	if err != nil {
-		return err
-	}
-	reader.GetActiveManifest()
-	certs := reader.GetProvenanceCertChain()
-	addr, err := signers.ParseES256KCert([]byte(certs))
-	if err != nil {
-		return err
-	}
-	for _, a := range mm.cli.AllowedStreams {
-		if a.Cmp(*addr) == 0 {
-			return nil
+type StringVal struct {
+	Value string `json:"@value"`
+}
+
+type ExpandedSchemaOrg []struct {
+	Type    []string `json:"@type"`
+	Creator []struct {
+		Type    []string    `json:"@type"`
+		Address []StringVal `json:"http://schema.org/address"`
+		Name    []StringVal `json:"http://schema.org/name"`
+	} `json:"http://schema.org/creator"`
+	StartTime []StringVal `json:"http://schema.org/startTime"`
+	EndTime   []StringVal `json:"http://schema.org/endTime"`
+}
+
+type SegmentMetadata struct {
+	StartTime string
+	EndTime   string
+}
+
+var InvalidMetadataError = errors.New("Invalid Schema.org Metadata")
+
+func ParseSegmentAssertions(mani *manifeststore.Manifest) (*SegmentMetadata, error) {
+	var ass *manifeststore.ManifestAssertion
+	for _, a := range mani.Assertions {
+		if a.Label == STDS_METADATA {
+			ass = &a
+			break
 		}
 	}
-	return fmt.Errorf("got valid segment, but address is not allowed: %s", hexutil.Encode(addr.Bytes()))
+	if ass == nil {
+		return nil, fmt.Errorf("couldn't find %s assertions", STDS_METADATA)
+	}
+	proc := ld.NewJsonLdProcessor()
+	options := ld.NewJsonLdOptions("")
+	flat, err := proc.Expand(ass.Data, options)
+	if err != nil {
+		return nil, err
+	}
+	bs, err := json.Marshal(flat)
+	if err != nil {
+		return nil, err
+	}
+	var metas ExpandedSchemaOrg
+	err = json.Unmarshal(bs, &metas)
+	if err != nil {
+		return nil, err
+	}
+	if len(metas) != 1 {
+		return nil, InvalidMetadataError
+	}
+	meta := metas[0]
+	if len(meta.Type) != 1 {
+		return nil, InvalidMetadataError
+	}
+	if meta.Type[0] != SCHEMA_ORG_VIDEO_OBJECT {
+		return nil, InvalidMetadataError
+	}
+	if len(meta.StartTime) != 1 {
+		return nil, InvalidMetadataError
+	}
+	if len(meta.EndTime) != 1 {
+		return nil, InvalidMetadataError
+	}
+	out := SegmentMetadata{
+		StartTime: meta.StartTime[0].Value,
+		EndTime:   meta.EndTime[0].Value,
+	}
+	return &out, nil
+}
+
+func (mm *MediaManager) ValidateMP4(ctx context.Context, input io.Reader) error {
+	buf, err := io.ReadAll(input)
+	if err != nil {
+		return err
+	}
+	r := bytes.NewReader(buf)
+	reader, err := c2pa.FromStream(r, "video/mp4")
+	if err != nil {
+		return err
+	}
+	mani := reader.GetActiveManifest()
+	certs := reader.GetProvenanceCertChain()
+	pub, err := signers.ParseES256KCert([]byte(certs))
+	if err != nil {
+		return err
+	}
+	found := false
+	for _, a := range mm.cli.AllowedStreams {
+		if a.Equals(pub) {
+			found = true
+			break
+		}
+	}
+	if !found {
+		return fmt.Errorf("got valid segment, but address is not allowed: %s", pub.String())
+	}
+	meta, err := ParseSegmentAssertions(mani)
+	if err != nil {
+		return err
+	}
+	fname := fmt.Sprintf("%s.mp4", meta.StartTime)
+	fd, err := mm.cli.DataFileCreate([]string{SEGMENTS_DIR, pub.String(), fname}, false)
+	if err != nil {
+		return err
+	}
+	defer fd.Close()
+	r = bytes.NewReader(buf)
+	io.Copy(fd, r)
+	return nil
 }

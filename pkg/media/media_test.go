@@ -11,12 +11,12 @@ import (
 	"time"
 
 	"aquareum.tv/aquareum/pkg/config"
+	"aquareum.tv/aquareum/pkg/crypto/aqpub"
 	"aquareum.tv/aquareum/pkg/crypto/signers"
 	"aquareum.tv/aquareum/pkg/crypto/signers/eip712"
 	"aquareum.tv/aquareum/pkg/crypto/signers/eip712/eip712test"
 	_ "aquareum.tv/aquareum/pkg/media/mediatesting"
 	"git.aquareum.tv/aquareum-tv/c2pa-go/pkg/c2pa"
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/require"
 )
 
@@ -28,10 +28,14 @@ func getFixture(name string) string {
 
 func getStaticTestMediaManager() MediaManager {
 	signer := c2pa.MakeStaticSigner(eip712test.CertBytes, eip712test.KeyBytes)
+	pub, err := aqpub.FromHexString("0x6fbe6863cf1efc713899455e526a13239d371175")
+	if err != nil {
+		panic(err)
+	}
 	return MediaManager{
 		cli: &config.CLI{
 			TAURL:          "http://timestamp.digicert.com",
-			AllowedStreams: []common.Address{common.HexToAddress("0x6fbe6863cf1efc713899455e526a13239d371175")},
+			AllowedStreams: []aqpub.Pub{pub},
 		},
 		signer: signer,
 		cert:   eip712test.CertBytes,
