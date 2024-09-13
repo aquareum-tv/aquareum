@@ -15,12 +15,14 @@ import (
 	"strings"
 	"time"
 
+	"aquareum.tv/aquareum/pkg/aqtime"
 	"aquareum.tv/aquareum/pkg/crypto/aqpub"
 	"github.com/peterbourgon/ff/v3"
 	"golang.org/x/exp/rand"
 )
 
 const AQ_DATA_DIR = "$AQ_DATA_DIR"
+const SEGMENTS_DIR = "segments"
 
 type BuildFlags struct {
 	Version   string
@@ -183,6 +185,32 @@ func (cli *CLI) DataFileCreate(fpath []string, overwrite bool) (*os.File, error)
 		}
 	}
 	return os.Create(ddpath)
+}
+
+// get a path to a segment file in our database
+func (cli *CLI) SegmentFilePath(user string, file string) (string, error) {
+	ext := filepath.Ext(file)
+	if ext != ".mp4" {
+		return "", fmt.Errorf("expected mp4 ext, got %s", ext)
+	}
+	base := strings.TrimSuffix(file, ext)
+	aqt, err := aqtime.FromString(base)
+	if err != nil {
+		return "", err
+	}
+	fname := fmt.Sprintf("%s%s", aqt.String(), ext)
+	yr, mon, day, hr, min, _, _ := aqt.Parts()
+	return cli.dataFilePath([]string{SEGMENTS_DIR, user, yr, mon, day, hr, min, fname}), nil
+}
+
+// create a segment file in our database
+func (cli *CLI) SegmentFileCreate(user string, aqt aqtime.AQTime, ext string) (*os.File, error) {
+	if ext != "mp4" {
+		return nil, fmt.Errorf("expected mp4 ext, got %s", ext)
+	}
+	fname := fmt.Sprintf("%s.%s", aqt.String(), ext)
+	yr, mon, day, hr, min, _, _ := aqt.Parts()
+	return cli.DataFileCreate([]string{SEGMENTS_DIR, user, yr, mon, day, hr, min, fname}, false)
 }
 
 // read a file from our data dir

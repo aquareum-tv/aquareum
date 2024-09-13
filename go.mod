@@ -19,6 +19,7 @@ require (
 	github.com/go-gst/go-gst v1.2.1
 	github.com/golang/glog v1.2.0
 	github.com/google/uuid v1.6.0
+	github.com/johncgriffin/overflow v0.0.0-20211019200055-46fa312c352c
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/livepeer/lpms v0.0.0-20240812093642-b5181eb92cb2
 	github.com/lmittmann/tint v1.0.4

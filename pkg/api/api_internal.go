@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
-	"path/filepath"
 	"regexp"
 	"time"
 
@@ -102,7 +101,12 @@ func (a *AquareumAPI) InternalHandler(ctx context.Context) (http.Handler, error)
 			errors.WriteHTTPBadRequest(w, "file required", nil)
 			return
 		}
-		fullpath := filepath.Join(a.CLI.DataDir, "segments", user, file)
+		fullpath, err := a.CLI.SegmentFilePath(user, file)
+		if err != nil {
+			errors.WriteHTTPBadRequest(w, "badly formatted request", err)
+			return
+		}
+		log.Log(ctx, "serving segment", "fullpath", fullpath)
 		http.ServeFile(w, r, fullpath)
 	})
 
