@@ -8,7 +8,7 @@ replace github.com/ThalesGroup/crypto11 => github.com/aquareum-tv/crypto11 v0.0.
 
 require (
 	firebase.google.com/go/v4 v4.14.1
-	git.aquareum.tv/aquareum-tv/c2pa-go v0.0.0-20240827194057-dc4fd1d2c425
+	git.aquareum.tv/aquareum-tv/c2pa-go v0.0.0-20240913223408-68f9878542d4
 	github.com/NYTimes/gziphandler v1.1.1
 	github.com/ThalesGroup/crypto11 v0.0.0-00010101000000-000000000000
 	github.com/decred/dcrd/dcrec/secp256k1 v1.0.4
@@ -19,11 +19,13 @@ require (
 	github.com/go-gst/go-gst v1.2.1
 	github.com/golang/glog v1.2.0
 	github.com/google/uuid v1.6.0
+	github.com/johncgriffin/overflow v0.0.0-20211019200055-46fa312c352c
 	github.com/julienschmidt/httprouter v1.3.0
 	github.com/livepeer/lpms v0.0.0-20240812093642-b5181eb92cb2
 	github.com/lmittmann/tint v1.0.4
 	github.com/orandin/slog-gorm v1.3.2
 	github.com/peterbourgon/ff/v3 v3.3.1
+	github.com/piprate/json-gold v0.5.0
 	github.com/rs/cors v1.7.0
 	github.com/samber/slog-http v1.4.0
 	github.com/stretchr/testify v1.9.0
@@ -105,6 +107,7 @@ require (
 	github.com/mmcloughlin/addchain v0.4.0 // indirect
 	github.com/pjbgf/sha1cd v0.3.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
+	github.com/pquerna/cachecontrol v0.0.0-20180517163645-1555304b9b35 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/sergi/go-diff v1.3.2-0.20230802210424-5b0b94c5c0d3 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect

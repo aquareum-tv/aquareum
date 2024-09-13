@@ -6,6 +6,7 @@ import (
 	"crypto"
 	"crypto/ecdsa"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -13,18 +14,27 @@ import (
 	"sync"
 	"time"
 
+	"aquareum.tv/aquareum/pkg/aqio"
+	"aquareum.tv/aquareum/pkg/aqtime"
 	"aquareum.tv/aquareum/pkg/config"
 	"aquareum.tv/aquareum/pkg/crypto/signers"
 	"aquareum.tv/aquareum/pkg/log"
+	"aquareum.tv/aquareum/pkg/replication"
 	"github.com/google/uuid"
 	"github.com/livepeer/lpms/ffmpeg"
 	"golang.org/x/sync/errgroup"
 
 	"git.aquareum.tv/aquareum-tv/c2pa-go/pkg/c2pa"
+	"git.aquareum.tv/aquareum-tv/c2pa-go/pkg/c2pa/generated/manifeststore"
+	"github.com/piprate/json-gold/ld"
 )
 
 const CERT_FILE = "cert.pem"
 const SEGMENTS_DIR = "segments"
+const STDS_METADATA = "stds.metadata"
+const SCHEMA_ORG_VIDEO_OBJECT = "http://schema.org/VideoObject"
+const SCHEMA_ORG_START_TIME = "http://schema.org/startTime"
+const SCHEMA_ORG_END_TIME = "http://schema.org/endTime"
 
 type MediaManager struct {
 	cli        *config.CLI
@@ -35,9 +45,10 @@ type MediaManager struct {
 	mp4subsmut sync.Mutex
 	mkvsubs    map[string]io.Writer
 	mkvsubsmut sync.Mutex
+	replicator replication.Replicator
 }
 
-func MakeMediaManager(ctx context.Context, cli *config.CLI, signer crypto.Signer) (*MediaManager, error) {
+func MakeMediaManager(ctx context.Context, cli *config.CLI, signer crypto.Signer, rep replication.Replicator) (*MediaManager, error) {
 	hex := signers.HexAddr(signer.Public().(*ecdsa.PublicKey))
 	exists, err := cli.DataFileExists([]string{hex, CERT_FILE})
 	if err != nil {
@@ -59,34 +70,33 @@ func MakeMediaManager(ctx context.Context, cli *config.CLI, signer crypto.Signer
 	cli.DataFileRead([]string{hex, CERT_FILE}, &buf)
 	cert := buf.Bytes()
 	return &MediaManager{
-		cli:     cli,
-		signer:  signer,
-		cert:    cert,
-		user:    hex,
-		mp4subs: map[string][]chan string{},
-		mkvsubs: map[string]io.Writer{},
+		cli:        cli,
+		signer:     signer,
+		cert:       cert,
+		user:       hex,
+		mp4subs:    map[string][]chan string{},
+		mkvsubs:    map[string]io.Writer{},
+		replicator: rep,
 	}, nil
 }
 
 // accept an incoming mkv segment, mux to mp4, and sign it
 func (mm *MediaManager) SignSegment(ctx context.Context, input io.Reader, ms int64) error {
-	segmentFile := fmt.Sprintf("%d.mp4", ms)
 	buf := bytes.Buffer{}
 	err := MuxToMP4(ctx, input, &buf)
 	if err != nil {
 		return fmt.Errorf("error muxing to mp4: %w", err)
 	}
 	reader := bytes.NewReader(buf.Bytes())
-	fd, err := mm.cli.DataFileCreate([]string{SEGMENTS_DIR, mm.user, segmentFile}, false)
-	if err != nil {
-		return err
-	}
-	defer fd.Close()
-	err = mm.SignMP4(ctx, reader, fd, ms)
+	rws := &aqio.ReadWriteSeeker{}
+	err = mm.SignMP4(ctx, reader, rws, ms)
 	if err != nil {
 		return fmt.Errorf("error signing mp4: %w", err)
 	}
-	go mm.PublishSegment(ctx, mm.user, segmentFile)
+	err = mm.ValidateMP4(ctx, rws.ReadSeeker())
+	if err != nil {
+		return fmt.Errorf("error validating mp4: %w", err)
+	}
 	return nil
 }
 
@@ -283,23 +293,48 @@ func (mm *MediaManager) HandleMKVStream(ctx context.Context, user, uu string, r 
 	return err
 }
 
-func (mm *MediaManager) SignMP4(ctx context.Context, input io.ReadSeeker, output io.ReadWriteSeeker, now int64) error {
-	manifestBs := []byte(fmt.Sprintf(`
-		{
-			"title": "Livestream Segment at %s",
-			"assertions": [
-				{
-					"label": "c2pa.actions",
-					"data": {"actions": [
-						{ "action": "c2pa.created" },
-						{ "action": "c2pa.published" }
-					]}
-				}
-			]
-		}
-	`, time.UnixMilli(now).UTC().Format("2006-01-02T15:04:05.999Z")))
+type obj map[string]any
+
+func (mm *MediaManager) SignMP4(ctx context.Context, input io.ReadSeeker, output io.ReadWriteSeeker, start int64) error {
+	end := time.Now().UnixMilli()
+	mani := obj{
+		"title": fmt.Sprintf("Livestream Segment at %s", aqtime.FromMillis(start)),
+		"assertions": []obj{
+			{
+				"label": "c2pa.actions",
+				"data": obj{
+					"actions": []obj{
+						{"action": "c2pa.created"},
+						{"action": "c2pa.published"},
+					},
+				},
+			},
+			{
+				"label": "stds.metadata",
+				"data": obj{
+					"@context": obj{
+						"s": "http://schema.org/",
+					},
+					"@type": "s:VideoObject",
+					"s:creator": []obj{
+						{
+							"@type":     "s:Person",
+							"s:name":    mm.cli.StreamerName,
+							"s:address": mm.user,
+						},
+					},
+					"s:startTime": aqtime.FromMillis(start).String(),
+					"s:endTime":   aqtime.FromMillis(end).String(),
+				},
+			},
+		},
+	}
+	manifestBs, err := json.Marshal(mani)
+	if err != nil {
+		return err
+	}
 	var manifest c2pa.ManifestDefinition
-	err := json.Unmarshal(manifestBs, &manifest)
+	err = json.Unmarshal(manifestBs, &manifest)
 	if err != nil {
 		return err
 	}
@@ -321,5 +356,127 @@ func (mm *MediaManager) SignMP4(ctx context.Context, input io.ReadSeeker, output
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+type StringVal struct {
+	Value string `json:"@value"`
+}
+
+type ExpandedSchemaOrg []struct {
+	Type    []string `json:"@type"`
+	Creator []struct {
+		Type    []string    `json:"@type"`
+		Address []StringVal `json:"http://schema.org/address"`
+		Name    []StringVal `json:"http://schema.org/name"`
+	} `json:"http://schema.org/creator"`
+	StartTime []StringVal `json:"http://schema.org/startTime"`
+	EndTime   []StringVal `json:"http://schema.org/endTime"`
+}
+
+type SegmentMetadata struct {
+	StartTime aqtime.AQTime
+	EndTime   aqtime.AQTime
+}
+
+var InvalidMetadataError = errors.New("Invalid Schema.org Metadata")
+
+func ParseSegmentAssertions(mani *manifeststore.Manifest) (*SegmentMetadata, error) {
+	var ass *manifeststore.ManifestAssertion
+	for _, a := range mani.Assertions {
+		if a.Label == STDS_METADATA {
+			ass = &a
+			break
+		}
+	}
+	if ass == nil {
+		return nil, fmt.Errorf("couldn't find %s assertions", STDS_METADATA)
+	}
+	proc := ld.NewJsonLdProcessor()
+	options := ld.NewJsonLdOptions("")
+	flat, err := proc.Expand(ass.Data, options)
+	if err != nil {
+		return nil, err
+	}
+	bs, err := json.Marshal(flat)
+	if err != nil {
+		return nil, err
+	}
+	var metas ExpandedSchemaOrg
+	err = json.Unmarshal(bs, &metas)
+	if err != nil {
+		return nil, err
+	}
+	if len(metas) != 1 {
+		return nil, InvalidMetadataError
+	}
+	meta := metas[0]
+	if len(meta.Type) != 1 {
+		return nil, InvalidMetadataError
+	}
+	if meta.Type[0] != SCHEMA_ORG_VIDEO_OBJECT {
+		return nil, InvalidMetadataError
+	}
+	if len(meta.StartTime) != 1 {
+		return nil, InvalidMetadataError
+	}
+	if len(meta.EndTime) != 1 {
+		return nil, InvalidMetadataError
+	}
+	start, err := aqtime.FromString(meta.StartTime[0].Value)
+	if err != nil {
+		return nil, err
+	}
+	end, err := aqtime.FromString(meta.EndTime[0].Value)
+	if err != nil {
+		return nil, err
+	}
+	out := SegmentMetadata{
+		StartTime: start,
+		EndTime:   end,
+	}
+	return &out, nil
+}
+
+func (mm *MediaManager) ValidateMP4(ctx context.Context, input io.Reader) error {
+	buf, err := io.ReadAll(input)
+	if err != nil {
+		return err
+	}
+	r := bytes.NewReader(buf)
+	reader, err := c2pa.FromStream(r, "video/mp4")
+	if err != nil {
+		return err
+	}
+	mani := reader.GetActiveManifest()
+	certs := reader.GetProvenanceCertChain()
+	pub, err := signers.ParseES256KCert([]byte(certs))
+	if err != nil {
+		return err
+	}
+	found := false
+	for _, a := range mm.cli.AllowedStreams {
+		if a.Equals(pub) {
+			found = true
+			break
+		}
+	}
+	if !found {
+		return fmt.Errorf("got valid segment, but address is not allowed: %s", pub.String())
+	}
+	meta, err := ParseSegmentAssertions(mani)
+	if err != nil {
+		return err
+	}
+	fd, err := mm.cli.SegmentFileCreate(pub.String(), meta.StartTime, "mp4")
+	if err != nil {
+		return err
+	}
+	defer fd.Close()
+	go mm.replicator.NewSegment(ctx, buf)
+	r = bytes.NewReader(buf)
+	io.Copy(fd, r)
+	base := filepath.Base(fd.Name())
+	go mm.PublishSegment(ctx, mm.user, base)
 	return nil
 }

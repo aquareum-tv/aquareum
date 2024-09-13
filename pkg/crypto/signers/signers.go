@@ -14,9 +14,11 @@ import (
 	"math/big"
 	"time"
 
+	"aquareum.tv/aquareum/pkg/crypto/aqpub"
 	"git.aquareum.tv/aquareum-tv/c2pa-go/pkg/c2pa"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/crypto/secp256k1"
 )
 
 // uses Go code to generate a es256p cert, then rewrites and resigns it into an es256k cert
@@ -127,6 +129,33 @@ func GenerateES256KCert(signer gocrypto.Signer) ([]byte, error) {
 
 	bs := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: k256DERBytes})
 	return bs, nil
+}
+
+func ParseES256KCert(pembs []byte) (aqpub.Pub, error) {
+	// todo: there may be a chain here
+	block, _ := pem.Decode(pembs)
+
+	if block == nil {
+		return nil, fmt.Errorf("failed to parse PEM block containing the cert")
+	}
+
+	k256cert := certificate{}
+	_, err := asn1.Unmarshal(block.Bytes, &k256cert)
+	if err != nil {
+		return nil, err
+	}
+
+	x, y := secp256k1.S256().Unmarshal(k256cert.TBSCertificate.PublicKey.PublicKey.Bytes)
+	if x == nil {
+		return nil, fmt.Errorf("unable to unmarshal k256 public key")
+	}
+
+	pub, err := aqpub.FromPoints(x, y)
+	if err != nil {
+		return nil, err
+	}
+
+	return pub, nil
 }
 
 func HexAddr(pub *ecdsa.PublicKey) string {

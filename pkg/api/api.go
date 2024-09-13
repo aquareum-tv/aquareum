@@ -94,6 +94,7 @@ func (a *AquareumAPI) Handler(ctx context.Context) (http.Handler, error) {
 	apiRouter.OPTIONS("/api/webrtc/:stream", a.MistProxyHandler(ctx, "/webrtc/%s"))
 	apiRouter.DELETE("/api/webrtc/:stream", a.MistProxyHandler(ctx, "/webrtc/%s"))
 	apiRouter.GET("/api/hls/:stream/*resource", a.MistProxyHandler(ctx, "/hls/%s"))
+	apiRouter.Handler("POST", "/api/segment", a.HandleSegment(ctx))
 	apiRouter.NotFound = a.HandleAPI404(ctx)
 	router.Handler("GET", "/api/*resource", apiRouter)
 	router.Handler("POST", "/api/*resource", apiRouter)
@@ -273,6 +274,17 @@ func (a *AquareumAPI) HandleNotification(ctx context.Context) http.HandlerFunc {
 			return
 		}
 		log.Log(ctx, "successfully created notification", "token", n.Token)
+		w.WriteHeader(200)
+	}
+}
+
+func (a *AquareumAPI) HandleSegment(ctx context.Context) http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		err := a.MediaManager.ValidateMP4(ctx, req.Body)
+		if err != nil {
+			apierrors.WriteHTTPBadRequest(w, "could not ingest segment", err)
+			return
+		}
 		w.WriteHeader(200)
 	}
 }

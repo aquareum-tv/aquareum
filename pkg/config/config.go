@@ -15,11 +15,14 @@ import (
 	"strings"
 	"time"
 
+	"aquareum.tv/aquareum/pkg/aqtime"
+	"aquareum.tv/aquareum/pkg/crypto/aqpub"
 	"github.com/peterbourgon/ff/v3"
 	"golang.org/x/exp/rand"
 )
 
 const AQ_DATA_DIR = "$AQ_DATA_DIR"
+const SEGMENTS_DIR = "segments"
 
 type BuildFlags struct {
 	Version   string
@@ -51,6 +54,7 @@ type CLI struct {
 	HttpInternalAddr       string
 	HttpsAddr              string
 	Insecure               bool
+	NoMist                 bool
 	MistAdminPort          int
 	MistHTTPPort           int
 	MistRTMPPort           int
@@ -65,6 +69,9 @@ type CLI struct {
 	PKCS11TokenSerial      string
 	PKCS11KeypairLabel     string
 	PKCS11KeypairID        string
+	StreamerName           string
+	AllowedStreams         []aqpub.Pub
+	Peers                  []string
 
 	dataDirFlags []*string
 }
@@ -108,25 +115,36 @@ func RandomTrailer(length int) string {
 	return string(res)
 }
 
-func DefaultDataDir() (string, error) {
+func DefaultDataDir() string {
 	home, err := os.UserHomeDir()
 	if err != nil {
-		return "", fmt.Errorf("error finding default data dir: %w", err)
+		// not fatal unless the user doesn't set one later
+		return ""
 	}
-	return filepath.Join(home, ".aquareum"), nil
+	return filepath.Join(home, ".aquareum")
 }
 
-func (cli *CLI) Parse(fs *flag.FlagSet, args []string) {
-	ff.Parse(
+func (cli *CLI) Parse(fs *flag.FlagSet, args []string) error {
+	err := ff.Parse(
 		fs, os.Args[1:],
 		ff.WithEnvVarPrefix("AQ"),
 	)
+	if err != nil {
+		return err
+	}
+	if cli.DataDir == "" {
+		return fmt.Errorf("could not determine default data dir (no $HOME) and none provided, please set --data-dir")
+	}
 	for _, dest := range cli.dataDirFlags {
 		*dest = strings.Replace(*dest, AQ_DATA_DIR, cli.DataDir, 1)
 	}
+	return nil
 }
 
 func (cli *CLI) dataFilePath(fpath []string) string {
+	if cli.DataDir == "" {
+		panic("no data dir configured")
+	}
 	fpath = append([]string{cli.DataDir}, fpath...)
 	fdpath := filepath.Join(fpath...)
 	return fdpath
@@ -182,6 +200,32 @@ func (cli *CLI) DataFileCreate(fpath []string, overwrite bool) (*os.File, error)
 	return os.Create(ddpath)
 }
 
+// get a path to a segment file in our database
+func (cli *CLI) SegmentFilePath(user string, file string) (string, error) {
+	ext := filepath.Ext(file)
+	if ext != ".mp4" {
+		return "", fmt.Errorf("expected mp4 ext, got %s", ext)
+	}
+	base := strings.TrimSuffix(file, ext)
+	aqt, err := aqtime.FromString(base)
+	if err != nil {
+		return "", err
+	}
+	fname := fmt.Sprintf("%s%s", aqt.String(), ext)
+	yr, mon, day, hr, min, _, _ := aqt.Parts()
+	return cli.dataFilePath([]string{SEGMENTS_DIR, user, yr, mon, day, hr, min, fname}), nil
+}
+
+// create a segment file in our database
+func (cli *CLI) SegmentFileCreate(user string, aqt aqtime.AQTime, ext string) (*os.File, error) {
+	if ext != "mp4" {
+		return nil, fmt.Errorf("expected mp4 ext, got %s", ext)
+	}
+	fname := fmt.Sprintf("%s.%s", aqt.String(), ext)
+	yr, mon, day, hr, min, _, _ := aqt.Parts()
+	return cli.DataFileCreate([]string{SEGMENTS_DIR, user, yr, mon, day, hr, min, fname}, false)
+}
+
 // read a file from our data dir
 func (cli *CLI) DataFileRead(fpath []string, w io.Writer) error {
 	ddpath := cli.dataFilePath(fpath)
@@ -210,4 +254,37 @@ func (cli *CLI) DataDirFlag(fs *flag.FlagSet, dest *string, name, defaultValue, 
 
 func (cli *CLI) HasMist() bool {
 	return runtime.GOOS == "linux"
+}
+
+// type for comma-separated ethereum addresses
+func (cli *CLI) AddressSliceFlag(fs *flag.FlagSet, dest *[]aqpub.Pub, name, defaultValue, usage string) {
+	*dest = []aqpub.Pub{}
+	usage = fmt.Sprintf(`%s (default: "%s")`, usage, *dest)
+	fs.Func(name, usage, func(s string) error {
+		if s == "" {
+			return nil
+		}
+		strs := strings.Split(s, ",")
+		for _, str := range strs {
+			pub, err := aqpub.FromHexString(str)
+			if err != nil {
+				return err
+			}
+			*dest = append(*dest, pub)
+		}
+		return nil
+	})
+}
+
+func (cli *CLI) StringSliceFlag(fs *flag.FlagSet, dest *[]string, name, defaultValue, usage string) {
+	*dest = []string{}
+	usage = fmt.Sprintf(`%s (default: "%s")`, usage, *dest)
+	fs.Func(name, usage, func(s string) error {
+		if s == "" {
+			return nil
+		}
+		strs := strings.Split(s, ",")
+		*dest = append(*dest, strs...)
+		return nil
+	})
 }
