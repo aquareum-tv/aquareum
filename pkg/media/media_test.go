@@ -11,11 +11,12 @@ import (
 	"time"
 
 	"aquareum.tv/aquareum/pkg/config"
+	ct "aquareum.tv/aquareum/pkg/config/configtesting"
 	"aquareum.tv/aquareum/pkg/crypto/aqpub"
-	"aquareum.tv/aquareum/pkg/crypto/signers"
 	"aquareum.tv/aquareum/pkg/crypto/signers/eip712"
 	"aquareum.tv/aquareum/pkg/crypto/signers/eip712/eip712test"
 	_ "aquareum.tv/aquareum/pkg/media/mediatesting"
+	"aquareum.tv/aquareum/pkg/replication/boring"
 	"git.aquareum.tv/aquareum-tv/c2pa-go/pkg/c2pa"
 	"github.com/stretchr/testify/require"
 )
@@ -26,21 +27,20 @@ func getFixture(name string) string {
 	return filepath.Join(dir, "..", "..", "test", "fixtures", name)
 }
 
-func getStaticTestMediaManager() MediaManager {
-	signer := c2pa.MakeStaticSigner(eip712test.CertBytes, eip712test.KeyBytes)
+func getStaticTestMediaManager(t *testing.T) *MediaManager {
+	signer, err := c2pa.MakeStaticSigner(eip712test.KeyBytes)
+	require.NoError(t, err)
 	pub, err := aqpub.FromHexString("0x6fbe6863cf1efc713899455e526a13239d371175")
 	if err != nil {
 		panic(err)
 	}
-	return MediaManager{
-		cli: &config.CLI{
-			TAURL:          "http://timestamp.digicert.com",
-			AllowedStreams: []aqpub.Pub{pub},
-		},
-		signer: signer,
-		cert:   eip712test.CertBytes,
-		user:   "testuser",
-	}
+	cli := ct.CLI(t, &config.CLI{
+		TAURL:          "http://timestamp.digicert.com",
+		AllowedStreams: []aqpub.Pub{pub},
+	})
+	mm, err := MakeMediaManager(context.Background(), cli, signer, &boring.BoringReplicator{})
+	require.NoError(t, err)
+	return mm
 }
 
 func mp4(t *testing.T) []byte {
@@ -64,7 +64,7 @@ func TestSignMP4(t *testing.T) {
 	r := bytes.NewReader(mp4bs)
 	f, err := os.CreateTemp("", "*.mp4")
 	require.NoError(t, err)
-	mm := getStaticTestMediaManager()
+	mm := getStaticTestMediaManager(t)
 	require.NoError(t, err)
 	ms := time.Now().UnixMilli()
 	err = mm.SignMP4(context.Background(), r, f, ms)
@@ -73,16 +73,12 @@ func TestSignMP4(t *testing.T) {
 
 func TestSignMP4WithWallet(t *testing.T) {
 	eip712test.WithTestSigner(func(signer *eip712.EIP712Signer) {
-		certBs, err := signers.GenerateES256KCert(signer)
+		cli := ct.CLI(t, &config.CLI{
+			TAURL:          "http://timestamp.digicert.com",
+			AllowedStreams: []aqpub.Pub{},
+		})
+		mm, err := MakeMediaManager(context.Background(), cli, signer, &boring.BoringReplicator{})
 		require.NoError(t, err)
-		mm := MediaManager{
-			cli: &config.CLI{
-				TAURL: "http://timestamp.digicert.com",
-			},
-			signer: signer,
-			cert:   certBs,
-			user:   "testuser",
-		}
 		mp4bs := mp4(t)
 		r := bytes.NewReader(mp4bs)
 		f, err := os.CreateTemp("", "*.mp4")
@@ -128,7 +124,7 @@ func TestSignMP4WithWallet(t *testing.T) {
 func TestVerifyMP4(t *testing.T) {
 	f, err := os.Open(getFixture("sample-segment.mp4"))
 	require.NoError(t, err)
-	mm := getStaticTestMediaManager()
+	mm := getStaticTestMediaManager(t)
 	err = mm.ValidateMP4(context.Background(), f)
 	require.NoError(t, err)
 }

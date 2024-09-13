@@ -142,6 +142,9 @@ func (cli *CLI) Parse(fs *flag.FlagSet, args []string) error {
 }
 
 func (cli *CLI) dataFilePath(fpath []string) string {
+	if cli.DataDir == "" {
+		panic("no data dir configured")
+	}
 	fpath = append([]string{cli.DataDir}, fpath...)
 	fdpath := filepath.Join(fpath...)
 	return fdpath
