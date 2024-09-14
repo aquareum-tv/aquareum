@@ -158,9 +158,10 @@ windows-amd64:
 	meson setup --cross-file util/windows-amd64-gnu.ini --buildtype debugoptimized build-windows $(OPTS)
 	meson compile -C build-windows archive 2>&1 | grep -v drectve
 
+# unbuffer here is a workaround for wine trying to pop up a terminal window and failing
 .PHONY: windows-amd64-startup-test
 windows-amd64-startup-test:
-	wine64 ./build-windows/aquareum.exe --version
+	bash -c 'set -euo pipefail && unbuffer wine64 ./build-windows/aquareum.exe --version | cat'
 
 .PHONY: node-all-platforms-macos
 node-all-platforms-macos: app
@@ -216,7 +217,7 @@ docker-release:
 		-t aqrm.io/aquareum-tv/aquareum \
 		.
 
-.PHONY: ci-upload 
+.PHONY: ci-upload
 ci-upload: ci-upload-node ci-upload-android
 
 .PHONY: ci-upload-node
