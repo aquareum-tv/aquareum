@@ -223,6 +223,8 @@ if host_machine.system() == 'windows'
     '-luserenv',
     '-lcrypt32',
     '-lbcrypt',
+    '-static-libstdc++',
+    '-static-libgcc',
   ], language : [ 'c', 'cpp' ])
 endif
 
