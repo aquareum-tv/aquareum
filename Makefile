@@ -166,8 +166,10 @@ windows-amd64-startup-test:
 node-all-platforms-macos: app
 	meson setup --buildtype debugoptimized build $(OPTS)
 	meson compile -C build archive
+	./build/aquareum --version
 	rustup target add x86_64-apple-darwin
 	meson setup --buildtype debugoptimized --cross-file util/darwin-amd64-apple.ini build-amd64 $(OPTS)
+	./build-amd64/aquareum --version
 	meson compile -C build-amd64 archive
 
 # link your local version of mist for dev
