@@ -144,6 +144,7 @@ node-all-platforms: app
 	$(MAKE) link-test
 	$(MAKE) linux-arm64
 	$(MAKE) windows-amd64
+	$(MAKE) windows-amd64-startup-test
 
 .PHONY: linux-arm64
 linux-arm64:
@@ -156,6 +157,10 @@ windows-amd64:
 	rustup target add x86_64-pc-windows-gnu
 	meson setup --cross-file util/windows-amd64-gnu.ini --buildtype debugoptimized build-windows $(OPTS)
 	meson compile -C build-windows archive 2>&1 | grep -v drectve
+
+.PHONY: windows-amd64-startup-test
+windows-amd64-startup-test:
+	wine64 ./build-windows/aquareum.exe --version
 
 .PHONY: node-all-platforms-macos
 node-all-platforms-macos: app
