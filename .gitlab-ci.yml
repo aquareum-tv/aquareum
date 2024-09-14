@@ -8,6 +8,7 @@ builder:
     entrypoint: [""]
   variables:
     FQ_IMAGE_NAME: "$CI_REGISTRY_IMAGE:builder-$DOCKERFILE_HASH"
+  timeout: 2 hours
   script:
     - /kaniko/executor
       --build-arg TARGETARCH=amd64
@@ -25,6 +26,7 @@ builder-rebuild:
     entrypoint: [""]
   needs:
     - job: builder
+  timeout: 2 hours
   script:
     - echo "CI_PIPELINE_ID=$CI_PIPELINE_ID"
     - echo "CI_PIPELINE_ID=$CI_PIPELINE_IID"
@@ -39,6 +41,7 @@ build:
   stage: build
   interruptible: true
   image: "$CI_REGISTRY_IMAGE:builder-$DOCKERFILE_HASH"
+  timeout: 2 hours
   script:
     - rm -rf /usr/x86_64-w64-mingw32/include/d3dcompiler.h /usr/share/mingw-w64/include/d3dcompiler.h
     - git fetch --unshallow || echo 'already unshallow'
@@ -51,6 +54,7 @@ test:
   stage: build
   interruptible: true
   image: "$CI_REGISTRY_IMAGE:builder-$DOCKERFILE_HASH"
+  timeout: 2 hours
   script:
     - git fetch --unshallow || echo 'already unshallow'
     - make ci-test -j$(nproc)
@@ -64,6 +68,7 @@ build-docker-amd64:
   image:
     name: gcr.io/kaniko-project/executor:v1.14.0-debug
     entrypoint: [""]
+  timeout: 2 hours
   script:
     - /kaniko/executor
       --build-arg TARGETARCH=amd64
@@ -82,6 +87,7 @@ build-docker-arm64:
   image:
     name: gcr.io/kaniko-project/executor:v1.14.0-debug
     entrypoint: [""]
+  timeout: 2 hours
   script:
     - /kaniko/executor
       --build-arg TARGETARCH=arm64
@@ -107,6 +113,7 @@ build-docker-manifest:
     - curl -s -L https://github.com/estesp/manifest-tool/releases/download/v2.1.7/binaries-manifest-tool-2.1.7.tar.gz | tar xvz
     - mv manifest-tool-linux-amd64 ./manifest-tool
     - chmod +x ./manifest-tool
+  timeout: 2 hours
   script:
     - ./manifest-tool --username "${CI_REGISTRY_USER}" --password "${CI_REGISTRY_PASSWORD}" push from-args
       --platforms linux/amd64,linux/arm64
@@ -118,6 +125,7 @@ build-android:
   stage: build
   interruptible: true
   image: "$CI_REGISTRY_IMAGE:builder-$DOCKERFILE_HASH"
+  timeout: 2 hours
   script:
     - git fetch --unshallow || echo 'already unshallow'
     - make ci-android -j$(nproc)
@@ -128,7 +136,7 @@ build-mac:
   image: ghcr.io/cirruslabs/macos-runner:sonoma
   tags:
     - tart-installed
-
+  timeout: 2 hours
   script:
     - git fetch --unshallow || echo 'already unshallow'
     - brew install ninja go openssl@3 && go version
@@ -158,5 +166,6 @@ release:
     - test
   rules:
     - if: '$CI_COMMIT_TAG =~ /^v?\d+\.\d+\.\d+$/'
+  timeout: 2 hours
   script:
     - make ci-release

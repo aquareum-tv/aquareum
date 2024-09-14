@@ -114,7 +114,7 @@ func (signer *EIP712Signer) InitKeystore(ctx context.Context) error {
 				return fmt.Errorf("unable to generate new ethereum account: %w", err)
 			}
 			account = &acct
-			log.Log(ctx, "generated new ethereum key", "addr", signer.Hex())
+			log.Log(ctx, "generated new ethereum key", "addr", account.Address.Hex())
 		}
 	}
 	err := keyStore.Unlock(*account, signer.Opts.EthKeystorePassword)

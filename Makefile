@@ -144,6 +144,7 @@ node-all-platforms: app
 	$(MAKE) link-test
 	$(MAKE) linux-arm64
 	$(MAKE) windows-amd64
+	$(MAKE) windows-amd64-startup-test
 
 .PHONY: linux-arm64
 linux-arm64:
@@ -157,13 +158,20 @@ windows-amd64:
 	meson setup --cross-file util/windows-amd64-gnu.ini --buildtype debugoptimized build-windows $(OPTS)
 	meson compile -C build-windows archive 2>&1 | grep -v drectve
 
+# unbuffer here is a workaround for wine trying to pop up a terminal window and failing
+.PHONY: windows-amd64-startup-test
+windows-amd64-startup-test:
+	bash -c 'set -euo pipefail && unbuffer wine64 ./build-windows/aquareum.exe --version | cat'
+
 .PHONY: node-all-platforms-macos
 node-all-platforms-macos: app
 	meson setup --buildtype debugoptimized build $(OPTS)
 	meson compile -C build archive
+	./build/aquareum --version
 	rustup target add x86_64-apple-darwin
 	meson setup --buildtype debugoptimized --cross-file util/darwin-amd64-apple.ini build-amd64 $(OPTS)
 	meson compile -C build-amd64 archive
+	./build-amd64/aquareum --version
 
 # link your local version of mist for dev
 .PHONY: link-mist
@@ -209,7 +217,7 @@ docker-release:
 		-t aqrm.io/aquareum-tv/aquareum \
 		.
 
-.PHONY: ci-upload 
+.PHONY: ci-upload
 ci-upload: ci-upload-node ci-upload-android
 
 .PHONY: ci-upload-node
