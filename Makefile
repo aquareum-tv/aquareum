@@ -170,8 +170,8 @@ node-all-platforms-macos: app
 	./build/aquareum --version
 	rustup target add x86_64-apple-darwin
 	meson setup --buildtype debugoptimized --cross-file util/darwin-amd64-apple.ini build-amd64 $(OPTS)
-	./build-amd64/aquareum --version
 	meson compile -C build-amd64 archive
+	./build-amd64/aquareum --version
 
 # link your local version of mist for dev
 .PHONY: link-mist
