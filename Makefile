@@ -145,6 +145,14 @@ node-all-platforms: app
 	$(MAKE) linux-arm64
 	$(MAKE) windows-amd64
 	$(MAKE) windows-amd64-startup-test
+	$(MAKE) desktop-linux
+
+.PHONY: desktop-linux
+desktop-linux:
+	cd js/desktop \
+	&& yarn run make --platform win32 --arch x64 \
+	&& cd - \
+	&& mv "js/desktop/out/make/squirrel.windows/x64/Aquareum-$(subst v,,$(VERSION)) Setup.exe" ./bin/aquareum-desktop-$(VERSION)-windows-amd64.exe
 
 .PHONY: linux-arm64
 linux-arm64:
@@ -176,13 +184,12 @@ node-all-platforms-macos: app
 
 .PHONY: desktop-macos
 desktop-macos:
-	export VERSION=$(VERSION) \
-	&& cd js/desktop \
+	cd js/desktop \
 	&& yarn run make --platform darwin --arch arm64 \
 	&& yarn run make --platform darwin --arch x64 \
 	&& cd - \
-	&& mv js/desktop/out/make/Aquareum-$(VERSION)-x64.dmg ./bin/aquareum-desktop-$(VERSION)-darwin-amd64.dmg \
-	&& mv js/desktop/out/make/Aquareum-$(VERSION)-arm64.dmg ./bin/aquareum-desktop-$(VERSION)-darwin-arm64.dmg
+	&& mv js/desktop/out/make/Aquareum-$(subst v,,$(VERSION))-x64.dmg ./bin/aquareum-desktop-$(VERSION)-darwin-amd64.dmg \
+	&& mv js/desktop/out/make/Aquareum-$(subst v,,$(VERSION))-arm64.dmg ./bin/aquareum-desktop-$(VERSION)-darwin-arm64.dmg
 
 # link your local version of mist for dev
 .PHONY: link-mist
@@ -242,6 +249,8 @@ ci-upload-node: node-all-platforms
 	for GOOS in windows; do \
 		for GOARCH in amd64; do \
 			export file=aquareum-$(VERSION)-$$GOOS-$$GOARCH.zip \
+			&& $(MAKE) ci-upload-file upload_file=$$file; \
+			export file=aquareum-desktop-$(VERSION)-$$GOOS-$$GOARCH.exe \
 			&& $(MAKE) ci-upload-file upload_file=$$file; \
 		done \
 	done;

@@ -11,13 +11,20 @@ import { FuseV1Options, FuseVersion } from "@electron/fuses";
 import { mainConfig } from "./webpack.main.config";
 import { rendererConfig } from "./webpack.renderer.config";
 import fs from "fs";
+import child_process from "child_process";
+
+// go get the version from the actual script
+const version = child_process
+  .execSync("go run ../../pkg/config/git/git.go -v")
+  .toString()
+  .slice(1);
 
 const config: ForgeConfig = {
   packagerConfig: {
     asar: true,
     name: "Aquareum",
-    appVersion: process.env.VERSION,
-    buildVersion: process.env.VERSION,
+    appVersion: version,
+    buildVersion: version,
   },
   hooks: {
     prePackage: async (config, plat, arch) => {
@@ -46,7 +53,7 @@ const config: ForgeConfig = {
       config.packagerConfig.extraResource = [binary];
     },
     readPackageJson: async (forgeConfig, packageJson) => {
-      packageJson.version = process.env.VERSION;
+      packageJson.version = version;
       return packageJson;
     },
   },
