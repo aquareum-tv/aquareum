@@ -172,6 +172,17 @@ node-all-platforms-macos: app
 	meson setup --buildtype debugoptimized --cross-file util/darwin-amd64-apple.ini build-darwin-amd64 $(OPTS)
 	meson compile -C build-darwin-amd64 archive
 	./build-darwin-amd64/aquareum --version
+	$(MAKE) desktop-macos
+
+.PHONY: desktop-macos
+desktop-macos:
+	export VERSION=$(VERSION) \
+	&& cd js/desktop \
+	&& yarn run make --platform darwin --arch arm64 \
+	&& yarn run make --platform darwin --arch x64 \
+	&& cd - \
+	&& mv js/desktop/out/make/Aquareum-$(VERSION)-x64.dmg ./bin/aquareum-desktop-$(VERSION)-darwin-amd64.dmg \
+	&& mv js/desktop/out/make/Aquareum-$(VERSION)-arm64.dmg ./bin/aquareum-desktop-$(VERSION)-darwin-arm64.dmg
 
 # link your local version of mist for dev
 .PHONY: link-mist
@@ -240,6 +251,8 @@ ci-upload-node-macos: node-all-platforms-macos
 	for GOOS in darwin; do \
 		for GOARCH in amd64 arm64; do \
 			export file=aquareum-$(VERSION)-$$GOOS-$$GOARCH.tar.gz \
+			&& $(MAKE) ci-upload-file upload_file=$$file; \
+			export file=aquareum-desktop-$(VERSION)-$$GOOS-$$GOARCH.dmg \
 			&& $(MAKE) ci-upload-file upload_file=$$file; \
 		done \
 	done;

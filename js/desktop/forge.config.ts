@@ -15,34 +15,40 @@ import fs from "fs";
 const config: ForgeConfig = {
   packagerConfig: {
     asar: true,
-    afterInitialize: [
-      (_1, _2, plat, arch) => {
-        let platform = plat;
-        let architecture = arch;
-        if (platform === "win32") {
-          platform = "windows";
-        }
-        if (architecture === "x64") {
-          architecture = "amd64";
-        }
-        let binary = `../../build-${platform}-${architecture}/aquareum`;
-        if (platform === "windows") {
-          binary += ".exe";
-        }
-        const exists = fs.existsSync(binary);
-        if (!exists) {
-          throw new Error(
-            `could not find ${binary} while building electron bundle. do you need to run make ${platform}-${architecture}?`,
-          );
-        }
+    name: "Aquareum",
+    appVersion: process.env.VERSION,
+    buildVersion: process.env.VERSION,
+  },
+  hooks: {
+    prePackage: async (config, plat, arch) => {
+      let platform = plat;
+      let architecture = arch;
+      if (platform === "win32") {
+        platform = "windows";
+      }
+      if (architecture === "x64") {
+        architecture = "amd64";
+      }
+      let binary = `../../build-${platform}-${architecture}/aquareum`;
+      if (platform === "windows") {
+        binary += ".exe";
+      }
+      const exists = fs.existsSync(binary);
+      if (!exists) {
+        throw new Error(
+          `could not find ${binary} while building electron bundle. do you need to run make ${platform}-${architecture}?`,
+        );
+      }
 
-        if (!config.packagerConfig) {
-          throw new Error("config.packageConfig undefined");
-        }
-        config.packagerConfig.extraResource = [binary];
-      },
-    ],
-    extraResource: ["/does/not/exist/fixme"],
+      if (!config.packagerConfig) {
+        throw new Error("config.packageConfig undefined");
+      }
+      config.packagerConfig.extraResource = [binary];
+    },
+    readPackageJson: async (forgeConfig, packageJson) => {
+      packageJson.version = process.env.VERSION;
+      return packageJson;
+    },
   },
   rebuildConfig: {},
   makers: [
