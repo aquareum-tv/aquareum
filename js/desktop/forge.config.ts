@@ -1,6 +1,6 @@
 import type { ForgeConfig } from "@electron-forge/shared-types";
 import { MakerSquirrel } from "@electron-forge/maker-squirrel";
-import { MakerZIP } from "@electron-forge/maker-zip";
+import { MakerDMG } from "@electron-forge/maker-dmg";
 import { MakerDeb } from "@electron-forge/maker-deb";
 import { MakerRpm } from "@electron-forge/maker-rpm";
 import { AutoUnpackNativesPlugin } from "@electron-forge/plugin-auto-unpack-natives";
@@ -10,15 +10,24 @@ import { FuseV1Options, FuseVersion } from "@electron/fuses";
 
 import { mainConfig } from "./webpack.main.config";
 import { rendererConfig } from "./webpack.renderer.config";
+import fs from "fs";
 
 const config: ForgeConfig = {
   packagerConfig: {
     asar: true,
+    // afterInitialize: [
+    //   (_1, _2, plat, arch) => {
+    //     fs.appendFileSync("/home/iameli/code/aquareum/js/desktop/log.txt", JSON.stringify([plat, arch]) + "\n", "utf8")
+    //     console.log(plat, arch)
+    //     throw new Error("wtf")
+    //   }
+    // ],
+    extraResource: ["../../bin/linux-x64/*"],
   },
   rebuildConfig: {},
   makers: [
     new MakerSquirrel({}),
-    new MakerZIP({}, ["darwin"]),
+    new MakerDMG({}, ["darwin"]),
     // new MakerRpm({}),
     new MakerDeb({}),
   ],

@@ -53,7 +53,7 @@ test:
 # test to make sure we haven't added any more dynamic dependencies
 .PHONY: link-test
 link-test:
-	count=$(shell ldd ./build/aquareum | wc -l) \
+	count=$(shell ldd ./build-linux-amd64/aquareum | wc -l) \
 	&& echo $$count \
 	&& if [ "$$count" != "6" ]; then echo "ldd reports new libaries linked! want 6 got $$count" \
 		&& ldd ./bin/aquareum \
@@ -139,8 +139,8 @@ meson-setup:
 
 .PHONY: node-all-platforms
 node-all-platforms: app
-	meson setup build $(OPTS) --buildtype debugoptimized
-	meson compile -C build archive
+	meson setup build-linux-amd64 $(OPTS) --buildtype debugoptimized
+	meson compile -C build-linux-amd64 archive
 	$(MAKE) link-test
 	$(MAKE) linux-arm64
 	$(MAKE) windows-amd64
@@ -149,29 +149,29 @@ node-all-platforms: app
 .PHONY: linux-arm64
 linux-arm64:
 	rustup target add aarch64-unknown-linux-gnu
-	meson setup --cross-file util/linux-arm64-gnu.ini --buildtype debugoptimized build-aarch64 $(OPTS)
-	meson compile -C build-aarch64 archive
+	meson setup --cross-file util/linux-arm64-gnu.ini --buildtype debugoptimized build-linux-arm64 $(OPTS)
+	meson compile -C build-linux-arm64 archive
 
 .PHONY: windows-amd64
 windows-amd64:
 	rustup target add x86_64-pc-windows-gnu
-	meson setup --cross-file util/windows-amd64-gnu.ini --buildtype debugoptimized build-windows $(OPTS)
-	meson compile -C build-windows archive 2>&1 | grep -v drectve
+	meson setup --cross-file util/windows-amd64-gnu.ini --buildtype debugoptimized build-windows-amd64 $(OPTS)
+	meson compile -C build-windows-amd64 archive 2>&1 | grep -v drectve
 
 # unbuffer here is a workaround for wine trying to pop up a terminal window and failing
 .PHONY: windows-amd64-startup-test
 windows-amd64-startup-test:
-	bash -c 'set -euo pipefail && unbuffer wine64 ./build-windows/aquareum.exe --version | cat'
+	bash -c 'set -euo pipefail && unbuffer wine64 ./build-windows-amd64/aquareum.exe --version | cat'
 
 .PHONY: node-all-platforms-macos
 node-all-platforms-macos: app
-	meson setup --buildtype debugoptimized build $(OPTS)
-	meson compile -C build archive
-	./build/aquareum --version
+	meson setup --buildtype debugoptimized build-darwin-arm64 $(OPTS)
+	meson compile -C build-darwin-arm64 archive
+	./build-darwin-arm64/aquareum --version
 	rustup target add x86_64-apple-darwin
-	meson setup --buildtype debugoptimized --cross-file util/darwin-amd64-apple.ini build-amd64 $(OPTS)
-	meson compile -C build-amd64 archive
-	./build-amd64/aquareum --version
+	meson setup --buildtype debugoptimized --cross-file util/darwin-amd64-apple.ini build-darwin-amd64 $(OPTS)
+	meson compile -C build-darwin-amd64 archive
+	./build-darwin-amd64/aquareum --version
 
 # link your local version of mist for dev
 .PHONY: link-mist
