@@ -9120,7 +9120,7 @@ __metadata:
     style-loader: "npm:^3.0.0"
     ts-loader: "npm:^9.2.2"
     ts-node: "npm:^10.0.0"
-    typescript: "npm:~4.5.4"
+    typescript: "npm:~5.5.3"
   languageName: unknown
   linkType: soft
 
@@ -23653,16 +23653,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:~4.5.4":
-  version: 4.5.5
-  resolution: "typescript@npm:4.5.5"
-  bin:
-    tsc: bin/tsc
-    tsserver: bin/tsserver
-  checksum: 10/6b1a99a272bb6bf701e6f5f7e23455049a85db4958cd19bc4c2d25025b5af5751756962ae7a8bbcc1e339fa5209384f5e15352aa973c2121d7f8f525067106b3
-  languageName: node
-  linkType: hard
-
 "typescript@patch:typescript@npm%3A>=3 < 6#optional!builtin<compat/typescript>, typescript@patch:typescript@npm%3A~5.5.3#optional!builtin<compat/typescript>":
   version: 5.5.3
   resolution: "typescript@patch:typescript@npm%3A5.5.3#optional!builtin<compat/typescript>::version=5.5.3&hash=b45daf"
@@ -23670,16 +23660,6 @@ __metadata:
     tsc: bin/tsc
     tsserver: bin/tsserver
   checksum: 10/b61b8bb4b4d6a8a00f9d5f931f8c67070eed6ad11feabf4c41744a326987080bfc806a621596c70fbf2e5974eca3ed65bafeeeb22a078071bdfb51d8abd7c013
-  languageName: node
-  linkType: hard
-
-"typescript@patch:typescript@npm%3A~4.5.4#optional!builtin<compat/typescript>":
-  version: 4.5.5
-  resolution: "typescript@patch:typescript@npm%3A4.5.5#optional!builtin<compat/typescript>::version=4.5.5&hash=f1b8ea"
-  bin:
-    tsc: bin/tsc
-    tsserver: bin/tsserver
-  checksum: 10/dddcdd55dab8823f6ab618d74b6b09f8c010e4fe3ae28904c3c17f176e186773ad7b99410176bf0a2ec4ea07e0edec9ccf11fe05e0ca6e7958bf05ee7ce487f6
   languageName: node
   linkType: hard
 

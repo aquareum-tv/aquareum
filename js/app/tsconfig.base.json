@@ -10,7 +10,7 @@
     "preserveSymlinks": true,
     "incremental": true,
     "jsx": "react-jsx",
-    "module": "system",
+    "module": "preserve",
     "moduleResolution": "node",
     "noEmitOnError": false,
     "noImplicitAny": false,
@@ -21,6 +21,7 @@
     "preserveConstEnums": true,
     // DONT DO THIS so jsdoc will remain
     "removeComments": false,
+    "resolveJsonModule": true,
     "skipLibCheck": true,
     "sourceMap": false,
     "strictNullChecks": true,
@@ -28,7 +29,7 @@
     "types": ["node"],
     "lib": ["dom", "esnext"]
   },
-  "exclude": ["_"],
+  "exclude": ["_", "*.d.ts"],
   "typeAcquisition": {
     "enable": true
   }
