@@ -4,13 +4,29 @@ import { app, BrowserWindow } from "electron";
 // whether you're running in development or production).
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
+import makeNode from "./node";
+import getEnv from "./env";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
   app.quit();
 }
 
-const createWindow = (): void => {
+const createWindow = async (): Promise<void> => {
+  const { skipNode, nodeFrontend } = getEnv();
+  let loadAddr;
+  if (!skipNode) {
+    const { proc, addr } = await makeNode();
+    loadAddr = addr;
+    let running = true;
+    app.on("before-quit", () => {
+      proc.kill("SIGTERM");
+    });
+    proc.on("exit", () => {
+      running = false;
+      app.quit();
+    });
+  }
   // Create the browser window.
   const mainWindow = new BrowserWindow({
     height: 600,
@@ -18,15 +34,17 @@ const createWindow = (): void => {
     webPreferences: {
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
     },
-    titleBarStyle: "hidden",
+    // titleBarStyle: "hidden",
     // titleBarOverlay: true,
   });
 
-  // and load the index.html of the app.
-  mainWindow.loadURL("http://127.0.0.1:8081");
+  mainWindow.removeMenu();
 
-  // Open the DevTools.
-  mainWindow.webContents.openDevTools();
+  if (nodeFrontend) {
+    mainWindow.loadURL(loadAddr);
+  } else {
+    mainWindow.loadURL("http://localhost:38081");
+  }
 };
 
 // This method will be called when Electron has finished

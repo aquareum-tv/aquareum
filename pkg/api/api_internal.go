@@ -63,6 +63,7 @@ func (a *AquareumAPI) InternalHandler(ctx context.Context) (http.Handler, error)
 	})
 	triggerCollection := misttriggers.NewMistCallbackHandlersCollection(a.CLI, broker)
 	router.POST("/mist-trigger", triggerCollection.Trigger())
+	router.HandlerFunc("GET", "/healthz", a.HandleHealthz(ctx))
 
 	router.GET("/playback/:user/concat", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		user := p.ByName("user")

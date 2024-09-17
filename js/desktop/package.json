@@ -5,7 +5,8 @@
   "description": "Aquareum Desktop Application",
   "main": ".webpack/main",
   "scripts": {
-    "start": "electron-forge start",
+    "start": "electron-forge start | cat",
+    "start-with-node": "electron-forge start | cat",
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
