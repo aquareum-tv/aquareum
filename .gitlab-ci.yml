@@ -150,7 +150,6 @@ build-mac:
       && source ~/venv/bin/activate
       && pip3 install meson
       && make ci-macos -j16
-      && make test
 
 release:
   stage: build

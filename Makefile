@@ -181,6 +181,7 @@ node-all-platforms-macos: app
 	meson compile -C build-darwin-amd64 archive
 	./build-darwin-amd64/aquareum --version
 	$(MAKE) desktop-macos
+	meson test -C build-darwin-arm64 go-tests
 
 .PHONY: desktop-macos
 desktop-macos:
