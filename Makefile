@@ -5,6 +5,7 @@ $(shell mkdir -p $(OUT_DIR))
 default: app node
 
 VERSION?=$(shell go run ./pkg/config/git/git.go -v)
+VERSION_ELECTRON=$(subst -,-z,$(subst v,,$(VERSION)))
 UUID?=$(shell go run ./pkg/config/uuid/uuid.go)
 BRANCH?=$(shell go run ./pkg/config/git/git.go --branch)
 
@@ -151,8 +152,12 @@ node-all-platforms: app
 desktop-linux:
 	cd js/desktop \
 	&& yarn run make --platform win32 --arch x64 \
+	&& yarn run make --platform linux --arch x64 \
+	&& yarn run make --platform linux --arch arm64 \
 	&& cd - \
-	&& mv "js/desktop/out/make/squirrel.windows/x64/Aquareum-$(subst v,,$(VERSION)) Setup.exe" ./bin/aquareum-desktop-$(VERSION)-windows-amd64.exe
+	&& mv "js/desktop/out/make/squirrel.windows/x64/Aquareum-$(VERSION_ELECTRON) Setup.exe" ./bin/aquareum-desktop-$(VERSION)-windows-amd64.exe \
+	&& mv "js/desktop/out/make/AppImage/x64/Aquareum-$(VERSION_ELECTRON)-x64.AppImage" ./bin/aquareum-desktop-$(VERSION)-linux-amd64.AppImage \
+	&& mv "js/desktop/out/make/AppImage/arm64/Aquareum-$(VERSION_ELECTRON)-arm64.AppImage" ./bin/aquareum-desktop-$(VERSION)-linux-arm64.AppImage
 
 .PHONY: linux-arm64
 linux-arm64:
@@ -189,8 +194,8 @@ desktop-macos:
 	&& yarn run make --platform darwin --arch arm64 \
 	&& yarn run make --platform darwin --arch x64 \
 	&& cd - \
-	&& mv js/desktop/out/make/Aquareum-$(subst v,,$(VERSION))-x64.dmg ./bin/aquareum-desktop-$(VERSION)-darwin-amd64.dmg \
-	&& mv js/desktop/out/make/Aquareum-$(subst v,,$(VERSION))-arm64.dmg ./bin/aquareum-desktop-$(VERSION)-darwin-arm64.dmg
+	&& mv js/desktop/out/make/Aquareum-$(VERSION_ELECTRON)-x64.dmg ./bin/aquareum-desktop-$(VERSION)-darwin-amd64.dmg \
+	&& mv js/desktop/out/make/Aquareum-$(VERSION_ELECTRON)-arm64.dmg ./bin/aquareum-desktop-$(VERSION)-darwin-arm64.dmg
 
 # link your local version of mist for dev
 .PHONY: link-mist
@@ -244,6 +249,8 @@ ci-upload-node: node-all-platforms
 	for GOOS in linux; do \
 		for GOARCH in amd64 arm64; do \
 			export file=aquareum-$(VERSION)-$$GOOS-$$GOARCH.tar.gz \
+			&& $(MAKE) ci-upload-file upload_file=$$file; \
+			export file=aquareum-desktop-$(VERSION)-$$GOOS-$$GOARCH.AppImage \
 			&& $(MAKE) ci-upload-file upload_file=$$file; \
 		done \
 	done;

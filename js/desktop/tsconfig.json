@@ -13,7 +13,8 @@
     "resolveJsonModule": true,
     "paths": {
       "*": ["node_modules/*"]
-    }
+    },
+    "lib": ["es2021"]
   },
   "include": ["src/**/*"]
 }
