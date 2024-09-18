@@ -3,7 +3,7 @@ export default function getEnv() {
   if (!isDev) {
     return {
       isDev: false,
-      skipNode: true,
+      skipNode: false,
       nodeFrontend: true,
     };
   }

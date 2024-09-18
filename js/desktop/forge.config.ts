@@ -7,7 +7,7 @@ import { AutoUnpackNativesPlugin } from "@electron-forge/plugin-auto-unpack-nati
 import { WebpackPlugin } from "@electron-forge/plugin-webpack";
 import { FusesPlugin } from "@electron-forge/plugin-fuses";
 import { FuseV1Options, FuseVersion } from "@electron/fuses";
-
+import { PublisherS3 } from "@electron-forge/publisher-s3";
 import { mainConfig } from "./webpack.main.config";
 import { rendererConfig } from "./webpack.renderer.config";
 import fs from "fs";
@@ -105,6 +105,16 @@ export default async function () {
         [FuseV1Options.EnableNodeCliInspectArguments]: false,
         [FuseV1Options.EnableEmbeddedAsarIntegrityValidation]: true,
         [FuseV1Options.OnlyLoadAppFromAsar]: true,
+      }),
+    ],
+    publishers: [
+      new PublisherS3({
+        endpoint: "http://localhost:9000/aquareum",
+        accessKeyId: "minioadmin",
+        secretAccessKey: "minioadmin",
+        public: true,
+        bucket: "aquareum",
+        region: "unused",
       }),
     ],
   };

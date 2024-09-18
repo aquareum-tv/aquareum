@@ -22,6 +22,7 @@
     "@electron-forge/plugin-auto-unpack-natives": "^7.4.0",
     "@electron-forge/plugin-fuses": "^7.4.0",
     "@electron-forge/plugin-webpack": "^7.4.0",
+    "@electron-forge/publisher-s3": "^7.4.0",
     "@electron/fuses": "^1.8.0",
     "@reforged/maker-appimage": "https://gitpkg.vercel.app/aquareum-tv/ReForged/makers/appimage?90c4b7e8449250fe2a83fb2df0f41a3fcc1b37ca",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
@@ -45,6 +46,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "electron-squirrel-startup": "^1.0.1"
+    "electron-squirrel-startup": "^1.0.1",
+    "update-electron-app": "^3.0.0"
   }
 }
