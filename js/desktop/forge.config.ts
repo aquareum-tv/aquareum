@@ -1,6 +1,7 @@
 import type { ForgeConfig } from "@electron-forge/shared-types";
 import { MakerSquirrel } from "@electron-forge/maker-squirrel";
 import { MakerDMG } from "@electron-forge/maker-dmg";
+import { MakerZIP } from "@electron-forge/maker-zip";
 // import { MakerDeb } from "@electron-forge/maker-deb";
 // import { MakerRpm } from "@electron-forge/maker-rpm";
 import { AutoUnpackNativesPlugin } from "@electron-forge/plugin-auto-unpack-natives";
@@ -70,6 +71,17 @@ export default async function () {
     makers: [
       new MakerSquirrel({}),
       new MakerDMG({}, ["darwin"]),
+      new MakerZIP(
+        (arch) => {
+          return {
+            // Note that we must provide this S3 URL here
+            // in order to support smooth version transitions
+            // especially when using a CDN to front your updates
+            macUpdateManifestBaseUrl: `https://1097-169-197-143-250.ngrok-free.app/aquareum/aquareum-desktop/darwin/${arch}`,
+          };
+        },
+        ["darwin"],
+      ),
       // new MakerRpm({}),
       new MakerAppImage({
         options: {
@@ -109,7 +121,7 @@ export default async function () {
     ],
     publishers: [
       new PublisherS3({
-        endpoint: "http://localhost:9000/aquareum",
+        endpoint: "http://192.168.8.136:9000",
         accessKeyId: "minioadmin",
         secretAccessKey: "minioadmin",
         public: true,

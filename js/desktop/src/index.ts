@@ -8,13 +8,13 @@ import makeNode from "./node";
 import getEnv from "./env";
 import { updateElectronApp, UpdateSourceType } from "update-electron-app";
 
-// updateElectronApp({
-//   updateSource: {
-//     type: UpdateSourceType.StaticStorage,
-//     baseUrl: `https://1097-169-197-143-250.ngrok-free.app/aquareum/aquareum-desktop/${process.platform}/${process.arch}`,
-//   },
-//   notifyUser: true,
-// });
+updateElectronApp({
+  updateSource: {
+    type: UpdateSourceType.StaticStorage,
+    baseUrl: `https://1097-169-197-143-250.ngrok-free.app/aquareum/aquareum-desktop/${process.platform}/${process.arch}`,
+  },
+  notifyUser: true,
+});
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
