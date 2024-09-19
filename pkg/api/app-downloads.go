@@ -4,11 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"regexp"
 	"strings"
 
+	apierrors "aquareum.tv/aquareum/pkg/errors"
 	"aquareum.tv/aquareum/pkg/log"
+	"github.com/julienschmidt/httprouter"
 )
 
 var (
@@ -16,64 +19,78 @@ var (
 	inputRe = regexp.MustCompile(`^aquareum-([0-9a-z]+)-([0-9a-z]+)\.(.+)$`)
 )
 
-func (a *AquareumAPI) AppDownloadHandler(ctx context.Context) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func queryGitlabReal(url string) (io.ReadCloser, error) {
+	req, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	return req.Body, nil
+}
+
+var queryGitlab = queryGitlabReal
+
+func (a *AquareumAPI) HandleAppDownload(ctx context.Context) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 		log.Log(ctx, "got here")
 		pathname := r.URL.Path
 		parts := strings.Split(pathname, "/")
 		if len(parts) < 4 {
-			http.Error(w, "usage: /dl/latest/aquareum-linux-arm64.tar.gz", http.StatusBadRequest)
+			apierrors.WriteHTTPBadRequest(w, "usage: /dl/latest/aquareum-linux-arm64.tar.gz", nil)
 			return
 		}
 
 		_, branch, file := parts[1], parts[2], parts[3]
 		if branch == "" || file == "" {
-			http.Error(w, "usage: /dl/latest/aquareum-linux-arm64.tar.gz", http.StatusBadRequest)
+			apierrors.WriteHTTPBadRequest(w, "usage: /dl/latest/aquareum-linux-arm64.tar.gz", nil)
 			return
 		}
 
 		inputPieces := inputRe.FindStringSubmatch(file)
 		if inputPieces == nil {
-			http.Error(w, fmt.Sprintf("could not parse filename %s", file), http.StatusBadRequest)
+			apierrors.WriteHTTPBadRequest(w, fmt.Sprintf("could not parse filename %s", file), nil)
 			return
 		}
 
 		inputPlatform, inputArch, inputExt := inputPieces[1], inputPieces[2], inputPieces[3]
 		packageURL := fmt.Sprintf("%s/packages?order_by=created_at&sort=desc&package_name=%s", a.CLI.GitLabURL, branch)
 
-		packageReq, err := http.Get(packageURL)
+		packageBody, err := queryGitlab(packageURL)
 		if err != nil {
-			http.Error(w, "failed to fetch packages", http.StatusInternalServerError)
+			apierrors.WriteHTTPInternalServerError(w, "failed to fetch packages", err)
 			return
 		}
-		defer packageReq.Body.Close()
+		defer packageBody.Close()
 
 		var packages []map[string]interface{}
-		if err := json.NewDecoder(packageReq.Body).Decode(&packages); err != nil {
-			http.Error(w, "failed to decode package response", http.StatusInternalServerError)
+		if err := json.NewDecoder(packageBody).Decode(&packages); err != nil {
+			apierrors.WriteHTTPInternalServerError(w, "failed to decode package response", err)
 			return
 		}
+		// bs, _ := json.Marshal(packages)
+		// fmt.Println(string(bs))
 
 		if len(packages) == 0 {
-			http.Error(w, fmt.Sprintf("package for branch %s not found", branch), http.StatusNotFound)
+			apierrors.WriteHTTPNotFound(w, fmt.Sprintf("package for branch %s not found", branch), nil)
 			return
 		}
 
 		pkg := packages[0]
 		fileURL := fmt.Sprintf("%s/packages/%v/package_files", a.CLI.GitLabURL, pkg["id"])
 
-		fileReq, err := http.Get(fileURL)
+		fileBody, err := queryGitlab(fileURL)
 		if err != nil {
-			http.Error(w, "failed to fetch files", http.StatusInternalServerError)
+			apierrors.WriteHTTPInternalServerError(w, "failed to fetch files", err)
 			return
 		}
-		defer fileReq.Body.Close()
+		defer fileBody.Close()
 
 		var files []map[string]interface{}
-		if err := json.NewDecoder(fileReq.Body).Decode(&files); err != nil {
-			http.Error(w, "failed to decode file response", http.StatusInternalServerError)
+		if err := json.NewDecoder(fileBody).Decode(&files); err != nil {
+			apierrors.WriteHTTPInternalServerError(w, "failed to decode file response", err)
 			return
 		}
+		// bs, _ = json.Marshal(files)
+		// fmt.Println(string(bs))
 
 		var foundFile map[string]interface{}
 		var outURL string
@@ -94,10 +111,10 @@ func (a *AquareumAPI) AppDownloadHandler(ctx context.Context) http.HandlerFunc {
 		}
 
 		if foundFile == nil {
-			http.Error(w, fmt.Sprintf("could not find a file for platform=%s arch=%s ext=%s", inputPlatform, inputArch, inputExt), http.StatusNotFound)
+			apierrors.WriteHTTPNotFound(w, "could not find a file for platform=%s arch=%s ext=%s", nil)
 			return
 		}
 
-		http.Redirect(w, r, outURL, http.StatusFound)
+		http.Redirect(w, r, outURL, http.StatusTemporaryRedirect)
 	}
 }
