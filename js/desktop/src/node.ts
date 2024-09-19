@@ -29,18 +29,21 @@ const findExe = async (): Promise<string> => {
 
 export default async function makeNode() {
   const exe = await findExe();
+  const addr = "127.0.0.1:38082";
+  const internalAddr = "127.0.0.1:39092";
   const proc = spawn(exe, ["--insecure"], {
     stdio: "inherit",
     env: {
       ...process.env,
       AQ_NO_MIST: "true",
+      AQ_HTTP_ADDR: addr,
+      AQ_HTTP_INTERNAL_ADDR: internalAddr,
     },
   });
-  const addr = "http://127.0.0.1:38080";
-  await checkService(`${addr}/api/healthz`);
+  await checkService(`http://${addr}/api/healthz`);
   return {
     proc,
-    addr,
+    addr: `http://${addr}`,
   };
 }
 

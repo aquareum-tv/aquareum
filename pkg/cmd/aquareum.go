@@ -50,7 +50,7 @@ func start(build *config.BuildFlags, platformJobs []jobFunc) error {
 	fs.StringVar(&cli.DataDir, "data-dir", config.DefaultDataDir(), "directory for keeping all aquareum data")
 	fs.StringVar(&cli.HttpAddr, "http-addr", ":38080", "Public HTTP address")
 	fs.StringVar(&cli.HttpInternalAddr, "http-internal-addr", "127.0.0.1:39090", "Private, admin-only HTTP address")
-	fs.StringVar(&cli.HttpsAddr, "https-addr", ":8443", "Public HTTPS address")
+	fs.StringVar(&cli.HttpsAddr, "https-addr", ":38443", "Public HTTPS address")
 	fs.BoolVar(&cli.Insecure, "insecure", false, "Run without HTTPS. not recomended, as WebRTC support requires HTTPS")
 	cli.DataDirFlag(fs, &cli.TLSCertPath, "tls-cert", filepath.Join("tls", "tls.crt"), "Path to TLS certificate")
 	cli.DataDirFlag(fs, &cli.TLSKeyPath, "tls-key", filepath.Join("tls", "tls.key"), "Path to TLS key")

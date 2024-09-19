@@ -11,7 +11,7 @@ import { updateElectronApp, UpdateSourceType } from "update-electron-app";
 updateElectronApp({
   updateSource: {
     type: UpdateSourceType.StaticStorage,
-    baseUrl: `https://1097-169-197-143-250.ngrok-free.app/aquareum/aquareum-desktop/${process.platform}/${process.arch}`,
+    baseUrl: `https://aquareum.localhost:38443/api/desktop-updates/${process.platform}/${process.arch}/${app.getVersion()}`,
   },
   notifyUser: true,
 });

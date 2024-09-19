@@ -90,6 +90,7 @@ func (a *AquareumAPI) Handler(ctx context.Context) (http.Handler, error) {
 	router.HandlerFunc("GET", "/app-updates", a.HandleAppUpdates(ctx))
 	// new ones
 	apiRouter.HandlerFunc("GET", "/api/manifest", a.HandleAppUpdates(ctx))
+	apiRouter.GET("/api/desktop-updates/:platform/:architecture/:version/RELEASES.json", a.HandleDesktopUpdates(ctx))
 	apiRouter.POST("/api/webrtc/:stream", a.MistProxyHandler(ctx, "/webrtc/%s"))
 	apiRouter.OPTIONS("/api/webrtc/:stream", a.MistProxyHandler(ctx, "/webrtc/%s"))
 	apiRouter.DELETE("/api/webrtc/:stream", a.MistProxyHandler(ctx, "/webrtc/%s"))

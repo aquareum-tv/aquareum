@@ -71,17 +71,7 @@ export default async function () {
     makers: [
       new MakerSquirrel({}),
       new MakerDMG({}, ["darwin"]),
-      new MakerZIP(
-        (arch) => {
-          return {
-            // Note that we must provide this S3 URL here
-            // in order to support smooth version transitions
-            // especially when using a CDN to front your updates
-            macUpdateManifestBaseUrl: `https://1097-169-197-143-250.ngrok-free.app/aquareum/aquareum-desktop/darwin/${arch}`,
-          };
-        },
-        ["darwin"],
-      ),
+      new MakerZIP({}, ["darwin"]),
       // new MakerRpm({}),
       new MakerAppImage({
         options: {

@@ -195,7 +195,9 @@ desktop-macos:
 	&& yarn run make --platform darwin --arch x64 \
 	&& cd - \
 	&& mv js/desktop/out/make/Aquareum-$(VERSION_ELECTRON)-x64.dmg ./bin/aquareum-desktop-$(VERSION)-darwin-amd64.dmg \
-	&& mv js/desktop/out/make/Aquareum-$(VERSION_ELECTRON)-arm64.dmg ./bin/aquareum-desktop-$(VERSION)-darwin-arm64.dmg
+	&& mv js/desktop/out/make/Aquareum-$(VERSION_ELECTRON)-arm64.dmg ./bin/aquareum-desktop-$(VERSION)-darwin-arm64.dmg \
+	&& mv js/desktop/out/make/zip/darwin/x64/Aquareum-darwin-x64-$(VERSION_ELECTRON).zip ./bin/aquareum-desktop-$(VERSION)-darwin-amd64.zip \
+	&& mv js/desktop/out/make/zip/darwin/arm64/Aquareum-darwin-arm64-$(VERSION_ELECTRON).zip ./bin/aquareum-desktop-$(VERSION)-darwin-arm64.zip
 
 # link your local version of mist for dev
 .PHONY: link-mist
@@ -270,6 +272,8 @@ ci-upload-node-macos: node-all-platforms-macos
 			export file=aquareum-$(VERSION)-$$GOOS-$$GOARCH.tar.gz \
 			&& $(MAKE) ci-upload-file upload_file=$$file; \
 			export file=aquareum-desktop-$(VERSION)-$$GOOS-$$GOARCH.dmg \
+			&& $(MAKE) ci-upload-file upload_file=$$file; \
+			export file=aquareum-desktop-$(VERSION)-$$GOOS-$$GOARCH.zip \
 			&& $(MAKE) ci-upload-file upload_file=$$file; \
 		done \
 	done;
