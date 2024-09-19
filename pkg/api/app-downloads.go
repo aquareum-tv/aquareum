@@ -15,8 +15,8 @@ import (
 )
 
 var (
-	re      = regexp.MustCompile(`^aquareum-(v[0-9]+\.[0-9]+\.[0-9]+)(-[0-9a-f]+)?-([0-9a-z]+)-([0-9a-z]+)\.(.+)$`)
-	inputRe = regexp.MustCompile(`^aquareum-([0-9a-z]+)-([0-9a-z]+)\.(.+)$`)
+	re      = regexp.MustCompile(`^aquareum(-desktop)?-(v[0-9]+\.[0-9]+\.[0-9]+)(-[0-9a-f]+)?-([0-9a-z]+)-([0-9a-z]+)\.(.+)$`)
+	inputRe = regexp.MustCompile(`^aquareum(-desktop)?-([0-9a-z]+)-([0-9a-z]+)\.(.+)$`)
 )
 
 func queryGitlabReal(url string) (io.ReadCloser, error) {
@@ -51,7 +51,7 @@ func (a *AquareumAPI) HandleAppDownload(ctx context.Context) httprouter.Handle {
 			return
 		}
 
-		inputPlatform, inputArch, inputExt := inputPieces[1], inputPieces[2], inputPieces[3]
+		inputDesktop, inputPlatform, inputArch, inputExt := inputPieces[1], inputPieces[2], inputPieces[3], inputPieces[4]
 		packageURL := fmt.Sprintf("%s/packages?order_by=created_at&sort=desc&package_name=%s", a.CLI.GitLabURL, branch)
 
 		packageBody, err := queryGitlab(packageURL)
@@ -101,8 +101,8 @@ func (a *AquareumAPI) HandleAppDownload(ctx context.Context) httprouter.Handle {
 				log.Log(ctx, "could not parse filename %s", "filename", filename)
 				continue
 			}
-			ver, hash, platform, arch, ext := pieces[1], pieces[2], pieces[3], pieces[4], pieces[5]
-			if platform == inputPlatform && arch == inputArch && ext == inputExt {
+			desktop, ver, hash, platform, arch, ext := pieces[1], pieces[2], pieces[3], pieces[4], pieces[5], pieces[6]
+			if desktop == inputDesktop && platform == inputPlatform && arch == inputArch && ext == inputExt {
 				foundFile = f
 				fullVer := ver + hash
 				outURL = fmt.Sprintf("%s/packages/generic/%s/%s/%s", a.CLI.GitLabURL, branch, fullVer, filename)
@@ -111,7 +111,7 @@ func (a *AquareumAPI) HandleAppDownload(ctx context.Context) httprouter.Handle {
 		}
 
 		if foundFile == nil {
-			apierrors.WriteHTTPNotFound(w, "could not find a file for platform=%s arch=%s ext=%s", nil)
+			apierrors.WriteHTTPNotFound(w, fmt.Sprintf("could not find a file for desktop=%s platform=%s arch=%s ext=%s", inputDesktop, inputPlatform, inputArch, inputExt), nil)
 			return
 		}
 

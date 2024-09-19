@@ -22,13 +22,16 @@ func TestRegexAquareum(t *testing.T) {
 		expectedGroups []string
 	}{
 		// Test cases for the 're' regex
-		{"aquareum-v1.2.3-abcdef-foo-bar.txt", true, []string{"v1.2.3", "-abcdef", "foo", "bar", "txt"}},
-		{"aquareum-v1.0.0-123456-hello-world.csv", true, []string{"v1.0.0", "-123456", "hello", "world", "csv"}},
-		{"aquareum-v2.5.1-abc123-done-done.xml", true, []string{"v2.5.1", "-abc123", "done", "done", "xml"}},
-		{"aquareum-v3.2.1-xyz-abc.json", true, []string{"v3.2.1", "", "xyz", "abc", "json"}},
-		{"aquareum-v3.2.1-nohash-xyz.json", true, []string{"v3.2.1", "", "nohash", "xyz", "json"}},
-		{"aquareum-v10.2.10-abc123-linux-amd64.json", true, []string{"v10.2.10", "-abc123", "linux", "amd64", "json"}},
-		{"aquareum-v10.2.10-darwin-arm64.json", true, []string{"v10.2.10", "", "darwin", "arm64", "json"}},
+		{"aquareum-v1.2.3-abcdef-foo-bar.txt", true, []string{"", "v1.2.3", "-abcdef", "foo", "bar", "txt"}},
+		{"aquareum-v1.0.0-123456-hello-world.csv", true, []string{"", "v1.0.0", "-123456", "hello", "world", "csv"}},
+		{"aquareum-v2.5.1-abc123-done-done.xml", true, []string{"", "v2.5.1", "-abc123", "done", "done", "xml"}},
+		{"aquareum-v3.2.1-xyz-abc.json", true, []string{"", "v3.2.1", "", "xyz", "abc", "json"}},
+		{"aquareum-v3.2.1-nohash-xyz.json", true, []string{"", "v3.2.1", "", "nohash", "xyz", "json"}},
+		{"aquareum-v10.2.10-abc123-linux-amd64.json", true, []string{"", "v10.2.10", "-abc123", "linux", "amd64", "json"}},
+		{"aquareum-v10.2.10-darwin-arm64.json", true, []string{"", "v10.2.10", "", "darwin", "arm64", "json"}},
+		{"aquareum-desktop-v3.2.1-nohash-xyz.json", true, []string{"-desktop", "v3.2.1", "", "nohash", "xyz", "json"}},
+		{"aquareum-desktop-v10.2.10-abc123-linux-amd64.json", true, []string{"-desktop", "v10.2.10", "-abc123", "linux", "amd64", "json"}},
+		{"aquareum-desktop-v10.2.10-darwin-arm64.json", true, []string{"-desktop", "v10.2.10", "", "darwin", "arm64", "json"}},
 
 		// Test cases where the regex should not match
 		{"aquareum-123-abc.txt", false, nil},
@@ -40,7 +43,7 @@ func TestRegexAquareum(t *testing.T) {
 			match := re.FindStringSubmatch(test.filename)
 			if test.shouldMatch {
 				require.NotNil(t, match, "Expected match for filename %s", test.filename)
-				require.Len(t, match, 6, "Unexpected number of capture groups for filename %s", test.filename)
+				require.Len(t, match, len(test.expectedGroups)+1, "Unexpected number of capture groups for filename %s", test.filename)
 				for i, expected := range test.expectedGroups {
 					require.Equal(t, expected, match[i+1], "Unexpected group %d for filename %s", i, test.filename)
 				}
@@ -58,10 +61,12 @@ func TestRegexInput(t *testing.T) {
 		expectedGroups []string
 	}{
 		// Test cases for the 'inputRe' regex
-		{"aquareum-foo-bar.txt", true, []string{"foo", "bar", "txt"}},
-		{"aquareum-abc-def.csv", true, []string{"abc", "def", "csv"}},
-		{"aquareum-x-y.xml", true, []string{"x", "y", "xml"}},
-		{"aquareum-hello-world.json", true, []string{"hello", "world", "json"}},
+		{"aquareum-foo-bar.txt", true, []string{"", "foo", "bar", "txt"}},
+		{"aquareum-abc-def.csv", true, []string{"", "abc", "def", "csv"}},
+		{"aquareum-x-y.xml", true, []string{"", "x", "y", "xml"}},
+		{"aquareum-hello-world.json", true, []string{"", "hello", "world", "json"}},
+		{"aquareum-desktop-x-y.xml", true, []string{"-desktop", "x", "y", "xml"}},
+		{"aquareum-desktop-hello-world.json", true, []string{"-desktop", "hello", "world", "json"}},
 
 		// Test cases where the regex should not match
 		{"aquareum-foo.txt", false, nil},
@@ -76,7 +81,7 @@ func TestRegexInput(t *testing.T) {
 			match := inputRe.FindStringSubmatch(test.filename)
 			if test.shouldMatch {
 				require.NotNil(t, match, "Expected match for filename %s", test.filename)
-				require.Len(t, match, 4, "Unexpected number of capture groups for filename %s", test.filename)
+				require.Len(t, match, len(test.expectedGroups)+1, "Unexpected number of capture groups for filename %s", test.filename)
 				for i, expected := range test.expectedGroups {
 					require.Equal(t, expected, match[i+1], "Unexpected group %d for filename %s", i, test.filename)
 				}
@@ -128,6 +133,34 @@ func TestDownloadRedirects(t *testing.T) {
 		{
 			in:  "aquareum-windows-amd64.zip",
 			out: "v0.1.3-51aab8b5/aquareum-v0.1.3-51aab8b5-windows-amd64.zip",
+		},
+		{
+			in:  "aquareum-desktop-windows-amd64.exe",
+			out: "v0.1.3-51aab8b5/aquareum-desktop-v0.1.3-51aab8b5-windows-amd64.exe",
+		},
+		{
+			in:  "aquareum-desktop-darwin-amd64.dmg",
+			out: "v0.1.3-51aab8b5/aquareum-desktop-v0.1.3-51aab8b5-darwin-amd64.dmg",
+		},
+		{
+			in:  "aquareum-desktop-darwin-arm64.dmg",
+			out: "v0.1.3-51aab8b5/aquareum-desktop-v0.1.3-51aab8b5-darwin-arm64.dmg",
+		},
+		{
+			in:  "aquareum-desktop-darwin-amd64.zip",
+			out: "v0.1.3-51aab8b5/aquareum-desktop-v0.1.3-51aab8b5-darwin-amd64.zip",
+		},
+		{
+			in:  "aquareum-desktop-darwin-arm64.zip",
+			out: "v0.1.3-51aab8b5/aquareum-desktop-v0.1.3-51aab8b5-darwin-arm64.zip",
+		},
+		{
+			in:  "aquareum-desktop-linux-amd64.AppImage",
+			out: "v0.1.3-51aab8b5/aquareum-desktop-v0.1.3-51aab8b5-linux-amd64.AppImage",
+		},
+		{
+			in:  "aquareum-desktop-linux-arm64.AppImage",
+			out: "v0.1.3-51aab8b5/aquareum-desktop-v0.1.3-51aab8b5-linux-arm64.AppImage",
 		},
 	}
 
