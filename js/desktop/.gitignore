@@ -90,3 +90,6 @@ typings/
 
 # Electron-Forge
 out/
+
+# auto-version
+src/version.ts

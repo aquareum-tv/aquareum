@@ -6,15 +6,8 @@ declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
 import makeNode from "./node";
 import getEnv from "./env";
-import { updateElectronApp, UpdateSourceType } from "update-electron-app";
-
-updateElectronApp({
-  updateSource: {
-    type: UpdateSourceType.StaticStorage,
-    baseUrl: `https://aquareum.localhost:38443/api/desktop-updates/${process.platform}/${process.arch}/${app.getVersion()}`,
-  },
-  notifyUser: true,
-});
+import initUpdater from "./updater";
+import { UpdateSourceType } from "update-electron-app";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
@@ -22,6 +15,7 @@ if (require("electron-squirrel-startup")) {
 }
 
 const createWindow = async (): Promise<void> => {
+  initUpdater();
   const { skipNode, nodeFrontend } = getEnv();
   let loadAddr;
   if (!skipNode) {

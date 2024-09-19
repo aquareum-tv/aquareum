@@ -22,6 +22,12 @@ export default async function () {
     .toString()
     .slice(1);
 
+  let versionCode = child_process
+    .execSync("go run ../../pkg/config/git/git.go --js")
+    .toString();
+
+  fs.writeFileSync("./src/version.ts", versionCode, "utf8");
+
   // https://github.com/Squirrel/Squirrel.Windows/issues/1394#issuecomment-2356692821
   // This makes the Desktop app have confusing numbers, but actual relases just use X.Y.Z
   // so it doesn't really matter. Those are just for testing.

@@ -22,6 +22,11 @@ func FromMillis(ms int64) AQTime {
 	return AQTime(time.UnixMilli(ms).UTC().Format(fstr))
 }
 
+// return a consistently formatted timestamp
+func FromSec(sec int64) AQTime {
+	return AQTime(time.Unix(sec, 0).UTC().Format(fstr))
+}
+
 func FromString(str string) (AQTime, error) {
 	bits := RE.FindStringSubmatch(str)
 	if bits == nil {
@@ -38,4 +43,12 @@ func (aqt AQTime) Parts() (string, string, string, string, string, string, strin
 
 func (aqt AQTime) String() string {
 	return string(aqt)
+}
+
+func (aqt AQTime) Time() time.Time {
+	t, err := time.Parse(fstr, aqt.String())
+	if err != nil {
+		panic(err)
+	}
+	return t
 }
