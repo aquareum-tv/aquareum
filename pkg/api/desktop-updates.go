@@ -14,6 +14,8 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
+const BRANCH = "latest"
+
 func formatRequest(r *http.Request) string {
 	// Create return string
 	var request []string
@@ -112,7 +114,7 @@ func (a *AquareumAPI) HandleMacDesktopUpdates(ctx context.Context) httprouter.Ha
 				PubDate: aqt.String(),
 				Notes:   fmt.Sprintf("Aquareum %s", clientVersion),
 				Name:    fmt.Sprintf("Aquareum %s", clientVersion),
-				URL:     fmt.Sprintf("https://%s/dl/latest/aquareum-desktop-%s-%s.zip", req.Host, platform, architecture),
+				URL:     fmt.Sprintf("https://%s/dl/%s/aquareum-desktop-%s-%s.zip", req.Host, BRANCH, platform, architecture),
 			}
 
 			mani = MacManifest{
@@ -154,21 +156,39 @@ func (a *AquareumAPI) HandleWindowsDesktopUpdates(ctx context.Context) httproute
 			"clientVersion", clientVersion,
 			"clientBuildTime", clientBuildTime,
 		)
-		clientBuildSec, err := strconv.ParseInt(clientBuildTime, 10, 64)
+		// clientBuildSec, err := strconv.ParseInt(clientBuildTime, 10, 64)
+		// if err != nil {
+		// 	apierrors.WriteHTTPBadRequest(w, "build time must be a number", err)
+		// 	return
+		// }
+
+		files, err := a.getGitlabPackage(BRANCH)
 		if err != nil {
-			apierrors.WriteHTTPBadRequest(w, "build time must be a number", err)
+			apierrors.WriteHTTPInternalServerError(w, "could not find gitlab package", err)
+			return
+		}
+
+		var gitlabFile *GitlabFile
+		for _, f := range files {
+			if f.Extension == "nupkg" {
+				gitlabFile = &f
+				break
+			}
+		}
+		if gitlabFile == nil {
+			apierrors.WriteHTTPInternalServerError(w, "could not find gitlab package", err)
 			return
 		}
 
 		if file == "RELEASES" {
-			if clientBuildSec >= a.CLI.Build.BuildTime {
-				// client is newer or the same as server
-				fmt.Fprintf(w, "0000000000000000000000000000000000000000 aquareum_desktop-%s-full.nupkg 1", clientVersion)
-				return
-			}
-			fmt.Fprintf(w, "1CBC2208DECB3E55C7AEA7320258AA36E3297F18 aquareum_desktop-0.1.4-full.nupkg 174710960")
+			// if clientBuildSec >= a.CLI.Build.BuildTime {
+			// 	// client is newer or the same as server
+			// 	fmt.Fprintf(w, "0000000000000000000000000000000000000000 aquareum_desktop-%s-full.nupkg 1", clientVersion)
+			// 	return
+			// }
+			fmt.Fprintf(w, "%s aquareum_desktop-%s-full.nupkg %d", gitlabFile.SHA1, gitlabFile.Version, gitlabFile.Size)
 			return
 		}
-		http.Redirect(w, req, "https://git.aquareum.tv/api/v4/projects/1/packages/generic/electron/v0.1.3-5742a5a4/aquareum-desktop-v0.1.3-5742a5a4-windows-amd64.1cbc2208decb3e55c7aea7320258aa36e3297f18.nupkg", http.StatusTemporaryRedirect)
+		http.Redirect(w, req, gitlabFile.URL(), http.StatusTemporaryRedirect)
 	}
 }

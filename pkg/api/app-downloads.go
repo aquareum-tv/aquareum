@@ -15,7 +15,7 @@ import (
 )
 
 var (
-	re      = regexp.MustCompile(`^aquareum(-desktop)?-(v[0-9]+\.[0-9]+\.[0-9]+)(-[0-9a-f]+)?-([0-9a-z]+)-([0-9a-z]+)\.(.+)$`)
+	re      = regexp.MustCompile(`^aquareum(-desktop)?-(v[0-9]+\.[0-9]+\.[0-9]+)(-[0-9a-f]+)?-([0-9a-z]+)-([0-9a-z]+)\.(?:([0-9a-f]+)\.)?(.+)$`)
 	inputRe = regexp.MustCompile(`^aquareum(-desktop)?-([0-9a-z]+)-([0-9a-z]+)\.(.+)$`)
 )
 
@@ -52,60 +52,16 @@ func (a *AquareumAPI) HandleAppDownload(ctx context.Context) httprouter.Handle {
 		}
 
 		inputDesktop, inputPlatform, inputArch, inputExt := inputPieces[1], inputPieces[2], inputPieces[3], inputPieces[4]
-		packageURL := fmt.Sprintf("%s/packages?order_by=created_at&sort=desc&package_name=%s", a.CLI.GitLabURL, branch)
-
-		packageBody, err := queryGitlab(packageURL)
+		files, err := a.getGitlabPackage(branch)
 		if err != nil {
-			apierrors.WriteHTTPInternalServerError(w, "failed to fetch packages", err)
-			return
-		}
-		defer packageBody.Close()
-
-		var packages []map[string]interface{}
-		if err := json.NewDecoder(packageBody).Decode(&packages); err != nil {
-			apierrors.WriteHTTPInternalServerError(w, "failed to decode package response", err)
-			return
-		}
-		// bs, _ := json.Marshal(packages)
-		// fmt.Println(string(bs))
-
-		if len(packages) == 0 {
-			apierrors.WriteHTTPNotFound(w, fmt.Sprintf("package for branch %s not found", branch), nil)
+			apierrors.WriteHTTPBadRequest(w, fmt.Sprintf("could not get gitlab package %s", file), err)
 			return
 		}
 
-		pkg := packages[0]
-		fileURL := fmt.Sprintf("%s/packages/%v/package_files", a.CLI.GitLabURL, pkg["id"])
-
-		fileBody, err := queryGitlab(fileURL)
-		if err != nil {
-			apierrors.WriteHTTPInternalServerError(w, "failed to fetch files", err)
-			return
-		}
-		defer fileBody.Close()
-
-		var files []map[string]interface{}
-		if err := json.NewDecoder(fileBody).Decode(&files); err != nil {
-			apierrors.WriteHTTPInternalServerError(w, "failed to decode file response", err)
-			return
-		}
-		// bs, _ = json.Marshal(files)
-		// fmt.Println(string(bs))
-
-		var foundFile map[string]interface{}
-		var outURL string
+		var foundFile *GitlabFile
 		for _, f := range files {
-			filename := f["file_name"].(string)
-			pieces := re.FindStringSubmatch(filename)
-			if pieces == nil {
-				log.Log(ctx, "could not parse filename %s", "filename", filename)
-				continue
-			}
-			desktop, ver, hash, platform, arch, ext := pieces[1], pieces[2], pieces[3], pieces[4], pieces[5], pieces[6]
-			if desktop == inputDesktop && platform == inputPlatform && arch == inputArch && ext == inputExt {
-				foundFile = f
-				fullVer := ver + hash
-				outURL = fmt.Sprintf("%s/packages/generic/%s/%s/%s", a.CLI.GitLabURL, branch, fullVer, filename)
+			if f.Desktop == inputDesktop && f.Platform == inputPlatform && f.Architecture == inputArch && f.Extension == inputExt {
+				foundFile = &f
 				break
 			}
 		}
@@ -115,6 +71,95 @@ func (a *AquareumAPI) HandleAppDownload(ctx context.Context) httprouter.Handle {
 			return
 		}
 
-		http.Redirect(w, r, outURL, http.StatusTemporaryRedirect)
+		http.Redirect(w, r, foundFile.URL(), http.StatusTemporaryRedirect)
 	}
+}
+
+type GitlabFile struct {
+	GitLabURL    string
+	Branch       string
+	Filename     string
+	Desktop      string
+	Version      string
+	Hash         string
+	Platform     string
+	Architecture string
+	SHA1         string
+	Extension    string
+	Size         int
+}
+
+func (f GitlabFile) FullVer() string {
+	return f.Version + f.Hash
+}
+
+func (f GitlabFile) URL() string {
+	return fmt.Sprintf("%s/packages/generic/%s/%s/%s", f.GitLabURL, f.Branch, f.FullVer(), f.Filename)
+}
+
+func (a *AquareumAPI) getGitlabPackage(branch string) ([]GitlabFile, error) {
+	packageURL := fmt.Sprintf("%s/packages?order_by=created_at&sort=desc&package_name=%s", a.CLI.GitLabURL, branch)
+
+	packageBody, err := queryGitlab(packageURL)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch packages: %w", err)
+	}
+	defer packageBody.Close()
+
+	var packages []map[string]any
+	if err := json.NewDecoder(packageBody).Decode(&packages); err != nil {
+		return nil, fmt.Errorf("failed to decode package response: %w", err)
+	}
+	// bs, _ := json.Marshal(packages)
+	// fmt.Println(string(bs))
+
+	if len(packages) == 0 {
+		return nil, fmt.Errorf("package for branch %s not found", branch)
+	}
+
+	pkg := packages[0]
+	fileURL := fmt.Sprintf("%s/packages/%v/package_files", a.CLI.GitLabURL, pkg["id"])
+
+	fileBody, err := queryGitlab(fileURL)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch files: %w", err)
+	}
+	defer fileBody.Close()
+
+	var files []map[string]any
+	if err := json.NewDecoder(fileBody).Decode(&files); err != nil {
+		return nil, fmt.Errorf("failed to decode file response: %w", err)
+	}
+
+	out := []GitlabFile{}
+	for _, f := range files {
+		filename, ok := f["file_name"].(string)
+		if !ok {
+			continue
+		}
+		pieces := re.FindStringSubmatch(filename)
+		if pieces == nil {
+			// log.Log(ctx, "could not parse filename %s", "filename", filename)
+			continue
+		}
+		size, ok := f["size"].(float64)
+		if !ok {
+			continue
+		}
+		desktop, ver, hash, platform, arch, sha1, ext := pieces[1], pieces[2], pieces[3], pieces[4], pieces[5], pieces[6], pieces[7]
+		out = append(out, GitlabFile{
+			GitLabURL:    a.CLI.GitLabURL,
+			Branch:       branch,
+			Filename:     filename,
+			Desktop:      desktop,
+			Version:      ver,
+			Hash:         hash,
+			Platform:     platform,
+			Architecture: arch,
+			SHA1:         sha1,
+			Extension:    ext,
+			Size:         int(size),
+		})
+	}
+	return out, nil
 }

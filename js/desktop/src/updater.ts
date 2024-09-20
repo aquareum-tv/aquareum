@@ -16,6 +16,7 @@ export default function () {
       baseUrl: `${env().updateBaseUrl}/api/desktop-updates`,
     },
     notifyUser: true,
+    updateInterval: "10 minutes",
   });
 }
 
