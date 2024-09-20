@@ -26,6 +26,7 @@
     "@electron-forge/publisher-s3": "^7.4.0",
     "@electron/fuses": "^1.8.0",
     "@reforged/maker-appimage": "https://gitpkg.vercel.app/aquareum-tv/ReForged/makers/appimage?90c4b7e8449250fe2a83fb2df0f41a3fcc1b37ca",
+    "@types/source-map-support": "^0",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "@vercel/webpack-asset-relocator-loader": "1.7.3",
@@ -48,6 +49,7 @@
   "license": "MIT",
   "dependencies": {
     "electron-squirrel-startup": "^1.0.1",
+    "source-map-support": "^0.5.21",
     "update-electron-app": "^3.0.0"
   }
 }

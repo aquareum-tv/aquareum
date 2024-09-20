@@ -59,11 +59,31 @@ type MacManifest struct {
 }
 
 func (a *AquareumAPI) HandleDesktopUpdates(ctx context.Context) httprouter.Handle {
+	mac := a.HandleMacDesktopUpdates(ctx)
+	win := a.HandleWindowsDesktopUpdates(ctx)
+	return func(w http.ResponseWriter, req *http.Request, params httprouter.Params) {
+		platform := params.ByName("platform")
+		if platform == "darwin" {
+			mac(w, req, params)
+		} else if platform == "windows" {
+			win(w, req, params)
+		} else {
+			apierrors.WriteHTTPBadRequest(w, fmt.Sprintf("unsupported platform: %s", platform), nil)
+		}
+	}
+}
+
+func (a *AquareumAPI) HandleMacDesktopUpdates(ctx context.Context) httprouter.Handle {
 	return func(w http.ResponseWriter, req *http.Request, params httprouter.Params) {
 		platform := params.ByName("platform")
 		architecture := params.ByName("architecture")
 		clientVersion := params.ByName("version")
 		clientBuildTime := params.ByName("buildTime")
+		file := params.ByName("file")
+		if file != "RELEASES.json" {
+			apierrors.WriteHTTPNotFound(w, fmt.Sprintf("unknown file: %s", file), nil)
+			return
+		}
 		log.Log(ctx, formatRequest(req),
 			"platform", platform,
 			"architecture", architecture,
@@ -73,6 +93,7 @@ func (a *AquareumAPI) HandleDesktopUpdates(ctx context.Context) httprouter.Handl
 		clientBuildSec, err := strconv.ParseInt(clientBuildTime, 10, 64)
 		if err != nil {
 			apierrors.WriteHTTPBadRequest(w, "build time must be a number", err)
+			return
 		}
 		var mani MacManifest
 		if clientBuildSec >= a.CLI.Build.BuildTime {
@@ -117,5 +138,37 @@ func (a *AquareumAPI) HandleDesktopUpdates(ctx context.Context) httprouter.Handl
 			log.Log(ctx, "error marshaling mac update manifest", "error", err)
 		}
 		w.Write(bs)
+	}
+}
+
+func (a *AquareumAPI) HandleWindowsDesktopUpdates(ctx context.Context) httprouter.Handle {
+	return func(w http.ResponseWriter, req *http.Request, params httprouter.Params) {
+		platform := params.ByName("platform")
+		architecture := params.ByName("architecture")
+		clientVersion := params.ByName("version")
+		clientBuildTime := params.ByName("buildTime")
+		file := params.ByName("file")
+		log.Log(ctx, formatRequest(req),
+			"platform", platform,
+			"architecture", architecture,
+			"clientVersion", clientVersion,
+			"clientBuildTime", clientBuildTime,
+		)
+		clientBuildSec, err := strconv.ParseInt(clientBuildTime, 10, 64)
+		if err != nil {
+			apierrors.WriteHTTPBadRequest(w, "build time must be a number", err)
+			return
+		}
+
+		if file == "RELEASES" {
+			if clientBuildSec >= a.CLI.Build.BuildTime {
+				// client is newer or the same as server
+				fmt.Fprintf(w, "0000000000000000000000000000000000000000 aquareum_desktop-%s-full.nupkg 1", clientVersion)
+				return
+			}
+			fmt.Fprintf(w, "1CBC2208DECB3E55C7AEA7320258AA36E3297F18 aquareum_desktop-0.1.4-full.nupkg 174710960")
+			return
+		}
+		http.Redirect(w, req, "https://git.aquareum.tv/api/v4/projects/1/packages/generic/electron/v0.1.3-5742a5a4/aquareum-desktop-v0.1.3-5742a5a4-windows-amd64.1cbc2208decb3e55c7aea7320258aa36e3297f18.nupkg", http.StatusTemporaryRedirect)
 	}
 }

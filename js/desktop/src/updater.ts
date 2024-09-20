@@ -31,14 +31,22 @@ export function initElectronUpdater(opts: IUpdateElectronAppOptions) {
   }
 
   const { app, autoUpdater, dialog } = electron;
+  let platform: string = process.platform;
+  let arch: string = process.arch;
+  if (platform === "win32") {
+    platform = "windows";
+  }
+  if (arch === "x64") {
+    arch = "amd64";
+  }
   let feedURL: string;
   let serverType: "default" | "json" = "default";
   const electronVersion = app.getVersion();
   switch (updateSource.type) {
     case UpdateSourceType.StaticStorage: {
-      feedURL = `${updateSource.baseUrl}/${process.platform}/${process.arch}/${electronVersion}/${build.buildTime}`;
+      feedURL = `${updateSource.baseUrl}/${platform}/${arch}/${electronVersion}/${build.buildTime}`;
 
-      if (process.platform === "darwin") {
+      if (platform === "darwin") {
         feedURL += "/RELEASES.json";
         serverType = "json";
       }
@@ -93,7 +101,7 @@ export function initElectronUpdater(opts: IUpdateElectronAppOptions) {
           type: "info",
           buttons: ["Restart", "Later"],
           title: "Application Update",
-          message: process.platform === "win32" ? releaseNotes : releaseName,
+          message: platform === "windows" ? releaseNotes : releaseName,
           detail:
             "A new version has been downloaded. Restart the application to apply the updates.",
         };

@@ -41,6 +41,7 @@ export default async function makeNode() {
     },
   });
   await checkService(`http://${addr}/api/healthz`);
+
   return {
     proc,
     addr: `http://${addr}`,
