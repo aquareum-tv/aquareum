@@ -147,6 +147,7 @@ node-all-platforms: app
 	$(MAKE) windows-amd64
 	$(MAKE) windows-amd64-startup-test
 	$(MAKE) desktop-linux
+	$(MAKE) desktop-windows
 
 .PHONY: desktop-linux
 desktop-linux:
@@ -155,9 +156,18 @@ desktop-linux:
 	&& yarn run make --platform linux --arch x64 \
 	&& yarn run make --platform linux --arch arm64 \
 	&& cd - \
-	&& mv "js/desktop/out/make/squirrel.windows/x64/Aquareum-$(VERSION_ELECTRON) Setup.exe" ./bin/aquareum-desktop-$(VERSION)-windows-amd64.exe \
 	&& mv "js/desktop/out/make/AppImage/x64/Aquareum-$(VERSION_ELECTRON)-x64.AppImage" ./bin/aquareum-desktop-$(VERSION)-linux-amd64.AppImage \
 	&& mv "js/desktop/out/make/AppImage/arm64/Aquareum-$(VERSION_ELECTRON)-arm64.AppImage" ./bin/aquareum-desktop-$(VERSION)-linux-arm64.AppImage
+
+.PHONY: desktop-linux
+desktop-windows:
+	cd js/desktop \
+	&& yarn run make --platform win32 --arch x64 \
+	&& cd - \
+	&& export SUM=$$(cat ./js/desktop/out/make/squirrel.windows/x64/aquareum_desktop-$(VERSION_ELECTRON)-full.nupkg | openssl sha1 | awk '{ print $$2 }') \
+	&& echo $$SUM > ./bin/aquareum-desktop-$(VERSION)-windows-amd64.nupkg.sha1 \
+	&& mv "js/desktop/out/make/squirrel.windows/x64/aquareum_desktop-$(VERSION_ELECTRON)-full.nupkg" ./bin/aquareum-desktop-$(VERSION)-windows-amd64.$$SUM.nupkg \
+	&& mv "js/desktop/out/make/squirrel.windows/x64/Aquareum-$(VERSION_ELECTRON) Setup.exe" ./bin/aquareum-desktop-$(VERSION)-windows-amd64.exe
 
 .PHONY: linux-arm64
 linux-arm64:
@@ -247,7 +257,7 @@ docker-release:
 ci-upload: ci-upload-node ci-upload-android
 
 .PHONY: ci-upload-node
-ci-upload-node: node-all-platforms
+ci-upload-node:
 	for GOOS in linux; do \
 		for GOARCH in amd64 arm64; do \
 			export file=aquareum-$(VERSION)-$$GOOS-$$GOARCH.tar.gz \
@@ -261,6 +271,9 @@ ci-upload-node: node-all-platforms
 			export file=aquareum-$(VERSION)-$$GOOS-$$GOARCH.zip \
 			&& $(MAKE) ci-upload-file upload_file=$$file; \
 			export file=aquareum-desktop-$(VERSION)-$$GOOS-$$GOARCH.exe \
+			&& $(MAKE) ci-upload-file upload_file=$$file; \
+			export SUM=$$(cat bin/aquareum-desktop-$(VERSION)-$$GOOS-$$GOARCH.nupkg.sha1) \
+			&& export file=aquareum-desktop-$(VERSION)-$$GOOS-$$GOARCH.$$SUM.nupkg \
 			&& $(MAKE) ci-upload-file upload_file=$$file; \
 		done \
 	done;

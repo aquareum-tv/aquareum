@@ -20,6 +20,7 @@ builder:
 
 builder-rebuild:
   stage: build
+  allow_failure: true
   interruptible: true
   image:
     name: curlimages/curl:latest
