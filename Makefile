@@ -257,7 +257,7 @@ docker-release:
 ci-upload: ci-upload-node ci-upload-android
 
 .PHONY: ci-upload-node
-ci-upload-node:
+ci-upload-node: node-all-platforms
 	for GOOS in linux; do \
 		for GOARCH in amd64 arm64; do \
 			export file=aquareum-$(VERSION)-$$GOOS-$$GOARCH.tar.gz \
