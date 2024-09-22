@@ -41,6 +41,8 @@ export default async function () {
       name: "Aquareum",
       appVersion: version,
       buildVersion: version,
+      icon: "./assets/images/aquareum-logo",
+      extraResource: ["./assets/images/aquareum-logo.png"],
     },
     hooks: {
       prePackage: async (config, plat, arch) => {
@@ -66,7 +68,13 @@ export default async function () {
         if (!config.packagerConfig) {
           throw new Error("config.packageConfig undefined");
         }
-        config.packagerConfig.extraResource = [binary];
+        if (!config.packagerConfig.extraResource) {
+          config.packagerConfig.extraResource = [];
+        }
+        config.packagerConfig.extraResource = [
+          ...config.packagerConfig.extraResource,
+          binary,
+        ];
       },
       readPackageJson: async (forgeConfig, packageJson) => {
         packageJson.version = version;
@@ -75,13 +83,23 @@ export default async function () {
     },
     rebuildConfig: {},
     makers: [
-      new MakerSquirrel({}),
-      new MakerDMG({}, ["darwin"]),
+      new MakerSquirrel({
+        iconUrl:
+          "https://git.aquareum.tv/-/project/1/uploads/2e5899ffd2b4799ce661cf9b8675e610/aquareum-logo-256.ico",
+        setupIcon: "./assets/images/aquareum-logo.ico",
+      }),
+      new MakerDMG(
+        {
+          icon: "./assets/images/aquareum-logo.icns",
+        },
+        ["darwin"],
+      ),
       new MakerZIP({}, ["darwin"]),
       // new MakerRpm({}),
       new MakerAppImage({
         options: {
           bin: "Aquareum",
+          icon: "./assets/images/aquareum-logo.png",
         },
       }),
     ],

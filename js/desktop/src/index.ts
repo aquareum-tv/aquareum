@@ -9,6 +9,7 @@ import makeNode from "./node";
 import getEnv from "./env";
 import initUpdater from "./updater";
 import { UpdateSourceType } from "update-electron-app";
+import { resolve } from "path";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
@@ -18,7 +19,7 @@ if (require("electron-squirrel-startup")) {
 const createWindow = async (): Promise<void> => {
   try {
     initUpdater();
-    const { skipNode, nodeFrontend } = getEnv();
+    const { skipNode, nodeFrontend, isDev } = getEnv();
     let loadAddr;
     if (!skipNode) {
       const { proc, addr } = await makeNode();
@@ -32,10 +33,18 @@ const createWindow = async (): Promise<void> => {
         app.quit();
       });
     }
+    let logoFile: string;
+    if (isDev) {
+      // theoretically cwd is aquareum/js/desktop:
+      logoFile = resolve(process.cwd(), "assets", "aquareum-logo.png");
+    } else {
+      logoFile = resolve(process.resourcesPath, "aquareum-logo.png");
+    }
     // Create the browser window.
     const mainWindow = new BrowserWindow({
       height: 600,
       width: 800,
+      icon: logoFile,
       webPreferences: {
         preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
       },
