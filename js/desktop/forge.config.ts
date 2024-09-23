@@ -37,6 +37,7 @@ export default async function () {
 
   const config: ForgeConfig = {
     packagerConfig: {
+      osxSign: {},
       asar: true,
       name: "Aquareum",
       appVersion: version,
