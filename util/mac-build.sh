@@ -5,9 +5,12 @@ set -x
 
 # setup environment
 export LANG=en_US.UTF-8
-echo 'admin' | sudo -S umount "/Volumes/My Shared Files"
-mkdir ~/build
-mount_virtiofs com.apple.virtio-fs.automount ~/build
+# echo 'admin' | sudo -S umount "/Volumes/My Shared Files"
+# mount_virtiofs com.apple.virtio-fs.automount ~/build
+mkdir ~/build 
+cd ~/build
+source '/Volumes/My Shared Files/signing/mac-codesigning.env'
+git clone '/Volumes/My Shared Files/aquareum'
 eval "$(/opt/homebrew/bin/brew shellenv)"
 brew update --force --quiet
 cd ~/build/aquareum
