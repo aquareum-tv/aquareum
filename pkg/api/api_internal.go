@@ -141,22 +141,6 @@ func (a *AquareumAPI) InternalHandler(ctx context.Context) (http.Handler, error)
 		w.WriteHeader(200)
 	})
 
-	// handler for post-segmented mkv streams
-	router.POST("/playback/:user/:uuid/stream.mkv", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-		user := p.ByName("user")
-		if user == "" {
-			errors.WriteHTTPBadRequest(w, "user required", nil)
-			return
-		}
-		user = strings.ToLower(user)
-		uu := p.ByName("uuid")
-		if uu == "" {
-			errors.WriteHTTPBadRequest(w, "uuid required", nil)
-			return
-		}
-		a.MediaManager.HandleMKVStream(ctx, user, uu, r.Body)
-	})
-
 	// internal route called for each pushed segment from ffmpeg
 	router.POST("/segment/:uuid/:user/:file", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		ms := time.Now().UnixMilli()

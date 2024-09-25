@@ -20,7 +20,6 @@ import (
 	"aquareum.tv/aquareum/pkg/crypto/signers"
 	"aquareum.tv/aquareum/pkg/log"
 	"aquareum.tv/aquareum/pkg/replication"
-	"github.com/google/uuid"
 	"github.com/livepeer/lpms/ffmpeg"
 	"golang.org/x/sync/errgroup"
 
@@ -43,8 +42,6 @@ type MediaManager struct {
 	user       string
 	mp4subs    map[string][]chan string
 	mp4subsmut sync.Mutex
-	mkvsubs    map[string]io.Writer
-	mkvsubsmut sync.Mutex
 	replicator replication.Replicator
 }
 
@@ -75,7 +72,6 @@ func MakeMediaManager(ctx context.Context, cli *config.CLI, signer crypto.Signer
 		cert:       cert,
 		user:       hex,
 		mp4subs:    map[string][]chan string{},
-		mkvsubs:    map[string]io.Writer{},
 		replicator: rep,
 	}, nil
 }
@@ -242,13 +238,11 @@ func SegmentToHTTP(ctx context.Context, input io.Reader, prefix string) error {
 func (mm *MediaManager) StreamToMKV(ctx context.Context, user string, w io.Writer) error {
 	tc := ffmpeg.NewTranscoder()
 	defer tc.StopTranscoder()
-	uu, err := uuid.NewV7()
+	or, ow, odone, err := SafePipe()
 	if err != nil {
 		return err
 	}
-	mm.mkvsubsmut.Lock()
-	mm.mkvsubs[uu.String()] = w
-	mm.mkvsubsmut.Unlock()
+	defer odone()
 	iname := fmt.Sprintf("%s/playback/%s/concat", mm.cli.OwnInternalURL(), user)
 	in := &ffmpeg.TranscodeOptionsIn{
 		Fname:       iname,
@@ -263,9 +257,10 @@ func (mm *MediaManager) StreamToMKV(ctx context.Context, user string, w io.Write
 			},
 		},
 	}
+	oname := fmt.Sprintf("pipe:%d", ow.Fd())
 	out := []ffmpeg.TranscodeOptions{
 		{
-			Oname: fmt.Sprintf("%s/playback/%s/%s/stream.mkv", mm.cli.OwnInternalURL(), user, uu.String()),
+			Oname: oname,
 			VideoEncoder: ffmpeg.ComponentOptions{
 				Name: "copy",
 			},
@@ -278,19 +273,24 @@ func (mm *MediaManager) StreamToMKV(ctx context.Context, user string, w io.Write
 			},
 		},
 	}
-	_, err = tc.Transcode(in, out)
-	return err
-}
-
-func (mm *MediaManager) HandleMKVStream(ctx context.Context, user, uu string, r io.Reader) error {
-	mm.mkvsubsmut.Lock()
-	w, ok := mm.mkvsubs[uu]
-	mm.mkvsubsmut.Unlock()
-	if !ok {
-		return fmt.Errorf("uuid not found: %s", uu)
-	}
-	err := AddOpusToMKV(ctx, r, w)
-	return err
+	g, _ := errgroup.WithContext(ctx)
+	pr, pw := io.Pipe()
+	g.Go(func() error {
+		_, err := tc.Transcode(in, out)
+		// log.Log(ctx, "transcode done", "error", err)
+		tc.StopTranscoder()
+		return err
+	})
+	g.Go(func() error {
+		_, err := io.Copy(pw, or)
+		// log.Log(ctx, "input copy done", "error", err)
+		or.Close()
+		return err
+	})
+	g.Go(func() error {
+		return AddOpusToMKV(ctx, pr, w)
+	})
+	return g.Wait()
 }
 
 type obj map[string]any
@@ -379,7 +379,7 @@ type SegmentMetadata struct {
 	EndTime   aqtime.AQTime
 }
 
-var InvalidMetadataError = errors.New("Invalid Schema.org Metadata")
+var ErrInvalidMetadata = errors.New("invalid Schema.org Metadata")
 
 func ParseSegmentAssertions(mani *manifeststore.Manifest) (*SegmentMetadata, error) {
 	var ass *manifeststore.ManifestAssertion
@@ -408,20 +408,20 @@ func ParseSegmentAssertions(mani *manifeststore.Manifest) (*SegmentMetadata, err
 		return nil, err
 	}
 	if len(metas) != 1 {
-		return nil, InvalidMetadataError
+		return nil, ErrInvalidMetadata
 	}
 	meta := metas[0]
 	if len(meta.Type) != 1 {
-		return nil, InvalidMetadataError
+		return nil, ErrInvalidMetadata
 	}
 	if meta.Type[0] != SCHEMA_ORG_VIDEO_OBJECT {
-		return nil, InvalidMetadataError
+		return nil, ErrInvalidMetadata
 	}
 	if len(meta.StartTime) != 1 {
-		return nil, InvalidMetadataError
+		return nil, ErrInvalidMetadata
 	}
 	if len(meta.EndTime) != 1 {
-		return nil, InvalidMetadataError
+		return nil, ErrInvalidMetadata
 	}
 	start, err := aqtime.FromString(meta.StartTime[0].Value)
 	if err != nil {
