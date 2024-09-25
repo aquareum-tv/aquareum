@@ -235,7 +235,32 @@ func SegmentToHTTP(ctx context.Context, input io.Reader, prefix string) error {
 	return g.Wait()
 }
 
-func (mm *MediaManager) StreamToMKV(ctx context.Context, user string, w io.Writer) error {
+func (mm *MediaManager) SegmentToMKVPlusOpus(ctx context.Context, user string, w io.Writer) error {
+	muxer := ffmpeg.ComponentOptions{
+		Name: "matroska",
+	}
+	pr, pw := io.Pipe()
+	g, ctx := errgroup.WithContext(ctx)
+	g.Go(func() error {
+		return mm.SegmentToStream(ctx, user, muxer, pw)
+	})
+	g.Go(func() error {
+		return AddOpusToMKV(ctx, pr, w)
+	})
+	return g.Wait()
+}
+
+func (mm *MediaManager) SegmentToMP4(ctx context.Context, user string, w io.Writer) error {
+	muxer := ffmpeg.ComponentOptions{
+		Name: "mp4",
+		Opts: map[string]string{
+			"movflags": "frag_keyframe+empty_moov",
+		},
+	}
+	return mm.SegmentToStream(ctx, user, muxer, w)
+}
+
+func (mm *MediaManager) SegmentToStream(ctx context.Context, user string, muxer ffmpeg.ComponentOptions, w io.Writer) error {
 	tc := ffmpeg.NewTranscoder()
 	defer tc.StopTranscoder()
 	or, ow, odone, err := SafePipe()
@@ -274,7 +299,6 @@ func (mm *MediaManager) StreamToMKV(ctx context.Context, user string, w io.Write
 		},
 	}
 	g, _ := errgroup.WithContext(ctx)
-	pr, pw := io.Pipe()
 	g.Go(func() error {
 		_, err := tc.Transcode(in, out)
 		// log.Log(ctx, "transcode done", "error", err)
@@ -282,13 +306,10 @@ func (mm *MediaManager) StreamToMKV(ctx context.Context, user string, w io.Write
 		return err
 	})
 	g.Go(func() error {
-		_, err := io.Copy(pw, or)
+		_, err := io.Copy(w, or)
 		// log.Log(ctx, "input copy done", "error", err)
 		or.Close()
 		return err
-	})
-	g.Go(func() error {
-		return AddOpusToMKV(ctx, pr, w)
 	})
 	return g.Wait()
 }
