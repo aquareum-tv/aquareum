@@ -208,7 +208,8 @@ node-all-platforms-macos: app
 
 .PHONY: desktop-macos
 desktop-macos:
-	cd js/desktop \
+	export DEBUG="electron-osx-sign*" \
+	&& cd js/desktop \
 	&& yarn run make --platform darwin --arch arm64 \
 	&& yarn run make --platform darwin --arch x64 \
 	&& cd - \
