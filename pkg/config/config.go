@@ -53,7 +53,7 @@ type CLI struct {
 	HttpAddr               string
 	HttpInternalAddr       string
 	HttpsAddr              string
-	Insecure               bool
+	Secure                 bool
 	NoMist                 bool
 	MistAdminPort          int
 	MistHTTPPort           int

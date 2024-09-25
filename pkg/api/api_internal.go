@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"net/http"
 	"regexp"
+	"strings"
 	"time"
 
 	"aquareum.tv/aquareum/pkg/errors"
@@ -71,6 +72,7 @@ func (a *AquareumAPI) InternalHandler(ctx context.Context) (http.Handler, error)
 			errors.WriteHTTPBadRequest(w, "user required", nil)
 			return
 		}
+		user = strings.ToLower(user)
 		w.Header().Set("content-type", "text/plain")
 		fmt.Fprintf(w, "ffconcat version 1.0\n")
 		// intermittent reports that you need two here to make things work properly? shouldn't matter.
@@ -85,6 +87,7 @@ func (a *AquareumAPI) InternalHandler(ctx context.Context) (http.Handler, error)
 			errors.WriteHTTPBadRequest(w, "user required", nil)
 			return
 		}
+		user = strings.ToLower(user)
 		log.Log(ctx, "got latest.mp4 request", "user", user)
 		file := <-a.MediaManager.SubscribeSegment(ctx, user)
 		w.Header().Set("Location", fmt.Sprintf("%s/playback/%s/segment/%s\n", a.CLI.OwnInternalURL(), user, file))
@@ -97,6 +100,7 @@ func (a *AquareumAPI) InternalHandler(ctx context.Context) (http.Handler, error)
 			errors.WriteHTTPBadRequest(w, "user required", nil)
 			return
 		}
+		user = strings.ToLower(user)
 		file := p.ByName("file")
 		if file == "" {
 			errors.WriteHTTPBadRequest(w, "file required", nil)
@@ -116,6 +120,7 @@ func (a *AquareumAPI) InternalHandler(ctx context.Context) (http.Handler, error)
 			errors.WriteHTTPBadRequest(w, "user required", nil)
 			return
 		}
+		user = strings.ToLower(user)
 		w.Header().Set("Content-Type", "video/x-matroska")
 		w.WriteHeader(200)
 		err := a.MediaManager.StreamToMKV(ctx, user, w)
@@ -130,6 +135,7 @@ func (a *AquareumAPI) InternalHandler(ctx context.Context) (http.Handler, error)
 			errors.WriteHTTPBadRequest(w, "user required", nil)
 			return
 		}
+		user = strings.ToLower(user)
 		w.Header().Set("Content-Type", "video/x-matroska")
 		w.Header().Set("Transfer-Encoding", "chunked")
 		w.WriteHeader(200)
@@ -142,6 +148,7 @@ func (a *AquareumAPI) InternalHandler(ctx context.Context) (http.Handler, error)
 			errors.WriteHTTPBadRequest(w, "user required", nil)
 			return
 		}
+		user = strings.ToLower(user)
 		uu := p.ByName("uuid")
 		if uu == "" {
 			errors.WriteHTTPBadRequest(w, "uuid required", nil)
@@ -164,6 +171,7 @@ func (a *AquareumAPI) InternalHandler(ctx context.Context) (http.Handler, error)
 			errors.WriteHTTPInternalServerError(w, "invalid code path: got empty user?", nil)
 			return
 		}
+		user = strings.ToLower(user)
 		f := p.ByName("file")
 		if !mkvRE.MatchString(f) {
 			errors.WriteHTTPBadRequest(w, "file was not in number.mp4 format", nil)
@@ -214,5 +222,5 @@ func (a *AquareumAPI) keyToUser(ctx context.Context, key string) (string, error)
 	if !ok {
 		return "", fmt.Errorf("got signed data but it wasn't a stream key")
 	}
-	return signed.Signer(), nil
+	return strings.ToLower(signed.Signer()), nil
 }

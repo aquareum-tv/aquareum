@@ -51,7 +51,7 @@ func start(build *config.BuildFlags, platformJobs []jobFunc) error {
 	fs.StringVar(&cli.HttpAddr, "http-addr", ":38080", "Public HTTP address")
 	fs.StringVar(&cli.HttpInternalAddr, "http-internal-addr", "127.0.0.1:39090", "Private, admin-only HTTP address")
 	fs.StringVar(&cli.HttpsAddr, "https-addr", ":38443", "Public HTTPS address")
-	fs.BoolVar(&cli.Insecure, "insecure", false, "Run without HTTPS. not recomended, as WebRTC support requires HTTPS")
+	fs.BoolVar(&cli.Secure, "secure", false, "Run with HTTPS. Required for WebRTC output")
 	cli.DataDirFlag(fs, &cli.TLSCertPath, "tls-cert", filepath.Join("tls", "tls.crt"), "Path to TLS certificate")
 	cli.DataDirFlag(fs, &cli.TLSKeyPath, "tls-key", filepath.Join("tls", "tls.key"), "Path to TLS key")
 	fs.StringVar(&cli.SigningKeyPath, "signing-key", "", "Path to signing key for pushing OTA updates to the app")
@@ -73,6 +73,8 @@ func start(build *config.BuildFlags, platformJobs []jobFunc) error {
 	fs.StringVar(&cli.StreamerName, "streamer-name", "", "name of the person streaming from this aquareum node")
 	cli.AddressSliceFlag(fs, &cli.AllowedStreams, "allowed-streams", "", "comma-separated list of addresses that this node will replicate")
 	cli.StringSliceFlag(fs, &cli.Peers, "peers", "", "other aquareum nodes to replicate to")
+
+	fs.Bool("insecure", false, "DEPRECATED, does nothing.")
 
 	version := fs.Bool("version", false, "print version and exit")
 
@@ -221,7 +223,7 @@ func start(build *config.BuildFlags, platformJobs []jobFunc) error {
 		return handleSignals(ctx)
 	})
 
-	if !cli.Insecure {
+	if cli.Secure {
 		group.Go(func() error {
 			return a.ServeHTTPS(ctx)
 		})
