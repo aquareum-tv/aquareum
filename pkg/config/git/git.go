@@ -31,6 +31,12 @@ var BuildTime = "%d"
 var UUID = "%s"
 `
 
+var tmplJS = `
+export const version = "%s";
+export const buildTime = "%d";
+export const uuid = "%s";
+`
+
 func gitlabURL() string {
 	CI_API_V4_URL := os.Getenv("CI_API_V4_URL")
 	CI_PROJECT_ID := os.Getenv("CI_PROJECT_ID")
@@ -67,6 +73,7 @@ func makeGit() error {
 	env := flag.Bool("env", false, "print a bunch of useful environment variables")
 	doBranch := flag.Bool("branch", false, "print branch")
 	doRelease := flag.Bool("release", false, "print release json file")
+	javascript := flag.Bool("js", false, "print code in javascript format")
 
 	flag.Parse()
 	r, err := git.PlainOpenWithOptions(".", &git.PlainOpenOptions{DetectDotGit: true})
@@ -144,6 +151,8 @@ func makeGit() error {
 			return err
 		}
 		out = string(bs)
+	} else if *javascript {
+		out = fmt.Sprintf(tmplJS, desc, ts, u)
 	} else {
 		out = fmt.Sprintf(tmpl, desc, ts, u)
 	}

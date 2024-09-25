@@ -20,6 +20,7 @@ builder:
 
 builder-rebuild:
   stage: build
+  allow_failure: true
   interruptible: true
   image:
     name: curlimages/curl:latest
@@ -150,7 +151,6 @@ build-mac:
       && source ~/venv/bin/activate
       && pip3 install meson
       && make ci-macos -j16
-      && make test
 
 release:
   stage: build

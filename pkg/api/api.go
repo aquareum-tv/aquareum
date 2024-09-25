@@ -90,18 +90,20 @@ func (a *AquareumAPI) Handler(ctx context.Context) (http.Handler, error) {
 	router.HandlerFunc("GET", "/app-updates", a.HandleAppUpdates(ctx))
 	// new ones
 	apiRouter.HandlerFunc("GET", "/api/manifest", a.HandleAppUpdates(ctx))
+	apiRouter.GET("/api/desktop-updates/:platform/:architecture/:version/:buildTime/:file", a.HandleDesktopUpdates(ctx))
 	apiRouter.POST("/api/webrtc/:stream", a.MistProxyHandler(ctx, "/webrtc/%s"))
 	apiRouter.OPTIONS("/api/webrtc/:stream", a.MistProxyHandler(ctx, "/webrtc/%s"))
 	apiRouter.DELETE("/api/webrtc/:stream", a.MistProxyHandler(ctx, "/webrtc/%s"))
 	apiRouter.GET("/api/hls/:stream/*resource", a.MistProxyHandler(ctx, "/hls/%s"))
 	apiRouter.Handler("POST", "/api/segment", a.HandleSegment(ctx))
+	apiRouter.HandlerFunc("GET", "/api/healthz", a.HandleHealthz(ctx))
 	apiRouter.NotFound = a.HandleAPI404(ctx)
 	router.Handler("GET", "/api/*resource", apiRouter)
 	router.Handler("POST", "/api/*resource", apiRouter)
 	router.Handler("PUT", "/api/*resource", apiRouter)
 	router.Handler("PATCH", "/api/*resource", apiRouter)
 	router.Handler("DELETE", "/api/*resource", apiRouter)
-	router.Handler("GET", "/dl/*params", a.AppDownloadHandler(ctx))
+	router.GET("/dl/*params", a.HandleAppDownload(ctx))
 	router.NotFound = a.FileHandler(ctx, http.FileServer(AppHostingFS{http.FS(files)}))
 	handler := sloghttp.Recovery(router)
 	handler = cors.Default().Handler(handler)
@@ -346,4 +348,10 @@ func (a *AquareumAPI) ServerWithShutdown(ctx context.Context, handler http.Handl
 	ctx, cancel = context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	return server.Shutdown(ctx)
+}
+
+func (a *AquareumAPI) HandleHealthz(ctx context.Context) http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		w.WriteHeader(200)
+	}
 }

@@ -50,7 +50,7 @@ export default function AdminPage() {
                 };
                 const signature = await signTypedDataAsync({
                   types: schema.types,
-                  domain: schema.domain,
+                  domain: schema.domain as any,
                   primaryType: "GoLive",
                   message: message,
                 });
@@ -98,7 +98,7 @@ export default function AdminPage() {
                 };
                 const signature = await signTypedDataAsync({
                   types: schema.types,
-                  domain: schema.domain,
+                  domain: schema.domain as any,
                   primaryType: "StreamKey",
                   message: message,
                 });

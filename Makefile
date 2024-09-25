@@ -5,6 +5,7 @@ $(shell mkdir -p $(OUT_DIR))
 default: app node
 
 VERSION?=$(shell go run ./pkg/config/git/git.go -v)
+VERSION_ELECTRON=$(subst -,-z,$(subst v,,$(VERSION)))
 UUID?=$(shell go run ./pkg/config/uuid/uuid.go)
 BRANCH?=$(shell go run ./pkg/config/git/git.go --branch)
 
@@ -53,7 +54,7 @@ test:
 # test to make sure we haven't added any more dynamic dependencies
 .PHONY: link-test
 link-test:
-	count=$(shell ldd ./build/aquareum | wc -l) \
+	count=$(shell ldd ./build-linux-amd64/aquareum | wc -l) \
 	&& echo $$count \
 	&& if [ "$$count" != "6" ]; then echo "ldd reports new libaries linked! want 6 got $$count" \
 		&& ldd ./bin/aquareum \
@@ -139,39 +140,83 @@ meson-setup:
 
 .PHONY: node-all-platforms
 node-all-platforms: app
-	meson setup build $(OPTS) --buildtype debugoptimized
-	meson compile -C build archive
+	meson setup build-linux-amd64 $(OPTS) --buildtype debugoptimized
+	meson compile -C build-linux-amd64 archive
 	$(MAKE) link-test
 	$(MAKE) linux-arm64
 	$(MAKE) windows-amd64
 	$(MAKE) windows-amd64-startup-test
+	$(MAKE) desktop-linux
+	$(MAKE) desktop-windows
+
+.PHONY: desktop-linux
+desktop-linux:
+	cd js/desktop \
+	&& yarn run make --platform win32 --arch x64 \
+	&& yarn run make --platform linux --arch x64 \
+	&& yarn run make --platform linux --arch arm64 \
+	&& cd - \
+	&& mv "js/desktop/out/make/AppImage/x64/Aquareum-$(VERSION_ELECTRON)-x64.AppImage" ./bin/aquareum-desktop-$(VERSION)-linux-amd64.AppImage \
+	&& mv "js/desktop/out/make/AppImage/arm64/Aquareum-$(VERSION_ELECTRON)-arm64.AppImage" ./bin/aquareum-desktop-$(VERSION)-linux-arm64.AppImage
+
+.PHONY: desktop-linux
+desktop-windows:
+	cd js/desktop \
+	&& yarn run make --platform win32 --arch x64 \
+	&& cd - \
+	&& export SUM=$$(cat ./js/desktop/out/make/squirrel.windows/x64/aquareum_desktop-$(VERSION_ELECTRON)-full.nupkg | openssl sha1 | awk '{ print $$2 }') \
+	&& echo $$SUM > ./bin/aquareum-desktop-$(VERSION)-windows-amd64.nupkg.sha1 \
+	&& mv "js/desktop/out/make/squirrel.windows/x64/aquareum_desktop-$(VERSION_ELECTRON)-full.nupkg" ./bin/aquareum-desktop-$(VERSION)-windows-amd64.$$SUM.nupkg \
+	&& mv "js/desktop/out/make/squirrel.windows/x64/Aquareum-$(VERSION_ELECTRON) Setup.exe" ./bin/aquareum-desktop-$(VERSION)-windows-amd64.exe
 
 .PHONY: linux-arm64
 linux-arm64:
 	rustup target add aarch64-unknown-linux-gnu
-	meson setup --cross-file util/linux-arm64-gnu.ini --buildtype debugoptimized build-aarch64 $(OPTS)
-	meson compile -C build-aarch64 archive
+	meson setup --cross-file util/linux-arm64-gnu.ini --buildtype debugoptimized build-linux-arm64 $(OPTS)
+	meson compile -C build-linux-arm64 archive
 
 .PHONY: windows-amd64
 windows-amd64:
 	rustup target add x86_64-pc-windows-gnu
-	meson setup --cross-file util/windows-amd64-gnu.ini --buildtype debugoptimized build-windows $(OPTS)
-	meson compile -C build-windows archive 2>&1 | grep -v drectve
+	meson setup --cross-file util/windows-amd64-gnu.ini --buildtype debugoptimized build-windows-amd64 $(OPTS)
+	meson compile -C build-windows-amd64 archive 2>&1 | grep -v drectve
 
 # unbuffer here is a workaround for wine trying to pop up a terminal window and failing
 .PHONY: windows-amd64-startup-test
 windows-amd64-startup-test:
-	bash -c 'set -euo pipefail && unbuffer wine64 ./build-windows/aquareum.exe --version | cat'
+	bash -c 'set -euo pipefail && unbuffer wine64 ./build-windows-amd64/aquareum.exe --version | cat'
 
 .PHONY: node-all-platforms-macos
 node-all-platforms-macos: app
-	meson setup --buildtype debugoptimized build $(OPTS)
-	meson compile -C build archive
-	./build/aquareum --version
+	meson setup --buildtype debugoptimized build-darwin-arm64 $(OPTS)
+	meson compile -C build-darwin-arm64
+	./util/mac-codesign.sh ./build-darwin-arm64/aquareum
+	cd build-darwin-arm64 \
+	&& tar -czvf ../bin/aquareum-$(VERSION)-darwin-arm64.tar.gz ./aquareum \
+	&& cd -
+	./build-darwin-arm64/aquareum --version
 	rustup target add x86_64-apple-darwin
-	meson setup --buildtype debugoptimized --cross-file util/darwin-amd64-apple.ini build-amd64 $(OPTS)
-	meson compile -C build-amd64 archive
-	./build-amd64/aquareum --version
+	meson setup --buildtype debugoptimized --cross-file util/darwin-amd64-apple.ini build-darwin-amd64 $(OPTS)
+	meson compile -C build-darwin-amd64
+	./util/mac-codesign.sh ./build-darwin-amd64/aquareum
+	cd build-darwin-amd64 \
+	&& tar -czvf ../bin/aquareum-$(VERSION)-darwin-amd64.tar.gz ./aquareum \
+	&& cd -
+	./build-darwin-amd64/aquareum --version
+	$(MAKE) desktop-macos
+	meson test -C build-darwin-arm64 go-tests
+
+.PHONY: desktop-macos
+desktop-macos:
+	export DEBUG="electron-osx-sign*" \
+	&& cd js/desktop \
+	&& yarn run make --platform darwin --arch arm64 \
+	&& yarn run make --platform darwin --arch x64 \
+	&& cd - \
+	&& mv js/desktop/out/make/Aquareum-$(VERSION_ELECTRON)-x64.dmg ./bin/aquareum-desktop-$(VERSION)-darwin-amd64.dmg \
+	&& mv js/desktop/out/make/Aquareum-$(VERSION_ELECTRON)-arm64.dmg ./bin/aquareum-desktop-$(VERSION)-darwin-arm64.dmg \
+	&& mv js/desktop/out/make/zip/darwin/x64/Aquareum-darwin-x64-$(VERSION_ELECTRON).zip ./bin/aquareum-desktop-$(VERSION)-darwin-amd64.zip \
+	&& mv js/desktop/out/make/zip/darwin/arm64/Aquareum-darwin-arm64-$(VERSION_ELECTRON).zip ./bin/aquareum-desktop-$(VERSION)-darwin-arm64.zip
 
 # link your local version of mist for dev
 .PHONY: link-mist
@@ -226,11 +271,18 @@ ci-upload-node: node-all-platforms
 		for GOARCH in amd64 arm64; do \
 			export file=aquareum-$(VERSION)-$$GOOS-$$GOARCH.tar.gz \
 			&& $(MAKE) ci-upload-file upload_file=$$file; \
+			export file=aquareum-desktop-$(VERSION)-$$GOOS-$$GOARCH.AppImage \
+			&& $(MAKE) ci-upload-file upload_file=$$file; \
 		done \
 	done;
 	for GOOS in windows; do \
 		for GOARCH in amd64; do \
 			export file=aquareum-$(VERSION)-$$GOOS-$$GOARCH.zip \
+			&& $(MAKE) ci-upload-file upload_file=$$file; \
+			export file=aquareum-desktop-$(VERSION)-$$GOOS-$$GOARCH.exe \
+			&& $(MAKE) ci-upload-file upload_file=$$file; \
+			export SUM=$$(cat bin/aquareum-desktop-$(VERSION)-$$GOOS-$$GOARCH.nupkg.sha1) \
+			&& export file=aquareum-desktop-$(VERSION)-$$GOOS-$$GOARCH.$$SUM.nupkg \
 			&& $(MAKE) ci-upload-file upload_file=$$file; \
 		done \
 	done;
@@ -240,6 +292,10 @@ ci-upload-node-macos: node-all-platforms-macos
 	for GOOS in darwin; do \
 		for GOARCH in amd64 arm64; do \
 			export file=aquareum-$(VERSION)-$$GOOS-$$GOARCH.tar.gz \
+			&& $(MAKE) ci-upload-file upload_file=$$file; \
+			export file=aquareum-desktop-$(VERSION)-$$GOOS-$$GOARCH.dmg \
+			&& $(MAKE) ci-upload-file upload_file=$$file; \
+			export file=aquareum-desktop-$(VERSION)-$$GOOS-$$GOARCH.zip \
 			&& $(MAKE) ci-upload-file upload_file=$$file; \
 		done \
 	done;

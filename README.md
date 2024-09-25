@@ -35,7 +35,7 @@ npx expo run:ios -d "Your iPhone"
 # Android
 npx expo run:android
 
-# Web http://localhost:8081
+# Web http://localhost:38081
 npx expo start
 ```
 
