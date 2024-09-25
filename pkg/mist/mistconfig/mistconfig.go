@@ -90,7 +90,7 @@ func Generate(cli *config.CLI) ([]byte, error) {
 			STREAM_NAME: {
 				"name":          STREAM_NAME,
 				"segmentsize":   1,
-				"source":        fmt.Sprintf("mkv-exec:%s stream $wildcard", exec),
+				"source":        fmt.Sprintf("mkv-exec:%s stream %s/playback/$wildcard/stream.mkv", exec, cli.OwnInternalURL()),
 				"stop_sessions": false,
 			},
 		},

@@ -7,6 +7,7 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"sort"
 	"strings"
 
 	"github.com/go-git/go-git/v5"
@@ -132,6 +133,11 @@ func makeGit() error {
 		id := pkgs[0]["id"].(float64)
 		pkgFiles := gitlabList(fmt.Sprintf("/packages/%d/package_files", int(id)))
 		outFiles := []string{}
+		sort.Slice(pkgFiles, func(i, j int) bool {
+			s1 := pkgFiles[i]["file_name"].(string)
+			s2 := pkgFiles[j]["file_name"].(string)
+			return s1 < s2
+		})
 		for _, file := range pkgFiles {
 			fileJson := map[string]string{
 				"name": file["file_name"].(string),

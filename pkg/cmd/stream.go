@@ -7,8 +7,8 @@ import (
 	"os"
 )
 
-func Stream(user string) error {
-	resp, err := http.Get(fmt.Sprintf("http://127.0.0.1:9090/playback/%s/stream.mkv", user))
+func Stream(u string) error {
+	resp, err := http.Get(u)
 	if err != nil {
 		return err
 	}

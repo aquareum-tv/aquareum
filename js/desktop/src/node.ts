@@ -39,6 +39,7 @@ export default async function makeNode() {
       AQ_HTTP_ADDR: addr,
       AQ_HTTP_INTERNAL_ADDR: internalAddr,
     },
+    windowsHide: true,
   });
   await checkService(`http://${addr}/api/healthz`);
 
