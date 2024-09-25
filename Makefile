@@ -152,7 +152,6 @@ node-all-platforms: app
 .PHONY: desktop-linux
 desktop-linux:
 	cd js/desktop \
-	&& yarn run make --platform win32 --arch x64 \
 	&& yarn run make --platform linux --arch x64 \
 	&& yarn run make --platform linux --arch arm64 \
 	&& cd - \
