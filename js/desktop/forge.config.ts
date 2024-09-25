@@ -1,4 +1,7 @@
-import type { ForgeConfig } from "@electron-forge/shared-types";
+import type {
+  ForgeConfig,
+  ForgePackagerOptions,
+} from "@electron-forge/shared-types";
 import { MakerSquirrel } from "@electron-forge/maker-squirrel";
 import { MakerDMG } from "@electron-forge/maker-dmg";
 import { MakerZIP } from "@electron-forge/maker-zip";
@@ -35,16 +38,17 @@ export default async function () {
     version = version.replace("-", "-z");
   }
 
+  const packagerConfig: ForgePackagerOptions = {
+    asar: true,
+    name: "Aquareum",
+    appVersion: version,
+    buildVersion: version,
+    icon: "./assets/images/aquareum-logo",
+    extraResource: ["./assets/images/aquareum-logo.png"],
+  };
+
   const config: ForgeConfig = {
-    packagerConfig: {
-      osxSign: {},
-      asar: true,
-      name: "Aquareum",
-      appVersion: version,
-      buildVersion: version,
-      icon: "./assets/images/aquareum-logo",
-      extraResource: ["./assets/images/aquareum-logo.png"],
-    },
+    packagerConfig: packagerConfig,
     hooks: {
       prePackage: async (config, plat, arch) => {
         let platform = plat;
@@ -146,5 +150,26 @@ export default async function () {
       }),
     ],
   };
+  if (
+    process.env.NOTARIZATION_TEAM_ID &&
+    process.env.NOTARIZATION_EMAIL &&
+    process.env.NOTARIZATION_PASSWORD
+  ) {
+    packagerConfig.osxNotarize = {
+      teamId: process.env.NOTARIZATION_TEAM_ID,
+      appleId: process.env.NOTARIZATION_EMAIL,
+      appleIdPassword: process.env.NOTARIZATION_PASSWORD,
+    };
+    packagerConfig.osxSign = {
+      optionsForFile: (filePath) => {
+        // Here, we keep it simple and return a single entitlements.plist file.
+        // You can use this callback to map different sets of entitlements
+        // to specific files in your packaged app.
+        return {
+          entitlements: "./entitlements.plist",
+        };
+      },
+    };
+  }
   return config;
 }

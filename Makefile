@@ -189,18 +189,27 @@ windows-amd64-startup-test:
 .PHONY: node-all-platforms-macos
 node-all-platforms-macos: app
 	meson setup --buildtype debugoptimized build-darwin-arm64 $(OPTS)
-	meson compile -C build-darwin-arm64 archive
+	meson compile -C build-darwin-arm64
+	./util/mac-codesign.sh ./build-darwin-arm64/aquareum
+	cd build-darwin-arm64 \
+	&& tar -czvf ../bin/aquareum-$(VERSION)-darwin-arm64.tar.gz ./aquareum \
+	&& cd -
 	./build-darwin-arm64/aquareum --version
 	rustup target add x86_64-apple-darwin
 	meson setup --buildtype debugoptimized --cross-file util/darwin-amd64-apple.ini build-darwin-amd64 $(OPTS)
-	meson compile -C build-darwin-amd64 archive
+	meson compile -C build-darwin-amd64
+	./util/mac-codesign.sh ./build-darwin-amd64/aquareum
+	cd build-darwin-amd64 \
+	&& tar -czvf ../bin/aquareum-$(VERSION)-darwin-amd64.tar.gz ./aquareum \
+	&& cd -
 	./build-darwin-amd64/aquareum --version
 	$(MAKE) desktop-macos
 	meson test -C build-darwin-arm64 go-tests
 
 .PHONY: desktop-macos
 desktop-macos:
-	cd js/desktop \
+	export DEBUG="electron-osx-sign*" \
+	&& cd js/desktop \
 	&& yarn run make --platform darwin --arch arm64 \
 	&& yarn run make --platform darwin --arch x64 \
 	&& cd - \
