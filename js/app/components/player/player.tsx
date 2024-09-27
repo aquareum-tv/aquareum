@@ -22,9 +22,16 @@ export function Player(props: { src: string }) {
     p = <HLSPlayer src={props.src} />;
   }
   return (
-    <View f={1}>
-      {p}
-      <XStack justifyContent="center">
+    <View f={1} backgroundColor="green" justifyContent="center">
+      <View
+        f={1}
+        flexDirection="column"
+        backgroundColor="blue"
+        justifyContent="center"
+      >
+        {p}
+      </View>
+      {/* <XStack justifyContent="center">
         <PickerButton
           name="webrtc"
           title="WebRTC"
@@ -37,7 +44,8 @@ export function Player(props: { src: string }) {
           picked={proto}
           setProto={setProto}
         />
-      </XStack>
+      </XStack> */}
+      <View f={1} backgroundColor="green" justifyContent="center"></View>
     </View>
   );
 }
@@ -116,11 +124,29 @@ export function WebRTCPlayer(props: { src: string }) {
 }
 
 const VideoElement = forwardRef(
-  (props, ref: ForwardedRef<HTMLVideoElement>) => {
+  (props: { src?: string }, ref: ForwardedRef<HTMLVideoElement>) => {
     return (
-      <View backgroundColor="#111">
-        <video autoPlay={true} ref={ref} loop={true} controls={true} />
+      <View backgroundColor="#111" alignItems="stretch">
+        <video
+          autoPlay={true}
+          ref={ref}
+          loop={true}
+          controls={false}
+          src={props.src}
+          muted={true}
+        />
       </View>
     );
   },
 );
+
+export function ProgressiveMP4Player(props: { src: string }) {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const { url } = useAquareumNode();
+  return (
+    <VideoElement
+      ref={videoRef}
+      src={`${url}/api/playback/${props.src}/stream.mp4`}
+    />
+  );
+}

@@ -24,6 +24,12 @@ make node
 ./bin/aquareum
 ```
 
+**Web Development**
+
+```
+yarn run app start
+```
+
 **App Development**
 
 ```

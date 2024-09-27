@@ -97,6 +97,7 @@ func (a *AquareumAPI) Handler(ctx context.Context) (http.Handler, error) {
 	apiRouter.GET("/api/hls/:stream/*resource", a.MistProxyHandler(ctx, "/hls/%s"))
 	apiRouter.Handler("POST", "/api/segment", a.HandleSegment(ctx))
 	apiRouter.HandlerFunc("GET", "/api/healthz", a.HandleHealthz(ctx))
+	apiRouter.GET("/api/playback/:user/stream.mp4", a.HandleMP4Playback(ctx))
 	apiRouter.NotFound = a.HandleAPI404(ctx)
 	router.Handler("GET", "/api/*resource", apiRouter)
 	router.Handler("POST", "/api/*resource", apiRouter)
