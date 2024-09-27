@@ -119,9 +119,9 @@ export default function TabOneScreen() {
       <View>
         <GetApps />
       </View>
-      <View fg={3} flexBasis={0}>
+      {/* <View fg={3} flexBasis={0}>
         <WebviewIframe src="https://iame.li" />
-      </View>
+      </View> */}
       <View paddingBottom="$10"></View>
     </YStack>
   );

@@ -107,7 +107,7 @@ func (a *AquareumAPI) Handler(ctx context.Context) (http.Handler, error) {
 	router.GET("/dl/*params", a.HandleAppDownload(ctx))
 	router.NotFound = a.FileHandler(ctx, http.FileServer(AppHostingFS{http.FS(files)}))
 	handler := sloghttp.Recovery(router)
-	handler = cors.Default().Handler(handler)
+	handler = cors.AllowAll().Handler(handler)
 	handler = sloghttp.New(slog.Default())(handler)
 
 	return handler, nil

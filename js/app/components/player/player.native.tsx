@@ -1,18 +1,55 @@
-import React from "react";
-import WebView from "react-native-webview";
-import { View, Text } from "tamagui";
+import React, { useEffect, useRef } from "react";
+import { useVideoPlayer, VideoView } from "expo-video";
+import { View, Text, Button } from "tamagui";
+import useAquareumNode from "hooks/useAquareumNode";
 
-export function Player() {
+// export function Player() {
+//   return <View f={1}></View>;
+// }
+
+export function Player(props: { src: string }) {
+  const ref = useRef(null);
+  const { url } = useAquareumNode();
+  const src = `${url}/api/playback/${props.src}/stream.mp4`;
+  const player = useVideoPlayer(src, (player) => {
+    player.loop = true;
+    player.play();
+    player.muted = true;
+  });
+
+  useEffect(() => {
+    const subscription = player.addListener("playingChange", (isPlaying) => {
+      // setIsPlaying(isPlaying);
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, [player]);
+
   return (
-    <View f={1}>
-      <WebView
-        allowsInlineMediaPlayback={true}
-        scrollEnabled={false}
-        source={{
-          uri: "http://127.0.0.1:38081/embed/0x6fbe6863cf1efc713899455e526a13239d371175",
-        }}
-        style={{ flex: 1, backgroundColor: "green" }}
-      ></WebView>
+    <View f={1} backgroundColor="green">
+      <VideoView
+        style={{ flex: 1, backgroundColor: "orange" }}
+        ref={ref}
+        player={player}
+        allowsFullscreen
+        allowsPictureInPicture
+        nativeControls={false}
+      />
+      <View>
+        {/* <Button
+          title={isPlaying ? "Pause" : "Play"}
+          onPress={() => {
+            if (isPlaying) {
+              player.pause();
+            } else {
+              player.play();
+            }
+            setIsPlaying(!isPlaying);
+          }}
+        /> */}
+      </View>
     </View>
   );
 }

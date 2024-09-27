@@ -15,18 +15,18 @@ import useAquareumNode from "hooks/useAquareumNode";
 
 export function Player(props: { src: string }) {
   const [proto, setProto] = useState("hls");
-  let p;
-  if (proto === "webrtc") {
-    p = <WebRTCPlayer src={props.src} />;
-  } else if (proto === "hls") {
-    p = <HLSPlayer src={props.src} />;
-  }
+  let p = <ProgressiveMP4Player src={props.src} />;
+  // if (proto === "webrtc") {
+  //   p = <WebRTCPlayer src={props.src} />;
+  // } else if (proto === "hls") {
+  //   p = <HLSPlayer src={props.src} />;
+  // }
   return (
     <View f={1} backgroundColor="green" justifyContent="center">
       <View
         f={1}
         flexDirection="column"
-        backgroundColor="blue"
+        backgroundColor="purple"
         justifyContent="center"
       >
         {p}
@@ -126,7 +126,7 @@ export function WebRTCPlayer(props: { src: string }) {
 const VideoElement = forwardRef(
   (props: { src?: string }, ref: ForwardedRef<HTMLVideoElement>) => {
     return (
-      <View backgroundColor="#111" alignItems="stretch">
+      <View backgroundColor="#111" alignItems="stretch" f={1}>
         <video
           autoPlay={true}
           ref={ref}
@@ -134,6 +134,13 @@ const VideoElement = forwardRef(
           controls={false}
           src={props.src}
           muted={true}
+          crossOrigin="anonymous"
+          style={{
+            objectFit: "contain",
+            backgroundColor: "transparent",
+            width: "100%",
+            height: "100%",
+          }}
         />
       </View>
     );

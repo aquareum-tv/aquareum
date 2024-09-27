@@ -59,8 +59,8 @@ export default function () {
       slug: name,
       version: pkg.version,
       // Only rev this to the current version when native dependencies change!
-      runtimeVersion: "0.0.5",
-      orientation: "portrait",
+      runtimeVersion: "0.2.2",
+      orientation: "default",
       icon: "./assets/images/icon.png",
       scheme: "myapp",
       userInterfaceStyle: "automatic",
