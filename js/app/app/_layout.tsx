@@ -24,6 +24,7 @@ import { SplashScreen, Stack } from "expo-router";
 import { Provider } from "components";
 import { Helmet } from "react-native-helmet-async";
 import { Settings } from "@tamagui/lucide-icons";
+import { topSafeHeight } from "./platform";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -71,52 +72,56 @@ function RootLayoutNav() {
 
   return (
     <Provider>
-      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-        {isWeb && (
-          <Helmet>
-            <title>Aquareum</title>
-          </Helmet>
-        )}
-        <Stack>
-          <Stack.Screen
-            name="(tabs)"
-            options={{
-              title: "",
-              headerShown: true,
-              headerRight: () => {
-                return (
-                  <Link href="/settings" asChild>
-                    <Button icon={<Settings size="$2" />}></Button>
-                  </Link>
-                );
-              },
-              headerLeft: () => (
-                <Anchor href="https://explorer.livepeer.org/treasury/74518185892381909671177921640414850443801430499809418110611019961553289709442">
-                  <View bg="rgb(189 110 134)" br="$5" padding="$2">
-                    <H4 fontSize="$4">What's Aquareum?</H4>
-                  </View>
-                </Anchor>
-              ),
-            }}
-          />
-          <Stack.Screen
-            name="embed/[stream]"
-            options={{
-              headerShown: false,
-            }}
-          />
-          <Stack.Screen
-            name="settings"
-            options={{
-              title: "Settings",
-              presentation: "modal",
-              animation: "slide_from_right",
-              gestureEnabled: true,
-              gestureDirection: "horizontal",
-            }}
-          />
-        </Stack>
-      </ThemeProvider>
+      <View f={1} paddingTop={topSafeHeight()} backgroundColor="$background">
+        <ThemeProvider
+          value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+        >
+          {isWeb && (
+            <Helmet>
+              <title>Aquareum</title>
+            </Helmet>
+          )}
+          <Stack>
+            <Stack.Screen
+              name="(tabs)"
+              options={{
+                title: "",
+                headerShown: true,
+                headerRight: () => {
+                  return (
+                    <Link href="/settings" asChild>
+                      <Button icon={<Settings size="$2" />}></Button>
+                    </Link>
+                  );
+                },
+                headerLeft: () => (
+                  <Anchor href="https://explorer.livepeer.org/treasury/74518185892381909671177921640414850443801430499809418110611019961553289709442">
+                    <View bg="rgb(189 110 134)" br="$5" padding="$2">
+                      <H4 fontSize="$4">What's Aquareum?</H4>
+                    </View>
+                  </Anchor>
+                ),
+              }}
+            />
+            <Stack.Screen
+              name="embed/[stream]"
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              name="settings"
+              options={{
+                title: "Settings",
+                presentation: "modal",
+                animation: "slide_from_right",
+                gestureEnabled: true,
+                gestureDirection: "horizontal",
+              }}
+            />
+          </Stack>
+        </ThemeProvider>
+      </View>
     </Provider>
   );
 }
