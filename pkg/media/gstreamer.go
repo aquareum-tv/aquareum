@@ -15,6 +15,8 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
+const HLS_PLAYLIST = "stream.m3u8"
+
 func init() {
 	gst.Init(nil)
 }
@@ -141,7 +143,7 @@ func ToHLS(ctx context.Context, input io.Reader, dir string) error {
 	mainLoop := glib.NewMainLoop(glib.MainContextDefault(), false)
 
 	seg := filepath.Join(dir, "segment%05d.ts")
-	playlist := filepath.Join(dir, "stream.m3u8")
+	playlist := filepath.Join(dir, HLS_PLAYLIST)
 	pipelineSlice := []string{
 		fmt.Sprintf("fdsrc name=livestream fd=%d ! matroskademux name=demux", ir.Fd()),
 		fmt.Sprintf("hlssink2 name=mux location=%s target-duration=1 playlist-location=%s", seg, playlist),

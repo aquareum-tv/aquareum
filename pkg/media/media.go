@@ -43,8 +43,13 @@ type MediaManager struct {
 	mp4subs       map[string][]chan string
 	mp4subsmut    sync.Mutex
 	replicator    replication.Replicator
-	hlsRunning    map[string]bool
+	hlsRunning    map[string]HLSStream
 	hlsRunningMut sync.Mutex
+}
+
+type HLSStream struct {
+	Dir  string
+	Wait func() string
 }
 
 func MakeMediaManager(ctx context.Context, cli *config.CLI, signer crypto.Signer, rep replication.Replicator) (*MediaManager, error) {
@@ -75,7 +80,7 @@ func MakeMediaManager(ctx context.Context, cli *config.CLI, signer crypto.Signer
 		user:       hex,
 		mp4subs:    map[string][]chan string{},
 		replicator: rep,
-		hlsRunning: map[string]bool{},
+		hlsRunning: map[string]HLSStream{},
 	}, nil
 }
 
@@ -253,36 +258,50 @@ func (mm *MediaManager) SegmentToMKVPlusOpus(ctx context.Context, user string, w
 	return g.Wait()
 }
 
-func (mm *MediaManager) SegmentToHLSOnce(ctx context.Context, user string) error {
+func (mm *MediaManager) SegmentToHLSOnce(ctx context.Context, user string) (func() string, error) {
 	mm.hlsRunningMut.Lock()
 	defer mm.hlsRunningMut.Unlock()
-	if mm.hlsRunning[user] == true {
-		return nil
-	}
-	go func() {
-		mm.hlsRunning[user] = true
-		err := mm.SegmentToHLS(ctx, user)
+	hls, ok := mm.hlsRunning[user]
+	if !ok {
+		dname, err := os.MkdirTemp("", "aquareum-hls")
 		if err != nil {
-			log.Log(ctx, "error in async segmentToHLS code", "error", err)
+			return nil, err
 		}
-		mm.hlsRunningMut.Lock()
-		defer mm.hlsRunningMut.Unlock()
-		mm.hlsRunning[user] = false
-	}()
-	return nil
+		wait := sync.OnceValue[string](func() string {
+			fpath := filepath.Join(dname, HLS_PLAYLIST)
+			for true {
+				_, err := os.Stat(fpath)
+				if err == nil {
+					break
+				}
+				if !errors.Is(err, os.ErrNotExist) {
+					log.Log(ctx, "unexpected error polling for HLS playlist", "error", err)
+				}
+				time.Sleep(500 * time.Millisecond)
+			}
+			return dname
+		})
+		hls = HLSStream{
+			Wait: wait,
+			Dir:  dname,
+		}
+		mm.hlsRunning[user] = hls
+		go func() {
+			err := mm.SegmentToHLS(ctx, user, dname)
+			if err != nil {
+				log.Log(ctx, "error in async segmentToHLS code", "error", err)
+			}
+			mm.hlsRunningMut.Lock()
+			defer mm.hlsRunningMut.Unlock()
+			delete(mm.hlsRunning, user)
+		}()
+	}
+	return hls.Wait, nil
 }
 
-func (mm *MediaManager) SegmentToHLS(ctx context.Context, user string) error {
+func (mm *MediaManager) SegmentToHLS(ctx context.Context, user, dir string) error {
 	muxer := ffmpeg.ComponentOptions{
 		Name: "matroska",
-	}
-	hlsdir, err := mm.cli.HLSDir(user)
-	if err != nil {
-		return err
-	}
-	err = os.MkdirAll(hlsdir, os.ModePerm)
-	if err != nil {
-		return err
 	}
 
 	pr, pw := io.Pipe()
@@ -291,7 +310,7 @@ func (mm *MediaManager) SegmentToHLS(ctx context.Context, user string) error {
 		return mm.SegmentToStream(ctx, user, muxer, pw)
 	})
 	g.Go(func() error {
-		return ToHLS(ctx, pr, hlsdir)
+		return ToHLS(ctx, pr, dir)
 	})
 	return g.Wait()
 }

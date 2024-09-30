@@ -106,13 +106,13 @@ func (a *AquareumAPI) HandleHLSPlayback(ctx context.Context) httprouter.Handle {
 			errors.WriteHTTPBadRequest(w, "file required", nil)
 			return
 		}
-		dir, err := a.CLI.HLSDir(user)
+		getDir, err := a.MediaManager.SegmentToHLSOnce(ctx, user)
 		if err != nil {
-			errors.WriteHTTPInternalServerError(w, "could not find hls dir for user", err)
+			errors.WriteHTTPInternalServerError(w, "SegmentToHLSOnce failed", nil)
 			return
 		}
+		dir := getDir()
 		fullpath := filepath.Join(dir, file)
-		a.MediaManager.SegmentToHLSOnce(ctx, user)
 		http.ServeFile(w, r, fullpath)
 	}
 }
