@@ -36,13 +36,15 @@ const SCHEMA_ORG_START_TIME = "http://schema.org/startTime"
 const SCHEMA_ORG_END_TIME = "http://schema.org/endTime"
 
 type MediaManager struct {
-	cli        *config.CLI
-	signer     crypto.Signer
-	cert       []byte
-	user       string
-	mp4subs    map[string][]chan string
-	mp4subsmut sync.Mutex
-	replicator replication.Replicator
+	cli           *config.CLI
+	signer        crypto.Signer
+	cert          []byte
+	user          string
+	mp4subs       map[string][]chan string
+	mp4subsmut    sync.Mutex
+	replicator    replication.Replicator
+	hlsRunning    map[string]bool
+	hlsRunningMut sync.Mutex
 }
 
 func MakeMediaManager(ctx context.Context, cli *config.CLI, signer crypto.Signer, rep replication.Replicator) (*MediaManager, error) {
@@ -73,6 +75,7 @@ func MakeMediaManager(ctx context.Context, cli *config.CLI, signer crypto.Signer
 		user:       hex,
 		mp4subs:    map[string][]chan string{},
 		replicator: rep,
+		hlsRunning: map[string]bool{},
 	}, nil
 }
 
@@ -246,6 +249,49 @@ func (mm *MediaManager) SegmentToMKVPlusOpus(ctx context.Context, user string, w
 	})
 	g.Go(func() error {
 		return AddOpusToMKV(ctx, pr, w)
+	})
+	return g.Wait()
+}
+
+func (mm *MediaManager) SegmentToHLSOnce(ctx context.Context, user string) error {
+	mm.hlsRunningMut.Lock()
+	defer mm.hlsRunningMut.Unlock()
+	if mm.hlsRunning[user] == true {
+		return nil
+	}
+	go func() {
+		mm.hlsRunning[user] = true
+		err := mm.SegmentToHLS(ctx, user)
+		if err != nil {
+			log.Log(ctx, "error in async segmentToHLS code", "error", err)
+		}
+		mm.hlsRunningMut.Lock()
+		defer mm.hlsRunningMut.Unlock()
+		mm.hlsRunning[user] = false
+	}()
+	return nil
+}
+
+func (mm *MediaManager) SegmentToHLS(ctx context.Context, user string) error {
+	muxer := ffmpeg.ComponentOptions{
+		Name: "matroska",
+	}
+	hlsdir, err := mm.cli.HLSDir(user)
+	if err != nil {
+		return err
+	}
+	err = os.MkdirAll(hlsdir, os.ModePerm)
+	if err != nil {
+		return err
+	}
+
+	pr, pw := io.Pipe()
+	g, ctx := errgroup.WithContext(ctx)
+	g.Go(func() error {
+		return mm.SegmentToStream(ctx, user, muxer, pw)
+	})
+	g.Go(func() error {
+		return ToHLS(ctx, pr, hlsdir)
 	})
 	return g.Wait()
 }

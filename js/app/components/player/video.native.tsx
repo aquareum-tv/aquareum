@@ -14,7 +14,7 @@ export default function NativeVideo(
   props: PlayerProps & { videoRef: React.RefObject<VideoView> },
 ) {
   const { url } = useAquareumNode();
-  const src = `${url}/api/playback/${props.src}/stream.mp4`;
+  const src = `http://192.168.8.248:38080/api/playback/${props.src}/hls/stream.m3u8`;
   const player = useVideoPlayer(src, (player) => {
     player.loop = true;
     player.muted = props.muted;
@@ -56,7 +56,7 @@ export default function NativeVideo(
       player={player}
       allowsFullscreen
       allowsPictureInPicture
-      nativeControls={false}
+      nativeControls={props.fullscreen}
       onFullscreenEnter={() => {
         props.setFullscreen(true);
       }}

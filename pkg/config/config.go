@@ -216,6 +216,11 @@ func (cli *CLI) SegmentFilePath(user string, file string) (string, error) {
 	return cli.dataFilePath([]string{SEGMENTS_DIR, user, yr, mon, day, hr, min, fname}), nil
 }
 
+// get a path to a segment file in our database
+func (cli *CLI) HLSDir(user string) (string, error) {
+	return cli.dataFilePath([]string{SEGMENTS_DIR, "hls"}), nil
+}
+
 // create a segment file in our database
 func (cli *CLI) SegmentFileCreate(user string, aqt aqtime.AQTime, ext string) (*os.File, error) {
 	if ext != "mp4" {

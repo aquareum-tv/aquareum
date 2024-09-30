@@ -54,7 +54,7 @@ export function ProgressiveMP4Player(props: { src: string; muted: boolean }) {
     <VideoElement
       muted={props.muted}
       ref={videoRef}
-      src={`${url}/api/playback/${props.src}/stream.mp4`}
+      src={`http://192.168.8.248:38080/api/playback/${props.src}/hls/stream.m3u8`}
     />
   );
 }

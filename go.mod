@@ -29,6 +29,8 @@ require (
 	github.com/rs/cors v1.7.0
 	github.com/samber/slog-http v1.4.0
 	github.com/stretchr/testify v1.9.0
+	github.com/tinyzimmer/go-glib v0.0.25
+	github.com/tinyzimmer/go-gst v0.2.33
 	gitlab.com/gitlab-org/release-cli v0.18.0
 	golang.org/x/exp v0.0.0-20240719175910-8a7402abbf56
 	golang.org/x/net v0.27.0

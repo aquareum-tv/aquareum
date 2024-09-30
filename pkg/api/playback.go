@@ -5,6 +5,7 @@ import (
 	"context"
 	"io"
 	"net/http"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -50,5 +51,68 @@ func (a *AquareumAPI) HandleMP4Playback(ctx context.Context) httprouter.Handle {
 			return err
 		})
 		g.Wait()
+	}
+}
+
+func (a *AquareumAPI) HandleMKVPlayback(ctx context.Context) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		user := p.ByName("user")
+		if user == "" {
+			errors.WriteHTTPBadRequest(w, "user required", nil)
+			return
+		}
+		user = strings.ToLower(user)
+		var delayMS int64 = 1000
+		userDelay := r.URL.Query().Get("delayms")
+		if userDelay != "" {
+			var err error
+			delayMS, err = strconv.ParseInt(userDelay, 10, 64)
+			if err != nil {
+				errors.WriteHTTPBadRequest(w, "error parsing delay", err)
+				return
+			}
+			if delayMS > 10000 {
+				errors.WriteHTTPBadRequest(w, "delay too large, maximum 10000", nil)
+				return
+			}
+		}
+		w.Header().Set("Content-Type", "video/mp4")
+		w.WriteHeader(200)
+		g, ctx := errgroup.WithContext(ctx)
+		pr, pw := io.Pipe()
+		bufw := bufio.NewWriter(pw)
+		g.Go(func() error {
+			return a.MediaManager.SegmentToMKVPlusOpus(ctx, user, bufw)
+		})
+		g.Go(func() error {
+			time.Sleep(time.Duration(delayMS) * time.Millisecond)
+			_, err := io.Copy(w, pr)
+			return err
+		})
+		g.Wait()
+	}
+}
+
+func (a *AquareumAPI) HandleHLSPlayback(ctx context.Context) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		user := p.ByName("user")
+		if user == "" {
+			errors.WriteHTTPBadRequest(w, "user required", nil)
+			return
+		}
+		user = strings.ToLower(user)
+		file := p.ByName("file")
+		if file == "" {
+			errors.WriteHTTPBadRequest(w, "file required", nil)
+			return
+		}
+		dir, err := a.CLI.HLSDir(user)
+		if err != nil {
+			errors.WriteHTTPInternalServerError(w, "could not find hls dir for user", err)
+			return
+		}
+		fullpath := filepath.Join(dir, file)
+		a.MediaManager.SegmentToHLSOnce(ctx, user)
+		http.ServeFile(w, r, fullpath)
 	}
 }

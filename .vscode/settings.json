@@ -7,5 +7,6 @@
     "mistserver.h": "c",
     "aquareum.h": "c",
     "avfilter.h": "c"
-  }
+  },
+  "mesonbuild.configureOnOpen": false
 }
