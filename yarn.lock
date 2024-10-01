@@ -10599,6 +10599,7 @@ __metadata:
     react-native-webview: "npm:13.10.5"
     tamagui: "npm:^1.102.3"
     typescript: "npm:~5.5.3"
+    ua-parser-js: "npm:^1.0.39"
     viem: "npm:2.x"
     wagmi: "npm:2"
   languageName: unknown
@@ -25366,6 +25367,15 @@ __metadata:
   version: 1.0.38
   resolution: "ua-parser-js@npm:1.0.38"
   checksum: 10/f2345e9bd0f9c5f85bcaa434535fae88f4bb891538e568106f0225b2c2937fbfbeb5782bd22320d07b6b3d68b350b8861574c1d7af072ff9b2362fb72d326fd9
+  languageName: node
+  linkType: hard
+
+"ua-parser-js@npm:^1.0.39":
+  version: 1.0.39
+  resolution: "ua-parser-js@npm:1.0.39"
+  bin:
+    ua-parser-js: script/cli.js
+  checksum: 10/dd4026b6ece8a34a0d39b6de5542154c4506077d8def8647a300a29e1b3ffa0e23f5c8eeeb8101df6162b7b3eb3597d0b4adb031ae6104cbdb730d6ebc07f3c0
   languageName: node
   linkType: hard
 

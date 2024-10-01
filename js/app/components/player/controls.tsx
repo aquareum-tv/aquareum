@@ -1,6 +1,38 @@
-import { View, Text, XStack } from "tamagui";
-import { Volume2, VolumeX, Maximize, Minimize } from "@tamagui/lucide-icons";
-import { Pressable, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  XStack,
+  Popover,
+  YStack,
+  Label,
+  Input,
+  Adapt,
+  ListItem,
+  Separator,
+  YGroup,
+} from "tamagui";
+import {
+  Volume2,
+  VolumeX,
+  Maximize,
+  Minimize,
+  Settings,
+  ChevronRight,
+  Moon,
+  Star,
+  Circle,
+  CheckCircle,
+  ChevronLeft,
+  Sparkle,
+} from "@tamagui/lucide-icons";
+import { Button, Pressable, TouchableOpacity } from "react-native";
+import { useState } from "react";
+import {
+  PlayerProps,
+  PROTOCOL_HLS,
+  PROTOCOL_PROGRESSIVE_MP4,
+  PROTOCOL_PROGRESSIVE_WEBM,
+} from "./props";
 
 const Bar = (props) => (
   <XStack
@@ -19,15 +51,7 @@ const Part = (props) => (
   </View>
 );
 
-export type Controls = {
-  name: string;
-  muted: boolean;
-  setMuted: (boolean) => void;
-  setFullscreen: (boolean) => void;
-  fullscreen: boolean;
-};
-
-export default function Controls(props: Controls) {
+export default function Controls(props: PlayerProps) {
   return (
     <View
       position="absolute"
@@ -61,6 +85,7 @@ export default function Controls(props: Controls) {
           </Pressable>
         </Part>
         <Part>
+          <PopoverMenu {...props} />
           <Pressable
             style={{
               justifyContent: "center",
@@ -74,5 +99,146 @@ export default function Controls(props: Controls) {
         </Part>
       </Bar>
     </View>
+  );
+}
+
+export function PopoverMenu(props: PlayerProps) {
+  return (
+    <Popover
+      size="$5"
+      allowFlip
+      placement="top"
+      keepChildrenMounted
+      stayInFrame
+    >
+      <Popover.Trigger asChild cursor="pointer">
+        <View paddingLeft="$3" paddingRight="$5" justifyContent="center">
+          <Settings />
+        </View>
+      </Popover.Trigger>
+
+      <Adapt when="sm" platform="touch">
+        <Popover.Sheet modal dismissOnSnapToBottom snapPoints={[50]}>
+          <Popover.Sheet.Frame padding="$2">
+            <Adapt.Contents />
+          </Popover.Sheet.Frame>
+          <Popover.Sheet.Overlay
+            animation="lazy"
+            enterStyle={{ opacity: 0 }}
+            exitStyle={{ opacity: 0 }}
+          />
+        </Popover.Sheet>
+      </Adapt>
+
+      <Popover.Content
+        borderWidth={0}
+        padding="$0"
+        enterStyle={{ y: -10, opacity: 0 }}
+        exitStyle={{ y: -10, opacity: 0 }}
+        elevate
+        userSelect="none"
+        animation={[
+          "quick",
+          {
+            opacity: {
+              overshootClamping: true,
+            },
+          },
+        ]}
+      >
+        <GearMenu {...props} />
+      </Popover.Content>
+    </Popover>
+  );
+}
+
+function GearMenu(props: PlayerProps) {
+  const [menu, setMenu] = useState("root");
+  return (
+    <YGroup alignSelf="center" bordered width={240} size="$5" borderRadius="$0">
+      {menu == "root" && (
+        <>
+          <YGroup.Item>
+            <ListItem
+              hoverTheme
+              pressTheme
+              title="Playback Protocol"
+              subTitle="How play?"
+              icon={Star}
+              iconAfter={ChevronRight}
+              onPress={() => setMenu("protocol")}
+            />
+          </YGroup.Item>
+          <Separator />
+          <YGroup.Item>
+            <ListItem
+              hoverTheme
+              pressTheme
+              title="Quality"
+              subTitle="WIP"
+              icon={Sparkle}
+              iconAfter={ChevronRight}
+            />
+          </YGroup.Item>
+        </>
+      )}
+      {menu == "protocol" && (
+        <>
+          <YGroup.Item>
+            <ListItem
+              hoverTheme
+              pressTheme
+              title="Back"
+              icon={ChevronLeft}
+              onPress={() => setMenu("root")}
+            />
+          </YGroup.Item>
+          <Separator />
+          <YGroup.Item>
+            <ListItem
+              hoverTheme
+              pressTheme
+              title="HLS"
+              subTitle="HTTP Live Streaming"
+              icon={Star}
+              iconAfter={props.protocol === PROTOCOL_HLS ? CheckCircle : Circle}
+              onPress={() => props.setProtocol(PROTOCOL_HLS)}
+            />
+          </YGroup.Item>
+          <Separator />
+          <YGroup.Item>
+            <ListItem
+              hoverTheme
+              pressTheme
+              title="Progressive MP4"
+              subTitle="MP4 but loooong"
+              icon={Moon}
+              iconAfter={
+                props.protocol === PROTOCOL_PROGRESSIVE_MP4
+                  ? CheckCircle
+                  : Circle
+              }
+              onPress={() => props.setProtocol(PROTOCOL_PROGRESSIVE_MP4)}
+            />
+          </YGroup.Item>
+          <Separator />
+          <YGroup.Item>
+            <ListItem
+              hoverTheme
+              pressTheme
+              title="Progressive WebM"
+              subTitle="WebM but loooong"
+              icon={Moon}
+              iconAfter={
+                props.protocol === PROTOCOL_PROGRESSIVE_WEBM
+                  ? CheckCircle
+                  : Circle
+              }
+              onPress={() => props.setProtocol(PROTOCOL_PROGRESSIVE_WEBM)}
+            />
+          </YGroup.Item>
+        </>
+      )}
+    </YGroup>
   );
 }

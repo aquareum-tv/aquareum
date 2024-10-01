@@ -1,10 +1,12 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import { useVideoPlayer, VideoView } from "expo-video";
-import { View, Text, Button } from "tamagui";
 import useAquareumNode from "hooks/useAquareumNode";
-import Controls from "./controls";
-import { Platform } from "react-native";
-import { PlayerProps } from "./props";
+import {
+  PlayerProps,
+  PROTOCOL_HLS,
+  PROTOCOL_PROGRESSIVE_MP4,
+  PROTOCOL_PROGRESSIVE_WEBM,
+} from "./props";
 
 // export function Player() {
 //   return <View f={1}></View>;
@@ -14,7 +16,16 @@ export default function NativeVideo(
   props: PlayerProps & { videoRef: React.RefObject<VideoView> },
 ) {
   const { url } = useAquareumNode();
-  const src = `http://192.168.8.248:38080/api/playback/${props.src}/hls/stream.m3u8`;
+  let src: string;
+  if (props.protocol === PROTOCOL_HLS) {
+    src = `${url}/api/playback/${props.src}/hls/stream.m3u8`;
+  } else if (props.protocol === PROTOCOL_PROGRESSIVE_MP4) {
+    src = `${url}/api/playback/${props.src}/stream.mp4`;
+  } else if (props.protocol === PROTOCOL_PROGRESSIVE_WEBM) {
+    src = `${url}/api/playback/${props.src}/stream.webm`;
+  } else {
+    throw new Error(`unknown playback protocol: ${url}`);
+  }
   const player = useVideoPlayer(src, (player) => {
     player.loop = true;
     player.muted = props.muted;
@@ -34,20 +45,6 @@ export default function NativeVideo(
       subscription.remove();
     };
   }, [player]);
-
-  // useEffect(() => {
-  //   if (!ref.current) {
-  //     return;
-  //   }
-  //   if (props.fullscreen) {
-  //     ref.current.enterFullscreen();
-  //   }
-  //   if (!props.fullscreen) {
-  //     if (Platform.OS !== "android") {
-  //       ref.current.exitFullscreen();
-  //     }
-  //   }
-  // }, [props.fullscreen, ref.current]);
 
   return (
     <VideoView

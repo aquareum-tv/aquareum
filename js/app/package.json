@@ -59,6 +59,7 @@
     "react-native-web": "^0.19.12",
     "react-native-webview": "13.10.5",
     "tamagui": "^1.102.3",
+    "ua-parser-js": "^1.0.39",
     "viem": "2.x",
     "wagmi": "2"
   },
