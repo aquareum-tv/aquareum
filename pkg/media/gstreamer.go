@@ -15,10 +15,15 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
+// #cgo pkg-config: aquareumdeps-uninstalled
+// #include "plugins.h"
+import "C"
+
 const HLS_PLAYLIST = "stream.m3u8"
 
 func init() {
 	gst.Init(nil)
+	C.gst_init_gofilesink()
 }
 
 // Pipe with a mechanism to keep the FDs not garbage collected
@@ -49,7 +54,8 @@ func AddOpusToMKV(ctx context.Context, input io.Reader, output io.Writer) error 
 
 	pipelineSlice := []string{
 		fmt.Sprintf("fdsrc name=livestream fd=%d ! matroskademux name=demux", ir.Fd()),
-		fmt.Sprintf("matroskamux name=mux ! fdsink fd=%d", ow.Fd()),
+		// fmt.Sprintf("matroskamux name=mux ! fdsink fd=%d", ow.Fd()),
+		"matroskamux name=mux ! gofilesink location=/Users/iameli/testvids/gofilesink",
 		"demux.audio_0 ! queue ! tee name=asplit",
 		"demux.video_0 ! queue ! mux.video_0",
 		"asplit. ! queue ! fdkaacdec ! audioresample ! opusenc inband-fec=true perfect-timestamp=true bitrate=128000 ! mux.audio_1",

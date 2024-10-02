@@ -198,6 +198,8 @@ aquareum_deps += [
   dependency('gstplayback'),
 ]
 
+subdir('pkg/media/gofilesink')
+
 libaquareum = custom_target(
   'libaquareum',
   input: [aquareum_go, flags],
@@ -244,7 +246,7 @@ aquareum = executable(
   dependencies: [
     aquareum_deps,
   ],
-  link_with: [c2pa_go_dep],
+  link_with: [c2pa_go_dep, gofilesink],
 )
 
 if not meson.is_cross_build()

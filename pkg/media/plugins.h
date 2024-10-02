@@ -1,0 +1,1 @@
+void gst_init_gofilesink(void);
