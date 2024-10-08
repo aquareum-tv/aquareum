@@ -138,10 +138,10 @@ github.com/go-git/go-git-fixtures/v4 v4.3.2-0.20231010084843-55a94097c399 h1:eMj
 github.com/go-git/go-git-fixtures/v4 v4.3.2-0.20231010084843-55a94097c399/go.mod h1:1OCfN199q1Jm3HZlxleg+Dw/mwps2Wbk9frAWm+4FII=
 github.com/go-git/go-git/v5 v5.12.0 h1:7Md+ndsjrzZxbddRDZjF14qK+NN56sy6wkqaVrjZtys=
 github.com/go-git/go-git/v5 v5.12.0/go.mod h1:FTM9VKtnI2m65hNI/TenDDDnUf2Q9FHnXYjuz9i5OEY=
-github.com/go-gst/go-glib v1.2.1 h1:ibAr5N1NmuHmZ5RaCFjFjeUy0Rk3t3LgvGutmwBeR9E=
-github.com/go-gst/go-glib v1.2.1/go.mod h1:JybIYeoHNwCkHGaBf1fHNIaM4sQTrJPkPLsi7dmPNOU=
-github.com/go-gst/go-gst v1.2.1 h1:FqUFGFllbuC8LkQoqULgAui2ZS0VU1WEBCNekIMcBEE=
-github.com/go-gst/go-gst v1.2.1/go.mod h1:OGPRsJdvNYCKjt3e4H4i8J6KVd2Wk5S2lzsEQ8mO1+g=
+github.com/go-gst/go-glib v1.3.0 h1:u+mPUdLmrDFA/MskIxInJY+M0O1RSkHeZYggnJGWlPk=
+github.com/go-gst/go-glib v1.3.0/go.mod h1:JybIYeoHNwCkHGaBf1fHNIaM4sQTrJPkPLsi7dmPNOU=
+github.com/go-gst/go-gst v1.3.0 h1:z4mQ7CNJXd6ZfkibzIT9kZKwtgEFJo7jJGlX9cXFzz0=
+github.com/go-gst/go-gst v1.3.0/go.mod h1:2li6ghiCBz7/R6DA7itVto3gsYh0QKicwSxEefNVYqE=
 github.com/go-logr/logr v1.2.2/go.mod h1:jdQByPbusPIv2/zmleS9BjJVeZ6kBagPoEUsqbVz/1A=
 github.com/go-logr/logr v1.4.2 h1:6pFjapn8bFcIbiKo3XT4j/BhANplGihG6tvd+8rYgrY=
 github.com/go-logr/logr v1.4.2/go.mod h1:9T104GzyrTigFIr8wt5mBrctHMim0Nb2HLGrmQ40KvY=
@@ -326,10 +326,6 @@ github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7 h1:epCh84lMvA70
 github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7/go.mod h1:q4W45IWZaF22tdD+VEXcAWRA037jwmWEB5VWYORlTpc=
 github.com/thales-e-security/pool v0.0.2 h1:RAPs4q2EbWsTit6tpzuvTFlgFRJ3S8Evf5gtvVDbmPg=
 github.com/thales-e-security/pool v0.0.2/go.mod h1:qtpMm2+thHtqhLzTwgDBj/OuNnMpupY8mv0Phz0gjhU=
-github.com/tinyzimmer/go-glib v0.0.25 h1:2GpumtkxA0wpXhCXP6D3ksb5pGMfo9WbhgLvEw8njK4=
-github.com/tinyzimmer/go-glib v0.0.25/go.mod h1:ltV0gO6xNFzZhsIRbFXv8RTq9NGoNT2dmAER4YmZfaM=
-github.com/tinyzimmer/go-gst v0.2.33 h1:wdwUYoN7dkWGUTrZIgB9Mp5LMRr/Sld5PVGRsE7/O9s=
-github.com/tinyzimmer/go-gst v0.2.33/go.mod h1:0hI+orMYVT61TEh429LvmoV9UmyqjeTqdJ3DW2TX114=
 github.com/tklauser/go-sysconf v0.3.12 h1:0QaGUFOdQaIVdPgfITYzaTegZvdCjmYO52cSFAEVmqU=
 github.com/tklauser/go-sysconf v0.3.12/go.mod h1:Ho14jnntGE1fpdOqQEEaiKRpvIavV0hSfmBq8nJbHYI=
 github.com/tklauser/numcpus v0.6.1 h1:ng9scYS7az0Bk4OZLvrNXNSAO2Pxr1XXRAPyjhIx+Fk=

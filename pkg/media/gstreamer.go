@@ -17,10 +17,6 @@ import (
 
 const HLS_PLAYLIST = "stream.m3u8"
 
-func init() {
-	gst.Init(nil)
-}
-
 // Pipe with a mechanism to keep the FDs not garbage collected
 func SafePipe() (*os.File, *os.File, func(), error) {
 	r, w, err := os.Pipe()

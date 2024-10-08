@@ -20,6 +20,7 @@ import (
 	"aquareum.tv/aquareum/pkg/crypto/signers"
 	"aquareum.tv/aquareum/pkg/log"
 	"aquareum.tv/aquareum/pkg/replication"
+	"github.com/go-gst/go-gst/gst"
 	"github.com/livepeer/lpms/ffmpeg"
 	"golang.org/x/sync/errgroup"
 
@@ -53,6 +54,7 @@ type HLSStream struct {
 }
 
 func MakeMediaManager(ctx context.Context, cli *config.CLI, signer crypto.Signer, rep replication.Replicator) (*MediaManager, error) {
+	gst.Init(nil)
 	hex := signers.HexAddr(signer.Public().(*ecdsa.PublicKey))
 	exists, err := cli.DataFileExists([]string{hex, CERT_FILE})
 	if err != nil {
@@ -269,7 +271,7 @@ func (mm *MediaManager) SegmentToHLSOnce(ctx context.Context, user string) (func
 		}
 		wait := sync.OnceValue[string](func() string {
 			fpath := filepath.Join(dname, HLS_PLAYLIST)
-			for true {
+			for {
 				_, err := os.Stat(fpath)
 				if err == nil {
 					break
