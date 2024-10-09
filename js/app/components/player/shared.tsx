@@ -16,10 +16,10 @@ export function srcToUrl(props: PlayerProps): {
   url: string;
   protocol: string;
 } {
-  console.log(props.src);
   if (props.src.startsWith("http://") || props.src.startsWith("https://")) {
     const suffix = props.src.split(".").pop() as string;
     if (protocolSuffixes[suffix]) {
+      console.log(`found ${protocolSuffixes[suffix]}`);
       return {
         url: props.src,
         protocol: protocolSuffixes[suffix],

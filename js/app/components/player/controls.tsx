@@ -67,9 +67,7 @@ export default function Controls(props: PlayerProps) {
             <Text>{props.name}</Text>
           </View>
         </Part>
-        <Part>
-          <Text>Top Right</Text>
-        </Part>
+        <Part>{/* <Text>Top Right</Text> */}</Part>
       </Bar>
       <Bar>
         <Part>

@@ -6,7 +6,14 @@ import Fullscreen from "./fullscreen";
 import { PlayerProps, PROTOCOL_HLS, PROTOCOL_PROGRESSIVE_MP4 } from "./props";
 import usePlatform from "hooks/usePlatform";
 
-export function Player(props: { src: string }) {
+export function Player(props: Partial<PlayerProps>) {
+  if (typeof props.src !== "string") {
+    return (
+      <View>
+        <Text>No source provided 🤷</Text>
+      </View>
+    );
+  }
   const [muted, setMuted] = useState(true);
   const plat = usePlatform();
   let defProto = PROTOCOL_PROGRESSIVE_MP4;
@@ -20,7 +27,7 @@ export function Player(props: { src: string }) {
   const [protocol, setProtocol] = useState(defProto);
   const [fullscreen, setFullscreen] = useState(false);
   const childProps: PlayerProps = {
-    name: props.src,
+    name: props.name || props.src,
     src: props.src,
     muted: muted,
     setMuted: setMuted,

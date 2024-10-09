@@ -64,26 +64,12 @@ const VideoElement = forwardRef(
 
 export function ProgressiveMP4Player(props: { url: string; muted: boolean }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const { url } = useAquareumNode();
-  return (
-    <VideoElement
-      muted={props.muted}
-      ref={videoRef}
-      src={`${url}/api/playback/${props.url}/stream.mp4`}
-    />
-  );
+  return <VideoElement muted={props.muted} ref={videoRef} src={props.url} />;
 }
 
 export function ProgressiveWebMPlayer(props: { url: string; muted: boolean }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const { url } = useAquareumNode();
-  return (
-    <VideoElement
-      muted={props.muted}
-      ref={videoRef}
-      src={`${url}/api/playback/${props.url}/stream.webm`}
-    />
-  );
+  return <VideoElement muted={props.muted} ref={videoRef} src={props.url} />;
 }
 
 export function HLSPlayer(props: { url: string; muted: boolean }) {
