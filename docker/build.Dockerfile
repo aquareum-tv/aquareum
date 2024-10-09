@@ -62,7 +62,8 @@ ENV CI_COMMIT_BRANCH $CI_COMMIT_BRANCH
 WORKDIR /cached-build
 RUN git clone https://git.aquareum.tv/aquareum-tv/aquareum \
   && cd aquareum \
-  && make version install check app node-all-platforms android -j$(nproc) \
+  && make version install check app android -j$(nproc) \
+  && make node \
   && make test \
   && cd .. \
   && rm -rf aquareum
