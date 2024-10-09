@@ -10,11 +10,22 @@ import getEnv from "./env";
 import initUpdater from "./updater";
 import { UpdateSourceType } from "update-electron-app";
 import { resolve } from "path";
+import { parseArgs } from "node:util";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require("electron-squirrel-startup")) {
   app.quit();
 }
+
+const {
+  values: { path },
+} = parseArgs({
+  options: {
+    path: {
+      type: "string",
+    },
+  },
+});
 
 const createWindow = async (): Promise<void> => {
   try {
@@ -55,9 +66,9 @@ const createWindow = async (): Promise<void> => {
     mainWindow.removeMenu();
 
     if (nodeFrontend) {
-      mainWindow.loadURL(loadAddr);
+      mainWindow.loadURL(`${loadAddr}${path}`);
     } else {
-      mainWindow.loadURL("http://localhost:38081");
+      mainWindow.loadURL(`http://localhost:38081${path}`);
     }
   } catch (e) {
     console.error(e);

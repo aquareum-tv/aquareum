@@ -7,6 +7,7 @@ import {
   PROTOCOL_PROGRESSIVE_MP4,
   PROTOCOL_PROGRESSIVE_WEBM,
 } from "./props";
+import { srcToUrl } from "./shared";
 
 // export function Player() {
 //   return <View f={1}></View>;
@@ -15,18 +16,8 @@ import {
 export default function NativeVideo(
   props: PlayerProps & { videoRef: React.RefObject<VideoView> },
 ) {
-  const { url } = useAquareumNode();
-  let src: string;
-  if (props.protocol === PROTOCOL_HLS) {
-    src = `${url}/api/playback/${props.src}/hls/stream.m3u8`;
-  } else if (props.protocol === PROTOCOL_PROGRESSIVE_MP4) {
-    src = `${url}/api/playback/${props.src}/stream.mp4`;
-  } else if (props.protocol === PROTOCOL_PROGRESSIVE_WEBM) {
-    src = `${url}/api/playback/${props.src}/stream.webm`;
-  } else {
-    throw new Error(`unknown playback protocol: ${url}`);
-  }
-  const player = useVideoPlayer(src, (player) => {
+  const { url } = srcToUrl(props);
+  const player = useVideoPlayer(url, (player) => {
     player.loop = true;
     player.muted = props.muted;
     player.play();

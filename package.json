@@ -14,7 +14,7 @@
     "release": "lerna publish --force-publish",
     "precommit": "make precommit",
     "app": "cd js/app && yarn run \"$@\"",
-    "desktop": "cd js/app && yarn run \"$@\""
+    "desktop": "cd js/desktop && yarn run \"$@\""
   },
   "keywords": [],
   "author": "Aquareum",

@@ -19,14 +19,17 @@ import {
   PROTOCOL_PROGRESSIVE_MP4,
   PROTOCOL_PROGRESSIVE_WEBM,
 } from "./props";
+import { srcToUrl } from "./shared";
 
 export default function WebVideo(props: PlayerProps) {
-  if (props.protocol === PROTOCOL_PROGRESSIVE_MP4) {
-    return <ProgressiveMP4Player src={props.src} muted={props.muted} />;
-  } else if (props.protocol === PROTOCOL_PROGRESSIVE_WEBM) {
-    return <ProgressiveWebMPlayer src={props.src} muted={props.muted} />;
-  } else if (props.protocol === PROTOCOL_HLS) {
-    return <HLSPlayer src={props.src} muted={props.muted} />;
+  const { url, protocol } = srcToUrl(props);
+  console.log("got", url, protocol);
+  if (protocol === PROTOCOL_PROGRESSIVE_MP4) {
+    return <ProgressiveMP4Player url={url} muted={props.muted} />;
+  } else if (protocol === PROTOCOL_PROGRESSIVE_WEBM) {
+    return <ProgressiveWebMPlayer url={url} muted={props.muted} />;
+  } else if (protocol === PROTOCOL_HLS) {
+    return <HLSPlayer url={url} muted={props.muted} />;
   } else {
     throw new Error(`unknown playback protocol ${props.protocol}`);
   }
@@ -59,41 +62,39 @@ const VideoElement = forwardRef(
   },
 );
 
-export function ProgressiveMP4Player(props: { src: string; muted: boolean }) {
+export function ProgressiveMP4Player(props: { url: string; muted: boolean }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const { url } = useAquareumNode();
   return (
     <VideoElement
       muted={props.muted}
       ref={videoRef}
-      src={`${url}/api/playback/${props.src}/stream.mp4`}
+      src={`${url}/api/playback/${props.url}/stream.mp4`}
     />
   );
 }
 
-export function ProgressiveWebMPlayer(props: { src: string; muted: boolean }) {
+export function ProgressiveWebMPlayer(props: { url: string; muted: boolean }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const { url } = useAquareumNode();
   return (
     <VideoElement
       muted={props.muted}
       ref={videoRef}
-      src={`${url}/api/playback/${props.src}/stream.webm`}
+      src={`${url}/api/playback/${props.url}/stream.webm`}
     />
   );
 }
 
-export function HLSPlayer(props: { src: string; muted: boolean }) {
+export function HLSPlayer(props: { url: string; muted: boolean }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const { url } = useAquareumNode();
   useEffect(() => {
     if (!videoRef.current) {
       return;
     }
-    const index = `${url}/api/playback/${props.src}/hls/stream.m3u8`;
     if (Hls.isSupported()) {
       var hls = new Hls();
-      hls.loadSource(index);
+      hls.loadSource(props.url);
       hls.attachMedia(videoRef.current);
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
         if (!videoRef.current) {
@@ -105,7 +106,7 @@ export function HLSPlayer(props: { src: string; muted: boolean }) {
         hls.stopLoad();
       };
     } else if (videoRef.current.canPlayType("application/vnd.apple.mpegurl")) {
-      videoRef.current.src = index;
+      videoRef.current.src = props.url;
       videoRef.current.addEventListener("canplay", () => {
         if (!videoRef.current) {
           return;
