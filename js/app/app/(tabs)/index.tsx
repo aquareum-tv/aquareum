@@ -110,18 +110,14 @@ export default function TabOneScreen() {
         </View>
       </YStack>
       <View flexShrink={0} flexGrow={0}>
-        <CenteredH2>
-          <Link href="/stream/0x6fbe6863cf1efc713899455e526a13239d371175">
-            Aquareum: The Video Layer for Everything
-          </Link>
-        </CenteredH2>
+        <CenteredH2>Aquareum: The Video Layer for Everything</CenteredH2>
       </View>
       <View>
         <GetApps />
       </View>
-      {/* <View fg={3} flexBasis={0}>
+      <View fg={3} flexBasis={0}>
         <WebviewIframe src="https://iame.li" />
-      </View> */}
+      </View>
       <View paddingBottom="$10"></View>
     </YStack>
   );
