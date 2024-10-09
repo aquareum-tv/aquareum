@@ -156,11 +156,12 @@ func (a *AquareumAPI) HandleWindowsDesktopUpdates(ctx context.Context) httproute
 			"clientVersion", clientVersion,
 			"clientBuildTime", clientBuildTime,
 		)
-		// clientBuildSec, err := strconv.ParseInt(clientBuildTime, 10, 64)
-		// if err != nil {
-		// 	apierrors.WriteHTTPBadRequest(w, "build time must be a number", err)
-		// 	return
-		// }
+
+		clientBuildSec, err := strconv.ParseInt(clientBuildTime, 10, 64)
+		if err != nil {
+			apierrors.WriteHTTPBadRequest(w, "build time must be a number", err)
+			return
+		}
 
 		files, err := a.getGitlabPackage(BRANCH)
 		if err != nil {
@@ -181,11 +182,11 @@ func (a *AquareumAPI) HandleWindowsDesktopUpdates(ctx context.Context) httproute
 		}
 
 		if file == "RELEASES" {
-			// if clientBuildSec >= a.CLI.Build.BuildTime {
-			// 	// client is newer or the same as server
-			// 	fmt.Fprintf(w, "0000000000000000000000000000000000000000 aquareum_desktop-%s-full.nupkg 1", clientVersion)
-			// 	return
-			// }
+			if clientBuildSec >= a.CLI.Build.BuildTime {
+				// client is newer or the same as server
+				fmt.Fprintf(w, "0000000000000000000000000000000000000000 aquareum_desktop-%s-full.nupkg 1", clientVersion)
+				return
+			}
 			fmt.Fprintf(w, "%s aquareum_desktop-%s-full.nupkg %d", gitlabFile.SHA1, gitlabFile.Version, gitlabFile.Size)
 			return
 		}
