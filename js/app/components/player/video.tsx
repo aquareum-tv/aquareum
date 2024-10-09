@@ -21,35 +21,41 @@ import {
 } from "./props";
 import { srcToUrl } from "./shared";
 
+type VideoProps = PlayerProps & { url: string };
+
 export default function WebVideo(props: PlayerProps) {
   const { url, protocol } = srcToUrl(props);
   console.log("got", url, protocol);
   if (protocol === PROTOCOL_PROGRESSIVE_MP4) {
-    return <ProgressiveMP4Player url={url} muted={props.muted} />;
+    return <ProgressiveMP4Player url={url} {...props} />;
   } else if (protocol === PROTOCOL_PROGRESSIVE_WEBM) {
-    return <ProgressiveWebMPlayer url={url} muted={props.muted} />;
+    return <ProgressiveWebMPlayer url={url} {...props} />;
   } else if (protocol === PROTOCOL_HLS) {
-    return <HLSPlayer url={url} muted={props.muted} />;
+    return <HLSPlayer url={url} {...props} />;
   } else {
     throw new Error(`unknown playback protocol ${props.protocol}`);
   }
 }
 
 const VideoElement = forwardRef(
-  (
-    props: { src?: string; muted: boolean },
-    ref: ForwardedRef<HTMLVideoElement>,
-  ) => {
+  (props: VideoProps, ref: ForwardedRef<HTMLVideoElement>) => {
     return (
-      <View backgroundColor="#111" alignItems="stretch" f={1}>
+      <View
+        backgroundColor="#111"
+        alignItems="stretch"
+        f={1}
+        onPointerMove={props.userInteraction}
+      >
         <video
           autoPlay={true}
           ref={ref}
           loop={true}
           controls={false}
-          src={props.src}
+          src={props.url}
           muted={props.muted}
           crossOrigin="anonymous"
+          onMouseMove={props.userInteraction}
+          onClick={props.userInteraction}
           style={{
             objectFit: "contain",
             backgroundColor: "transparent",
@@ -62,17 +68,17 @@ const VideoElement = forwardRef(
   },
 );
 
-export function ProgressiveMP4Player(props: { url: string; muted: boolean }) {
+export function ProgressiveMP4Player(props: VideoProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  return <VideoElement muted={props.muted} ref={videoRef} src={props.url} />;
+  return <VideoElement {...props} ref={videoRef} />;
 }
 
-export function ProgressiveWebMPlayer(props: { url: string; muted: boolean }) {
+export function ProgressiveWebMPlayer(props: VideoProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  return <VideoElement muted={props.muted} ref={videoRef} src={props.url} />;
+  return <VideoElement {...props} ref={videoRef} />;
 }
 
-export function HLSPlayer(props: { url: string; muted: boolean }) {
+export function HLSPlayer(props: VideoProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   useEffect(() => {
     if (!videoRef.current) {
@@ -101,7 +107,7 @@ export function HLSPlayer(props: { url: string; muted: boolean }) {
       });
     }
   }, [videoRef.current]);
-  return <VideoElement ref={videoRef} muted={props.muted} />;
+  return <VideoElement {...props} ref={videoRef} />;
 }
 
 // export function WebRTCPlayer(props: { src: string }) {

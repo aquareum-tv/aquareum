@@ -8,6 +8,8 @@ export type PlayerProps = {
   fullscreen: boolean;
   protocol: string;
   setProtocol: (string) => void;
+  showControls: boolean;
+  userInteraction: () => void;
 };
 
 export const PROTOCOL_HLS = "hls";

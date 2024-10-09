@@ -111,7 +111,7 @@ export default function TabOneScreen() {
       </YStack>
       <View flexShrink={0} flexGrow={0}>
         <CenteredH2>
-          <Link href="/stream/0xfc880262352ce6f31bffb9b6ecd8ede6a3026fe9">
+          <Link href="/stream/0x6fbe6863cf1efc713899455e526a13239d371175">
             Aquareum: The Video Layer for Everything
           </Link>
         </CenteredH2>

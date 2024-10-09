@@ -25,8 +25,8 @@ import {
   ChevronLeft,
   Sparkle,
 } from "@tamagui/lucide-icons";
-import { Button, Pressable, TouchableOpacity } from "react-native";
-import { useState } from "react";
+import { Animated, Button, Pressable, TouchableOpacity } from "react-native";
+import { useEffect, useRef, useState } from "react";
 import {
   PlayerProps,
   PROTOCOL_HLS,
@@ -52,6 +52,21 @@ const Part = (props) => (
 );
 
 export default function Controls(props: PlayerProps) {
+  const fadeAnim = useRef(new Animated.Value(1)).current;
+
+  // useEffect(() => {
+  //   Animated.timing(fadeAnim, {
+  //     toValue: props.showControls ? 1 : 1,
+  //     duration: 175,
+  //     useNativeDriver: false,
+  //   }).start();
+  // }, [fadeAnim, props.showControls]);
+
+  let cursor = {};
+  if (props.fullscreen && !props.showControls) {
+    cursor = { cursor: "none" };
+  }
+
   return (
     <View
       position="absolute"
@@ -60,7 +75,25 @@ export default function Controls(props: PlayerProps) {
       zIndex={999}
       flexDirection="column"
       justifyContent="space-between"
+      animation="quick"
+      animateOnly={["opacity"]}
+      opacity={props.showControls ? 1 : 0}
+      onPointerMove={props.userInteraction}
+      onTouchStart={props.userInteraction}
+      {...cursor}
     >
+      {/* <Animated.View
+        // onPointerMove={props.userInteraction}
+        // onTouchStart={props.userInteraction}
+        style={{
+          flex: 1,
+          opacity: fadeAnim,
+          width: "100%",
+          height: "100%",
+          flexDirection: "column",
+          justifyContent: "space-between",
+        }}
+      > */}
       <Bar>
         <Part>
           <View justifyContent="center" paddingLeft="$5">
@@ -96,6 +129,7 @@ export default function Controls(props: PlayerProps) {
           </Pressable>
         </Part>
       </Bar>
+      {/* </Animated.View> */}
     </View>
   );
 }
