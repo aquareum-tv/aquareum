@@ -6,10 +6,12 @@ import (
 	"testing"
 
 	_ "aquareum.tv/aquareum/pkg/media/mediatesting"
+	"github.com/go-gst/go-gst/gst"
 	"github.com/stretchr/testify/require"
 )
 
 func TestNormalizeAudio(t *testing.T) {
+	gst.Init(nil)
 	ifile, err := os.Open(getFixture("sample-stream.mkv"))
 	require.NoError(t, err)
 	ofile, err := os.CreateTemp("", "*.mkv")

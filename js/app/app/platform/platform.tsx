@@ -1,1 +1,1 @@
-export * from "./platform.mobile";
+export * from "./platform.web";

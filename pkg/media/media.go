@@ -20,7 +20,7 @@ import (
 	"aquareum.tv/aquareum/pkg/crypto/signers"
 	"aquareum.tv/aquareum/pkg/log"
 	"aquareum.tv/aquareum/pkg/replication"
-	"github.com/google/uuid"
+	"github.com/go-gst/go-gst/gst"
 	"github.com/livepeer/lpms/ffmpeg"
 	"golang.org/x/sync/errgroup"
 
@@ -37,18 +37,24 @@ const SCHEMA_ORG_START_TIME = "http://schema.org/startTime"
 const SCHEMA_ORG_END_TIME = "http://schema.org/endTime"
 
 type MediaManager struct {
-	cli        *config.CLI
-	signer     crypto.Signer
-	cert       []byte
-	user       string
-	mp4subs    map[string][]chan string
-	mp4subsmut sync.Mutex
-	mkvsubs    map[string]io.Writer
-	mkvsubsmut sync.Mutex
-	replicator replication.Replicator
+	cli           *config.CLI
+	signer        crypto.Signer
+	cert          []byte
+	user          string
+	mp4subs       map[string][]chan string
+	mp4subsmut    sync.Mutex
+	replicator    replication.Replicator
+	hlsRunning    map[string]HLSStream
+	hlsRunningMut sync.Mutex
+}
+
+type HLSStream struct {
+	Dir  string
+	Wait func() string
 }
 
 func MakeMediaManager(ctx context.Context, cli *config.CLI, signer crypto.Signer, rep replication.Replicator) (*MediaManager, error) {
+	gst.Init(nil)
 	hex := signers.HexAddr(signer.Public().(*ecdsa.PublicKey))
 	exists, err := cli.DataFileExists([]string{hex, CERT_FILE})
 	if err != nil {
@@ -75,8 +81,8 @@ func MakeMediaManager(ctx context.Context, cli *config.CLI, signer crypto.Signer
 		cert:       cert,
 		user:       hex,
 		mp4subs:    map[string][]chan string{},
-		mkvsubs:    map[string]io.Writer{},
 		replicator: rep,
+		hlsRunning: map[string]HLSStream{},
 	}, nil
 }
 
@@ -239,16 +245,96 @@ func SegmentToHTTP(ctx context.Context, input io.Reader, prefix string) error {
 	return g.Wait()
 }
 
-func (mm *MediaManager) StreamToMKV(ctx context.Context, user string, w io.Writer) error {
+func (mm *MediaManager) SegmentToMKVPlusOpus(ctx context.Context, user string, w io.Writer) error {
+	muxer := ffmpeg.ComponentOptions{
+		Name: "matroska",
+	}
+	pr, pw := io.Pipe()
+	g, ctx := errgroup.WithContext(ctx)
+	g.Go(func() error {
+		return mm.SegmentToStream(ctx, user, muxer, pw)
+	})
+	g.Go(func() error {
+		return AddOpusToMKV(ctx, pr, w)
+	})
+	return g.Wait()
+}
+
+func (mm *MediaManager) SegmentToHLSOnce(ctx context.Context, user string) (func() string, error) {
+	mm.hlsRunningMut.Lock()
+	defer mm.hlsRunningMut.Unlock()
+	hls, ok := mm.hlsRunning[user]
+	if !ok {
+		dname, err := os.MkdirTemp("", "aquareum-hls")
+		if err != nil {
+			return nil, err
+		}
+		wait := sync.OnceValue[string](func() string {
+			fpath := filepath.Join(dname, HLS_PLAYLIST)
+			for {
+				_, err := os.Stat(fpath)
+				if err == nil {
+					break
+				}
+				if !errors.Is(err, os.ErrNotExist) {
+					log.Log(ctx, "unexpected error polling for HLS playlist", "error", err)
+				}
+				time.Sleep(500 * time.Millisecond)
+			}
+			return dname
+		})
+		hls = HLSStream{
+			Wait: wait,
+			Dir:  dname,
+		}
+		mm.hlsRunning[user] = hls
+		go func() {
+			err := mm.SegmentToHLS(ctx, user, dname)
+			if err != nil {
+				log.Log(ctx, "error in async segmentToHLS code", "error", err)
+			}
+			mm.hlsRunningMut.Lock()
+			defer mm.hlsRunningMut.Unlock()
+			delete(mm.hlsRunning, user)
+		}()
+	}
+	return hls.Wait, nil
+}
+
+func (mm *MediaManager) SegmentToHLS(ctx context.Context, user, dir string) error {
+	muxer := ffmpeg.ComponentOptions{
+		Name: "matroska",
+	}
+
+	pr, pw := io.Pipe()
+	g, ctx := errgroup.WithContext(ctx)
+	g.Go(func() error {
+		return mm.SegmentToStream(ctx, user, muxer, pw)
+	})
+	g.Go(func() error {
+		return ToHLS(ctx, pr, dir)
+	})
+	return g.Wait()
+}
+
+func (mm *MediaManager) SegmentToMP4(ctx context.Context, user string, w io.Writer) error {
+	muxer := ffmpeg.ComponentOptions{
+		Name: "mp4",
+		Opts: map[string]string{
+			"movflags": "frag_keyframe+empty_moov",
+		},
+	}
+	return mm.SegmentToStream(ctx, user, muxer, w)
+}
+
+func (mm *MediaManager) SegmentToStream(ctx context.Context, user string, muxer ffmpeg.ComponentOptions, w io.Writer) error {
 	tc := ffmpeg.NewTranscoder()
 	defer tc.StopTranscoder()
-	uu, err := uuid.NewV7()
+	or, ow, odone, err := SafePipe()
 	if err != nil {
 		return err
 	}
-	mm.mkvsubsmut.Lock()
-	mm.mkvsubs[uu.String()] = w
-	mm.mkvsubsmut.Unlock()
+	defer odone()
 	iname := fmt.Sprintf("%s/playback/%s/concat", mm.cli.OwnInternalURL(), user)
 	in := &ffmpeg.TranscodeOptionsIn{
 		Fname:       iname,
@@ -263,9 +349,10 @@ func (mm *MediaManager) StreamToMKV(ctx context.Context, user string, w io.Write
 			},
 		},
 	}
+	oname := fmt.Sprintf("pipe:%d", ow.Fd())
 	out := []ffmpeg.TranscodeOptions{
 		{
-			Oname: fmt.Sprintf("%s/playback/%s/%s/stream.mkv", mm.cli.OwnInternalURL(), user, uu.String()),
+			Oname: oname,
 			VideoEncoder: ffmpeg.ComponentOptions{
 				Name: "copy",
 			},
@@ -278,19 +365,20 @@ func (mm *MediaManager) StreamToMKV(ctx context.Context, user string, w io.Write
 			},
 		},
 	}
-	_, err = tc.Transcode(in, out)
-	return err
-}
-
-func (mm *MediaManager) HandleMKVStream(ctx context.Context, user, uu string, r io.Reader) error {
-	mm.mkvsubsmut.Lock()
-	w, ok := mm.mkvsubs[uu]
-	mm.mkvsubsmut.Unlock()
-	if !ok {
-		return fmt.Errorf("uuid not found: %s", uu)
-	}
-	err := AddOpusToMKV(ctx, r, w)
-	return err
+	g, _ := errgroup.WithContext(ctx)
+	g.Go(func() error {
+		_, err := tc.Transcode(in, out)
+		// log.Log(ctx, "transcode done", "error", err)
+		tc.StopTranscoder()
+		return err
+	})
+	g.Go(func() error {
+		_, err := io.Copy(w, or)
+		// log.Log(ctx, "input copy done", "error", err)
+		or.Close()
+		return err
+	})
+	return g.Wait()
 }
 
 type obj map[string]any
@@ -379,7 +467,7 @@ type SegmentMetadata struct {
 	EndTime   aqtime.AQTime
 }
 
-var InvalidMetadataError = errors.New("Invalid Schema.org Metadata")
+var ErrInvalidMetadata = errors.New("invalid Schema.org Metadata")
 
 func ParseSegmentAssertions(mani *manifeststore.Manifest) (*SegmentMetadata, error) {
 	var ass *manifeststore.ManifestAssertion
@@ -408,20 +496,20 @@ func ParseSegmentAssertions(mani *manifeststore.Manifest) (*SegmentMetadata, err
 		return nil, err
 	}
 	if len(metas) != 1 {
-		return nil, InvalidMetadataError
+		return nil, ErrInvalidMetadata
 	}
 	meta := metas[0]
 	if len(meta.Type) != 1 {
-		return nil, InvalidMetadataError
+		return nil, ErrInvalidMetadata
 	}
 	if meta.Type[0] != SCHEMA_ORG_VIDEO_OBJECT {
-		return nil, InvalidMetadataError
+		return nil, ErrInvalidMetadata
 	}
 	if len(meta.StartTime) != 1 {
-		return nil, InvalidMetadataError
+		return nil, ErrInvalidMetadata
 	}
 	if len(meta.EndTime) != 1 {
-		return nil, InvalidMetadataError
+		return nil, ErrInvalidMetadata
 	}
 	start, err := aqtime.FromString(meta.StartTime[0].Value)
 	if err != nil {

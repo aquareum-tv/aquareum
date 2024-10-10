@@ -1,12 +1,15 @@
 package api
 
 import (
+	"bufio"
 	"context"
 	"encoding/base64"
 	"fmt"
+	"io"
 	"log/slog"
 	"net/http"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -19,6 +22,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/julienschmidt/httprouter"
 	sloghttp "github.com/samber/slog-http"
+	"golang.org/x/sync/errgroup"
 )
 
 func (a *AquareumAPI) ServeInternalHTTP(ctx context.Context) error {
@@ -123,10 +127,47 @@ func (a *AquareumAPI) InternalHandler(ctx context.Context) (http.Handler, error)
 		user = strings.ToLower(user)
 		w.Header().Set("Content-Type", "video/x-matroska")
 		w.WriteHeader(200)
-		err := a.MediaManager.StreamToMKV(ctx, user, w)
+		err := a.MediaManager.SegmentToMKVPlusOpus(ctx, user, w)
 		if err != nil {
 			log.Log(ctx, "stream.mkv error", "error", err)
 		}
+	})
+
+	router.GET("/playback/:user/stream.mp4", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		user := p.ByName("user")
+		if user == "" {
+			errors.WriteHTTPBadRequest(w, "user required", nil)
+			return
+		}
+		user = strings.ToLower(user)
+		var delayMS int64 = 1000
+		userDelay := r.URL.Query().Get("delayms")
+		if userDelay != "" {
+			var err error
+			delayMS, err = strconv.ParseInt(userDelay, 10, 64)
+			if err != nil {
+				errors.WriteHTTPBadRequest(w, "error parsing delay", err)
+				return
+			}
+			if delayMS > 10000 {
+				errors.WriteHTTPBadRequest(w, "delay too large, maximum 10000", nil)
+				return
+			}
+		}
+		w.Header().Set("Content-Type", "video/mp4")
+		w.WriteHeader(200)
+		g, ctx := errgroup.WithContext(ctx)
+		pr, pw := io.Pipe()
+		bufw := bufio.NewWriter(pw)
+		g.Go(func() error {
+			return a.MediaManager.SegmentToMP4(ctx, user, bufw)
+		})
+		g.Go(func() error {
+			time.Sleep(time.Duration(delayMS) * time.Millisecond)
+			_, err := io.Copy(w, pr)
+			return err
+		})
+		g.Wait()
 	})
 
 	router.HEAD("/playback/:user/stream.mkv", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
@@ -135,26 +176,9 @@ func (a *AquareumAPI) InternalHandler(ctx context.Context) (http.Handler, error)
 			errors.WriteHTTPBadRequest(w, "user required", nil)
 			return
 		}
-		user = strings.ToLower(user)
 		w.Header().Set("Content-Type", "video/x-matroska")
 		w.Header().Set("Transfer-Encoding", "chunked")
 		w.WriteHeader(200)
-	})
-
-	// handler for post-segmented mkv streams
-	router.POST("/playback/:user/:uuid/stream.mkv", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-		user := p.ByName("user")
-		if user == "" {
-			errors.WriteHTTPBadRequest(w, "user required", nil)
-			return
-		}
-		user = strings.ToLower(user)
-		uu := p.ByName("uuid")
-		if uu == "" {
-			errors.WriteHTTPBadRequest(w, "uuid required", nil)
-			return
-		}
-		a.MediaManager.HandleMKVStream(ctx, user, uu, r.Body)
 	})
 
 	// internal route called for each pushed segment from ffmpeg

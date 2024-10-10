@@ -218,21 +218,24 @@ if host_machine.system() == 'darwin'
   aquareum_deps += [dependency('appleframeworks', modules: ['CoreFoundation', 'Security'])]
 endif
 if host_machine.system() == 'windows'
-  add_project_link_arguments([
-    '-lntdll',
-    '-luserenv',
-    '-lcrypt32',
-    '-lbcrypt',
-    '-static-libstdc++',
-    '-static-libgcc',
-  ], language : [ 'c', 'cpp' ])
+  add_project_link_arguments(
+    [
+      '-lntdll',
+      '-luserenv',
+      '-lcrypt32',
+      '-lbcrypt',
+      '-static-libstdc++',
+      '-static-libgcc',
+    ],
+    language: ['c', 'cpp'],
+  )
 endif
 
 pkg = import('pkgconfig')
 pkg.generate(
   name: 'aquareumdeps',
   libraries: [aquareum_deps, c2pa_go_dep],
-  description: 'all aquareum dependencies bundled for easy inclusion'
+  description: 'all aquareum dependencies bundled for easy inclusion',
 )
 
 aquareum = executable(
@@ -245,17 +248,19 @@ aquareum = executable(
 )
 
 if not meson.is_cross_build()
-  test('go-tests', prog_go,
+  test(
+    'go-tests',
+    prog_go,
     depends: [aquareum],
     env: env,
     verbose: true,
     timeout: 0,
-    args : [
-    'test',
-    '@0@/pkg/...'.format(meson.current_source_dir()),
-    '@0@/cmd/...'.format(meson.current_source_dir()),
-  ]
-)
+    args: [
+      'test',
+      '@0@/pkg/...'.format(meson.current_source_dir()),
+      '@0@/cmd/...'.format(meson.current_source_dir()),
+    ],
+  )
 endif
 
 if host_machine.system() == 'windows'

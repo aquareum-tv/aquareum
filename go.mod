@@ -15,8 +15,8 @@ require (
 	github.com/dunglas/httpsfv v1.0.2
 	github.com/ethereum/go-ethereum v1.14.7
 	github.com/go-git/go-git/v5 v5.12.0
-	github.com/go-gst/go-glib v1.2.1
-	github.com/go-gst/go-gst v1.2.1
+	github.com/go-gst/go-glib v1.3.0
+	github.com/go-gst/go-gst v1.3.0
 	github.com/golang/glog v1.2.0
 	github.com/google/uuid v1.6.0
 	github.com/johncgriffin/overflow v0.0.0-20211019200055-46fa312c352c

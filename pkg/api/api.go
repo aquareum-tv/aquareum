@@ -97,6 +97,9 @@ func (a *AquareumAPI) Handler(ctx context.Context) (http.Handler, error) {
 	apiRouter.GET("/api/hls/:stream/*resource", a.MistProxyHandler(ctx, "/hls/%s"))
 	apiRouter.Handler("POST", "/api/segment", a.HandleSegment(ctx))
 	apiRouter.HandlerFunc("GET", "/api/healthz", a.HandleHealthz(ctx))
+	apiRouter.GET("/api/playback/:user/stream.mp4", a.HandleMP4Playback(ctx))
+	apiRouter.GET("/api/playback/:user/stream.webm", a.HandleMKVPlayback(ctx))
+	apiRouter.GET("/api/playback/:user/hls/:file", a.HandleHLSPlayback(ctx))
 	apiRouter.NotFound = a.HandleAPI404(ctx)
 	router.Handler("GET", "/api/*resource", apiRouter)
 	router.Handler("POST", "/api/*resource", apiRouter)
@@ -106,7 +109,7 @@ func (a *AquareumAPI) Handler(ctx context.Context) (http.Handler, error) {
 	router.GET("/dl/*params", a.HandleAppDownload(ctx))
 	router.NotFound = a.FileHandler(ctx, http.FileServer(AppHostingFS{http.FS(files)}))
 	handler := sloghttp.Recovery(router)
-	handler = cors.Default().Handler(handler)
+	handler = cors.AllowAll().Handler(handler)
 	handler = sloghttp.New(slog.Default())(handler)
 
 	return handler, nil
