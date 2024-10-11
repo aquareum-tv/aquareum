@@ -79,6 +79,7 @@ export default function () {
         },
         infoPlist: {
           UIBackgroundModes: ["fetch", "remote-notification"],
+          LSMinimumSystemVersion: "12.0",
         },
       },
       android: {
