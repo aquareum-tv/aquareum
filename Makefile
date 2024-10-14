@@ -188,7 +188,7 @@ windows-amd64:
 # unbuffer here is a workaround for wine trying to pop up a terminal window and failing
 .PHONY: windows-amd64-startup-test
 windows-amd64-startup-test:
-	bash -c 'set -euo pipefail && unbuffer wine64 ./build-windows-amd64/aquareum.exe --version | cat'
+	bash -c 'set -euo pipefail && unbuffer wine64 ./build-windows-amd64/aquareum.exe self-test | cat'
 
 .PHONY: node-all-platforms-macos
 node-all-platforms-macos: app
@@ -199,6 +199,7 @@ node-all-platforms-macos: app
 	&& tar -czvf ../bin/aquareum-$(VERSION)-darwin-arm64.tar.gz ./aquareum \
 	&& cd -
 	./build-darwin-arm64/aquareum --version
+	./build-darwin-arm64/aquareum self-test
 	rustup target add x86_64-apple-darwin
 	meson setup --buildtype debugoptimized --cross-file util/darwin-amd64-apple.ini build-darwin-amd64 $(OPTS)
 	meson compile -C build-darwin-amd64
@@ -207,6 +208,7 @@ node-all-platforms-macos: app
 	&& tar -czvf ../bin/aquareum-$(VERSION)-darwin-amd64.tar.gz ./aquareum \
 	&& cd -
 	./build-darwin-amd64/aquareum --version
+	./build-darwin-arm64/aquareum self-test
 	$(MAKE) desktop-macos
 	meson test -C build-darwin-arm64 go-tests
 

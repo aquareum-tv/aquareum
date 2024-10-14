@@ -53,6 +53,11 @@ type HLSStream struct {
 	Wait func() string
 }
 
+func RunSelfTest(ctx context.Context) error {
+	gst.Init(nil)
+	return SelfTest(ctx)
+}
+
 func MakeMediaManager(ctx context.Context, cli *config.CLI, signer crypto.Signer, rep replication.Replicator) (*MediaManager, error) {
 	gst.Init(nil)
 	err := SelfTest(ctx)

@@ -45,6 +45,16 @@ func start(build *config.BuildFlags, platformJobs []jobFunc) error {
 		return Stream(os.Args[2])
 	}
 
+	if len(os.Args) > 1 && os.Args[1] == "self-test" {
+		err := media.RunSelfTest(context.Background())
+		if err != nil {
+			fmt.Println(err.Error())
+			os.Exit(1)
+		}
+		fmt.Println("self-test successful!")
+		os.Exit(0)
+	}
+
 	fs := flag.NewFlagSet("aquareum", flag.ExitOnError)
 	cli := config.CLI{Build: build}
 	fs.StringVar(&cli.DataDir, "data-dir", config.DefaultDataDir(), "directory for keeping all aquareum data")
