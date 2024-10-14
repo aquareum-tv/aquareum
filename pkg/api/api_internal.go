@@ -210,8 +210,7 @@ func (a *AquareumAPI) InternalHandler(ctx context.Context) (http.Handler, error)
 		}
 	})
 
-	// route to accept an incoming mkv stream from OBS, segment it, and push the segments back to this HTTP handler
-	router.POST("/stream/:key", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	handleIncomingStream := func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		log.Log(ctx, "stream start")
 		user, err := a.keyToUser(ctx, p.ByName("key"))
 		if err != nil {
@@ -227,7 +226,11 @@ func (a *AquareumAPI) InternalHandler(ctx context.Context) (http.Handler, error)
 			return
 		}
 		log.Log(ctx, "stream success", "url", r.URL.String())
-	})
+	}
+
+	// route to accept an incoming mkv stream from OBS, segment it, and push the segments back to this HTTP handler
+	router.POST("/stream/:key", handleIncomingStream)
+	router.PUT("/stream/:key", handleIncomingStream)
 	handler := sloghttp.Recovery(router)
 	handler = sloghttp.New(slog.Default())(handler)
 	return handler, nil
