@@ -19,7 +19,6 @@ import (
 	"aquareum.tv/aquareum/pkg/mist/mistconfig"
 	"aquareum.tv/aquareum/pkg/mist/misttriggers"
 	v0 "aquareum.tv/aquareum/pkg/schema/v0"
-	"github.com/google/uuid"
 	"github.com/julienschmidt/httprouter"
 	sloghttp "github.com/samber/slog-http"
 	"golang.org/x/sync/errgroup"
@@ -38,18 +37,10 @@ func (a *AquareumAPI) ServeInternalHTTP(ctx context.Context) error {
 }
 
 // lightweight way to authenticate push requests to ourself
-var secretUUID string
 var mkvRE *regexp.Regexp
 
 func init() {
-	uu, err := uuid.NewV7()
-	if err != nil {
-		panic(err)
-	}
-	secretUUID = uu.String()
-
 	mkvRE = regexp.MustCompile(`^\d+\.mkv$`)
-
 }
 
 func (a *AquareumAPI) InternalHandler(ctx context.Context) (http.Handler, error) {
@@ -182,13 +173,8 @@ func (a *AquareumAPI) InternalHandler(ctx context.Context) (http.Handler, error)
 	})
 
 	// internal route called for each pushed segment from ffmpeg
-	router.POST("/segment/:uuid/:user/:file", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	router.POST("/segment/:user/:file", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		ms := time.Now().UnixMilli()
-		uu := p.ByName("uuid")
-		if uu != secretUUID {
-			errors.WriteHTTPForbidden(w, "unable to authenticate internal url", nil)
-			return
-		}
 		user := p.ByName("user")
 		if user == "" {
 			log.Log(ctx, "invalid code path: got empty user?")
@@ -217,7 +203,7 @@ func (a *AquareumAPI) InternalHandler(ctx context.Context) (http.Handler, error)
 			errors.WriteHTTPForbidden(w, "unable to authenticate stream key", err)
 			return
 		}
-		prefix := fmt.Sprintf("%s/segment/%s/%s", a.CLI.OwnInternalURL(), secretUUID, user)
+		prefix := fmt.Sprintf("%s/segment/%s", a.CLI.OwnInternalURL(), user)
 		err = media.SegmentToHTTP(ctx, r.Body, prefix)
 
 		if err != nil {

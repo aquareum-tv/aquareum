@@ -271,8 +271,69 @@ func ToHLS(ctx context.Context, input io.Reader, dir string) error {
 		return nil
 	})
 
+	return g.Wait()
+}
+
+func (mm *MediaManager) TestSource(ctx context.Context) error {
+	or, ow, odone, err := SafePipe()
+	if err != nil {
+		return err
+	}
+	defer odone()
+
+	mainLoop := glib.NewMainLoop(glib.MainContextDefault(), false)
+
+	pipelineSlice := []string{
+		fmt.Sprintf("matroskamux name=mux ! fdsink fd=%d", ow.Fd()),
+		`videotestsrc is-live=true ! video/x-raw,width=1280,height=720 ! x264enc speed-preset=ultrafast key-int-max=30 ! mux.`,
+	}
+
+	pipeline, err := gst.NewPipelineFromString(strings.Join(pipelineSlice, "\n"))
+	if err != nil {
+		return err
+	}
+
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+	go func() {
+		<-ctx.Done()
+		pipeline.BlockSetState(gst.StateNull)
+		mainLoop.Quit()
+	}()
+
+	// Add a message handler to the pipeline bus, printing interesting information to the console.
+	pipeline.GetPipelineBus().AddWatch(func(msg *gst.Message) bool {
+		switch msg.Type() {
+
+		case gst.MessageEOS: // When end-of-stream is received flush the pipeling and stop the main loop
+			cancel()
+		case gst.MessageError: // Error messages are always fatal
+			err := msg.ParseError()
+			log.Log(ctx, "gstreamer error", "error", err.Error())
+			if debug := err.DebugString(); debug != "" {
+				log.Log(ctx, "gstreamer debug", "message", debug)
+			}
+			cancel()
+		default:
+			log.Log(ctx, msg.String())
+		}
+		return true
+	})
+
+	// Start the pipeline
+	pipeline.SetState(gst.StatePlaying)
+
+	g, _ := errgroup.WithContext(ctx)
+
 	g.Go(func() error {
-		runtime.GC()
+		mainLoop.Run()
+		log.Log(ctx, "main loop complete")
+		return nil
+	})
+
+	g.Go(func() error {
+		prefix := fmt.Sprintf("%s/segment/%s", mm.cli.OwnInternalURL(), "foo")
+		err = SegmentToHTTP(ctx, or, prefix)
 		log.Log(ctx, "output copy complete", "error", err)
 		return err
 	})

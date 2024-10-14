@@ -119,6 +119,7 @@ OPTS = -D "gst-plugins-base:audioresample=enabled" \
 		-D "gst-plugins-base:playback=enabled" \
 		-D "gst-plugins-base:opus=enabled" \
 		-D "gst-plugins-base:gio-typefinder=enabled" \
+		-D "gst-plugins-base:videotestsrc=enabled" \
 		-D "gst-plugins-base:typefind=enabled" \
 		-D "gst-plugins-good:matroska=enabled" \
 		-D "gst-plugins-good:multifile=enabled" \
@@ -127,14 +128,16 @@ OPTS = -D "gst-plugins-base:audioresample=enabled" \
 		-D "gst-plugins-good:audioparsers=enabled" \
 		-D "gst-plugins-bad:videoparsers=enabled" \
 		-D "gst-plugins-bad:mpegtsmux=enabled" \
+		-D "gst-plugins-ugly:x264=enabled" \
+		-D "gst-plugins-ugly:gpl=enabled" \
 		-D "gstreamer-full:gst-full=enabled" \
-		-D "gstreamer-full:gst-full-plugins=libgstaudioresample.a;libgstmatroska.a;libgstmultifile.a;libgstfdkaac.a;libgsthls.a;libgstopus.a;libgstvideoparsersbad.a;libgstaudioparsers.a;libgstmpegtsmux.a;libgstplayback.a;libgsttypefindfunctions.a" \
+		-D "gstreamer-full:gst-full-plugins=libgstaudioresample.a;libgstmatroska.a;libgstmultifile.a;libgstfdkaac.a;libgsthls.a;libgstx264.a;libgstopus.a;libgstvideotestsrc.a;libgstvideoparsersbad.a;libgstaudioparsers.a;libgstmpegtsmux.a;libgstplayback.a;libgsttypefindfunctions.a" \
 		-D "gstreamer-full:gst-full-libraries=gstreamer-controller-1.0,gstreamer-plugins-base-1.0,gstreamer-pbutils-1.0" \
 		-D "gstreamer-full:gst-full-target-type=static_library" \
-		-D "gstreamer-full:gst-full-elements=coreelements:fdsrc,fdsink,queue,queue2,typefind,tee,filesink" \
+		-D "gstreamer-full:gst-full-elements=coreelements:fdsrc,fdsink,queue,queue2,typefind,tee,filesink,capsfilter" \
 		-D "gstreamer-full:bad=enabled" \
-		-D "gstreamer-full:ugly=disabled" \
 		-D "gstreamer-full:tls=disabled" \
+		-D "gstreamer-full:ugly=enabled" \
 		-D "gstreamer-full:gpl=enabled" \
 		-D "gstreamer-full:gst-full-typefind-functions="
 
@@ -188,7 +191,7 @@ windows-amd64:
 # unbuffer here is a workaround for wine trying to pop up a terminal window and failing
 .PHONY: windows-amd64-startup-test
 windows-amd64-startup-test:
-	bash -c 'set -euo pipefail && unbuffer wine64 ./build-windows-amd64/aquareum.exe self-test | cat'
+	bash -c 'set -euo pipefail && unbuffer wine64 ./build-windows-amd64/aquareum.exe --version | cat'
 
 .PHONY: node-all-platforms-macos
 node-all-platforms-macos: app
