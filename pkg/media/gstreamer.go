@@ -1,6 +1,7 @@
 package media
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
@@ -10,6 +11,7 @@ import (
 	"strings"
 
 	"aquareum.tv/aquareum/pkg/log"
+	"aquareum.tv/aquareum/test"
 	"github.com/go-gst/go-glib/glib"
 	"github.com/go-gst/go-gst/gst"
 	"golang.org/x/sync/errgroup"
@@ -127,6 +129,76 @@ func AddOpusToMKV(ctx context.Context, input io.Reader, output io.Writer) error 
 	})
 
 	return g.Wait()
+}
+
+func SelfTest(ctx context.Context) error {
+	f, err := test.Files.Open("fixtures/sample-segment.mp4")
+	if err != nil {
+		return err
+	}
+
+	ir, iw, idone, err := SafePipe()
+	if err != nil {
+		return err
+	}
+	defer idone()
+	or, ow, odone, err := SafePipe()
+	if err != nil {
+		return err
+	}
+	defer odone()
+
+	mainLoop := glib.NewMainLoop(glib.MainContextDefault(), false)
+
+	pipelineSlice := []string{
+		fmt.Sprintf("fdsrc fd=%d ! fdsink fd=%d", ir.Fd(), ow.Fd()),
+	}
+
+	pipeline, err := gst.NewPipelineFromString(strings.Join(pipelineSlice, "\n"))
+	if err != nil {
+		return err
+	}
+
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+	go func() {
+		<-ctx.Done()
+		pipeline.BlockSetState(gst.StateNull)
+		mainLoop.Quit()
+	}()
+
+	// Start the pipeline
+	pipeline.SetState(gst.StatePlaying)
+
+	g, _ := errgroup.WithContext(ctx)
+
+	g.Go(func() error {
+		_, err := io.Copy(iw, f)
+		iw.Close()
+		return err
+	})
+
+	g.Go(func() error {
+		mainLoop.Run()
+		ow.Close()
+		return nil
+	})
+
+	var output bytes.Buffer
+	g.Go(func() error {
+		runtime.GC()
+		_, err := io.Copy(&output, or)
+		return err
+	})
+
+	err = g.Wait()
+	if err != nil {
+		return err
+	}
+	if len(output.Bytes()) < 1 {
+		return fmt.Errorf("got a zero-byte buffer from SelfTest")
+	}
+	return nil
 }
 
 func ToHLS(ctx context.Context, input io.Reader, dir string) error {
