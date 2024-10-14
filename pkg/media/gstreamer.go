@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"time"
 
 	"aquareum.tv/aquareum/pkg/log"
 	"aquareum.tv/aquareum/test"
@@ -132,6 +133,8 @@ func AddOpusToMKV(ctx context.Context, input io.Reader, output io.Writer) error 
 }
 
 func SelfTest(ctx context.Context) error {
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
 	f, err := test.Files.Open("fixtures/sample-segment.mp4")
 	if err != nil {
 		return err
@@ -159,8 +162,6 @@ func SelfTest(ctx context.Context) error {
 		return err
 	}
 
-	ctx, cancel := context.WithCancel(ctx)
-	defer cancel()
 	go func() {
 		<-ctx.Done()
 		pipeline.BlockSetState(gst.StateNull)
@@ -175,6 +176,8 @@ func SelfTest(ctx context.Context) error {
 	g.Go(func() error {
 		_, err := io.Copy(iw, f)
 		iw.Close()
+		pipeline.BlockSetState(gst.StateNull)
+		mainLoop.Quit()
 		return err
 	})
 
@@ -186,7 +189,6 @@ func SelfTest(ctx context.Context) error {
 
 	var output bytes.Buffer
 	g.Go(func() error {
-		runtime.GC()
 		_, err := io.Copy(&output, or)
 		return err
 	})
