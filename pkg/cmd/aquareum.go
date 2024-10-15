@@ -251,9 +251,11 @@ func start(build *config.BuildFlags, platformJobs []jobFunc) error {
 		return a.ServeInternalHTTP(ctx)
 	})
 
-	group.Go(func() error {
-		return mm.TestSource(ctx)
-	})
+	if cli.TestStream {
+		group.Go(func() error {
+			return mm.TestSource(ctx)
+		})
+	}
 
 	for _, job := range platformJobs {
 		group.Go(func() error {

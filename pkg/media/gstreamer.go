@@ -285,7 +285,9 @@ func (mm *MediaManager) TestSource(ctx context.Context) error {
 
 	pipelineSlice := []string{
 		fmt.Sprintf("matroskamux name=mux ! fdsink fd=%d", ow.Fd()),
-		`videotestsrc is-live=true ! video/x-raw,width=1280,height=720 ! x264enc speed-preset=ultrafast key-int-max=30 ! mux.`,
+		"compositor name=comp ! videoconvert ! x264enc speed-preset=ultrafast key-int-max=30 ! mux.",
+		`videotestsrc is-live=true ! video/x-raw,format=AYUV,framerate=30/1,width=1280,height=720 ! comp.`,
+		"filesrc location=/home/iameli/Desktop/qr.png ! pngdec ! videoconvert ! videorate ! video/x-raw,framerate=1/2147483647 ! videobox border-alpha=0 top=-180 left=-460 ! comp.",
 	}
 
 	pipeline, err := gst.NewPipelineFromString(strings.Join(pipelineSlice, "\n"))
@@ -328,6 +330,7 @@ func (mm *MediaManager) TestSource(ctx context.Context) error {
 	g.Go(func() error {
 		mainLoop.Run()
 		log.Log(ctx, "main loop complete")
+		or.Close()
 		return nil
 	})
 
