@@ -130,6 +130,7 @@ OPTS = -D "gst-plugins-base:audioresample=enabled" \
 		-D "gst-plugins-bad:mpegtsmux=enabled" \
 		-D "gst-plugins-ugly:x264=enabled" \
 		-D "gst-plugins-ugly:gpl=enabled" \
+		-D "x264:asm=enabled" \
 		-D "gstreamer-full:gst-full=enabled" \
 		-D "gstreamer-full:gst-full-plugins=libgstaudioresample.a;libgstmatroska.a;libgstmultifile.a;libgstfdkaac.a;libgsthls.a;libgstx264.a;libgstopus.a;libgstvideotestsrc.a;libgstvideoparsersbad.a;libgstaudioparsers.a;libgstmpegtsmux.a;libgstplayback.a;libgsttypefindfunctions.a" \
 		-D "gstreamer-full:gst-full-libraries=gstreamer-controller-1.0,gstreamer-plugins-base-1.0,gstreamer-pbutils-1.0" \
