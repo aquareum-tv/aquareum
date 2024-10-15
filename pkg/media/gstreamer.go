@@ -280,11 +280,6 @@ const TESTSRC_HEIGHT = 720
 const QR_SIZE = 256
 
 func (mm *MediaManager) TestSource(ctx context.Context) error {
-	or, ow, odone, err := SafePipe()
-	if err != nil {
-		return err
-	}
-	defer odone()
 	qrr, qrw, qrdone, err := SafePipe()
 	if err != nil {
 		return err
@@ -299,7 +294,7 @@ func (mm *MediaManager) TestSource(ctx context.Context) error {
 	mainLoop := glib.NewMainLoop(glib.MainContextDefault(), false)
 
 	pipelineSlice := []string{
-		fmt.Sprintf("matroskamux name=mux ! fdsink fd=%d", ow.Fd()),
+		"h264parse name=mux ! splitmuxsink name=splitter location=/home/iameli/Desktop/testvids/video%02d.mkv async-finalize=true sink-factory=fdsink muxer-factory=matroskamux max-size-bytes=1",
 		"compositor name=comp ! videoconvert ! x264enc speed-preset=ultrafast key-int-max=30 ! mux.",
 		fmt.Sprintf(`videotestsrc is-live=true ! video/x-raw,format=AYUV,framerate=30/1,width=%d,height=%d ! comp.`, TESTSRC_WIDTH, TESTSRC_HEIGHT),
 		fmt.Sprintf("videobox border-alpha=0 top=-%d left=-%d name=box ! comp.", (TESTSRC_HEIGHT/2)-(QR_SIZE/2), (TESTSRC_WIDTH/2)-(QR_SIZE/2)),
@@ -310,6 +305,44 @@ func (mm *MediaManager) TestSource(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+
+	ele, err := pipeline.GetElementByName("splitter")
+	if err != nil {
+		return err
+	}
+	if ele == nil {
+		return fmt.Errorf("splitter not found")
+	}
+
+	var r *os.File
+	var w *os.File
+	var done func()
+	cleanup := func() {
+		if r != nil {
+			r.Close()
+		}
+		if done != nil {
+			done()
+		}
+		r = nil
+		w = nil
+		done = nil
+	}
+	defer cleanup()
+	ele.Connect("sink-added", func(split, sink *gst.Element) {
+		cleanup()
+		var err error
+		r, w, done, err = SafePipe()
+		if err != nil {
+			panic("SafePipe error that should not happen")
+		}
+		sink.SetProperty("fd", int(w.Fd()))
+		go func() {
+			buf := &bytes.Buffer{}
+			io.Copy(buf, r)
+			mm.SignSegment(ctx, buf, time.Now().UnixMilli())
+		}()
+	})
 
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
@@ -353,15 +386,7 @@ func (mm *MediaManager) TestSource(ctx context.Context) error {
 	g.Go(func() error {
 		mainLoop.Run()
 		log.Log(ctx, "main loop complete")
-		or.Close()
 		return nil
-	})
-
-	g.Go(func() error {
-		prefix := fmt.Sprintf("%s/segment/%s", mm.cli.OwnInternalURL(), "foo")
-		err = SegmentToHTTP(ctx, or, prefix)
-		log.Log(ctx, "output copy complete", "error", err)
-		return err
 	})
 
 	return g.Wait()
