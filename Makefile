@@ -124,6 +124,7 @@ OPTS = -D "gst-plugins-base:audioresample=enabled" \
 		-D "gst-plugins-base:typefind=enabled" \
 		-D "gst-plugins-base:compositor=enabled" \
 		-D "gst-plugins-base:videorate=enabled" \
+		-D "gst-plugins-base:app=enabled" \
 		-D "gst-plugins-good:matroska=enabled" \
 		-D "gst-plugins-good:multifile=enabled" \
 		-D "gst-plugins-bad:fdkaac=enabled" \
@@ -137,7 +138,7 @@ OPTS = -D "gst-plugins-base:audioresample=enabled" \
 		-D "gst-plugins-ugly:gpl=enabled" \
 		-D "x264:asm=enabled" \
 		-D "gstreamer-full:gst-full=enabled" \
-		-D "gstreamer-full:gst-full-plugins=libgstaudioresample.a;libgstmatroska.a;libgstmultifile.a;libgstfdkaac.a;libgstvideoconvertscale.a;libgstvideobox.a;libgstvideorate.a;libgstpng.a;libgstcompositor.a;libgsthls.a;libgstx264.a;libgstopus.a;libgstvideotestsrc.a;libgstvideoparsersbad.a;libgstaudioparsers.a;libgstmpegtsmux.a;libgstplayback.a;libgsttypefindfunctions.a" \
+		-D "gstreamer-full:gst-full-plugins=libgstaudioresample.a;libgstmatroska.a;libgstmultifile.a;libgstfdkaac.a;libgstapp.a;libgstvideoconvertscale.a;libgstvideobox.a;libgstvideorate.a;libgstpng.a;libgstcompositor.a;libgsthls.a;libgstx264.a;libgstopus.a;libgstvideotestsrc.a;libgstvideoparsersbad.a;libgstaudioparsers.a;libgstmpegtsmux.a;libgstplayback.a;libgsttypefindfunctions.a" \
 		-D "gstreamer-full:gst-full-libraries=gstreamer-controller-1.0,gstreamer-plugins-base-1.0,gstreamer-pbutils-1.0" \
 		-D "gstreamer-full:gst-full-target-type=static_library" \
 		-D "gstreamer-full:gst-full-elements=coreelements:fdsrc,filesrc,fdsink,filesink,queue,queue2,typefind,tee,filesink,capsfilter" \

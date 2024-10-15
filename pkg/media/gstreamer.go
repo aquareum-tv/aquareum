@@ -3,6 +3,7 @@ package media
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -15,6 +16,7 @@ import (
 	"aquareum.tv/aquareum/test"
 	"github.com/go-gst/go-glib/glib"
 	"github.com/go-gst/go-gst/gst"
+	"github.com/go-gst/go-gst/gst/app"
 	"github.com/skip2/go-qrcode"
 	"golang.org/x/sync/errgroup"
 )
@@ -279,26 +281,19 @@ const TESTSRC_WIDTH = 1280
 const TESTSRC_HEIGHT = 720
 const QR_SIZE = 256
 
+type QRData struct {
+	Now int64 `json:"now"`
+}
+
 func (mm *MediaManager) TestSource(ctx context.Context) error {
-	qrr, qrw, qrdone, err := SafePipe()
-	if err != nil {
-		return err
-	}
-	defer qrdone()
-
-	png, err := qrcode.Encode("https://example.org", qrcode.Medium, 256)
-	if err != nil {
-		return err
-	}
-
 	mainLoop := glib.NewMainLoop(glib.MainContextDefault(), false)
 
 	pipelineSlice := []string{
-		"h264parse name=mux ! splitmuxsink name=splitter location=/home/iameli/Desktop/testvids/video%02d.mkv async-finalize=true sink-factory=fdsink muxer-factory=matroskamux max-size-bytes=1",
+		"h264parse name=mux ! splitmuxsink name=splitter async-finalize=true sink-factory=fdsink muxer-factory=matroskamux max-size-bytes=1",
 		"compositor name=comp ! videoconvert ! x264enc speed-preset=ultrafast key-int-max=30 ! mux.",
 		fmt.Sprintf(`videotestsrc is-live=true ! video/x-raw,format=AYUV,framerate=30/1,width=%d,height=%d ! comp.`, TESTSRC_WIDTH, TESTSRC_HEIGHT),
 		fmt.Sprintf("videobox border-alpha=0 top=-%d left=-%d name=box ! comp.", (TESTSRC_HEIGHT/2)-(QR_SIZE/2), (TESTSRC_WIDTH/2)-(QR_SIZE/2)),
-		fmt.Sprintf("fdsrc fd=%d ! pngdec ! videoconvert ! videorate ! video/x-raw,format=AYUV,framerate=1/2147483647 ! box.", qrr.Fd()),
+		"appsrc name=pngsrc ! pngdec ! videoconvert ! videorate ! video/x-raw,format=AYUV,framerate=1/1 ! box.",
 	}
 
 	pipeline, err := gst.NewPipelineFromString(strings.Join(pipelineSlice, "\n"))
@@ -344,6 +339,31 @@ func (mm *MediaManager) TestSource(ctx context.Context) error {
 		}()
 	})
 
+	pngele, err := pipeline.GetElementByName("pngsrc")
+	if err != nil {
+		return err
+	}
+	if pngele == nil {
+		return fmt.Errorf("pngsrc not found")
+	}
+	src := app.SrcFromElement(pngele)
+	src.SetCallbacks(&app.SourceCallbacks{
+		NeedDataFunc: func(self *app.Source, _ uint) {
+			now := time.Now().UnixMilli()
+			data := QRData{Now: now}
+			bs, err := json.Marshal(data)
+			if err != nil {
+				panic(err)
+			}
+			png, err := qrcode.Encode(string(bs), qrcode.Medium, 256)
+			if err != nil {
+				panic(err)
+			}
+			buffer := gst.NewBufferWithSize(int64(len(png)))
+			buffer.Map(gst.MapWrite).WriteData(png)
+			self.PushBuffer(buffer)
+		},
+	})
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 	go func() {
@@ -365,8 +385,8 @@ func (mm *MediaManager) TestSource(ctx context.Context) error {
 				log.Log(ctx, "gstreamer debug", "message", debug)
 			}
 			cancel()
-		default:
-			log.Log(ctx, msg.String())
+			// default:
+			// 	log.Log(ctx, msg.String())
 		}
 		return true
 	})
@@ -375,13 +395,6 @@ func (mm *MediaManager) TestSource(ctx context.Context) error {
 	pipeline.SetState(gst.StatePlaying)
 
 	g, _ := errgroup.WithContext(ctx)
-
-	g.Go(func() error {
-		io.Copy(qrw, bytes.NewReader(png))
-		log.Log(ctx, "png copy complete")
-		qrw.Close()
-		return nil
-	})
 
 	g.Go(func() error {
 		mainLoop.Run()

@@ -194,6 +194,7 @@ aquareum_deps += [
   gst_full_dep,
   dependency('gio-2.0'),
   dependency('gstreamer-controller-1.0'),
+  dependency('gstreamer-app-1.0'),
   dependency('gstreamer-pbutils-1.0'),
   dependency('gstplayback'),
 ]
