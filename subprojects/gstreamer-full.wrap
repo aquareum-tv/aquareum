@@ -1,4 +1,4 @@
 [wrap-git]
-url = https://gitlab.freedesktop.org/gstreamer/gstreamer.git
-revision = 95ca7014c88e5538b0b0380f41cd15904a34fc53
+url = https://github.com/iameli-streams/gstreamer.git
+revision = 9b7a2a6f759daa49171d81133c9ea817aa2864cf
 depth = 1
