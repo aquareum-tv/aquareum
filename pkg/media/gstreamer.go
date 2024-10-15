@@ -15,6 +15,7 @@ import (
 	"aquareum.tv/aquareum/test"
 	"github.com/go-gst/go-glib/glib"
 	"github.com/go-gst/go-gst/gst"
+	"github.com/skip2/go-qrcode"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -274,20 +275,35 @@ func ToHLS(ctx context.Context, input io.Reader, dir string) error {
 	return g.Wait()
 }
 
+const TESTSRC_WIDTH = 1280
+const TESTSRC_HEIGHT = 720
+const QR_SIZE = 256
+
 func (mm *MediaManager) TestSource(ctx context.Context) error {
 	or, ow, odone, err := SafePipe()
 	if err != nil {
 		return err
 	}
 	defer odone()
+	qrr, qrw, qrdone, err := SafePipe()
+	if err != nil {
+		return err
+	}
+	defer qrdone()
+
+	png, err := qrcode.Encode("https://example.org", qrcode.Medium, 256)
+	if err != nil {
+		return err
+	}
 
 	mainLoop := glib.NewMainLoop(glib.MainContextDefault(), false)
 
 	pipelineSlice := []string{
 		fmt.Sprintf("matroskamux name=mux ! fdsink fd=%d", ow.Fd()),
 		"compositor name=comp ! videoconvert ! x264enc speed-preset=ultrafast key-int-max=30 ! mux.",
-		`videotestsrc is-live=true ! video/x-raw,format=AYUV,framerate=30/1,width=1280,height=720 ! comp.`,
-		"filesrc location=/home/iameli/Desktop/qr.png ! pngdec ! videoconvert ! videorate ! video/x-raw,framerate=1/2147483647 ! videobox border-alpha=0 top=-180 left=-460 ! comp.",
+		fmt.Sprintf(`videotestsrc is-live=true ! video/x-raw,format=AYUV,framerate=30/1,width=%d,height=%d ! comp.`, TESTSRC_WIDTH, TESTSRC_HEIGHT),
+		fmt.Sprintf("videobox border-alpha=0 top=-%d left=-%d name=box ! comp.", (TESTSRC_HEIGHT/2)-(QR_SIZE/2), (TESTSRC_WIDTH/2)-(QR_SIZE/2)),
+		fmt.Sprintf("fdsrc fd=%d ! pngdec ! videoconvert ! videorate ! video/x-raw,format=AYUV,framerate=1/2147483647 ! box.", qrr.Fd()),
 	}
 
 	pipeline, err := gst.NewPipelineFromString(strings.Join(pipelineSlice, "\n"))
@@ -326,6 +342,13 @@ func (mm *MediaManager) TestSource(ctx context.Context) error {
 	pipeline.SetState(gst.StatePlaying)
 
 	g, _ := errgroup.WithContext(ctx)
+
+	g.Go(func() error {
+		io.Copy(qrw, bytes.NewReader(png))
+		log.Log(ctx, "png copy complete")
+		qrw.Close()
+		return nil
+	})
 
 	g.Go(func() error {
 		mainLoop.Run()
