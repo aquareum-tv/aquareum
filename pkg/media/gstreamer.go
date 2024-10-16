@@ -135,6 +135,7 @@ func AddOpusToMKV(ctx context.Context, input io.Reader, output io.Writer) error 
 	return g.Wait()
 }
 
+// basic test to make sure gstreamer functionality is working
 func SelfTest(ctx context.Context) error {
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
@@ -142,61 +143,79 @@ func SelfTest(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+	defer f.Close()
+	bs, err := io.ReadAll(f)
+	if err != nil {
+		return err
+	}
 
-	ir, iw, idone, err := SafePipe()
+	pipeline, err := gst.NewPipelineFromString("appsrc name=src ! appsink name=sink")
 	if err != nil {
 		return err
 	}
-	defer idone()
-	or, ow, odone, err := SafePipe()
+
+	srcele, err := pipeline.GetElementByName("src")
 	if err != nil {
 		return err
 	}
-	defer odone()
+	if srcele == nil {
+		return fmt.Errorf("srcele not found")
+	}
+	src := app.SrcFromElement(srcele)
+	src.SetCallbacks(&app.SourceCallbacks{
+		NeedDataFunc: func(self *app.Source, _ uint) {
+			buffer := gst.NewBufferWithSize(int64(len(bs)))
+			buffer.Map(gst.MapWrite).WriteData(bs)
+			self.PushBuffer(buffer)
+			pipeline.SendEvent(gst.NewEOSEvent())
+		},
+	})
 
 	mainLoop := glib.NewMainLoop(glib.MainContextDefault(), false)
 
-	pipelineSlice := []string{
-		fmt.Sprintf("fdsrc fd=%d ! fdsink fd=%d", ir.Fd(), ow.Fd()),
-	}
-
-	pipeline, err := gst.NewPipelineFromString(strings.Join(pipelineSlice, "\n"))
+	output := &bytes.Buffer{}
+	sinkele, err := pipeline.GetElementByName("sink")
 	if err != nil {
 		return err
 	}
+	if sinkele == nil {
+		return fmt.Errorf("sinkele not found")
+	}
+	appsink := app.SinkFromElement(sinkele)
+	appsink.SetCallbacks(&app.SinkCallbacks{
+		NewSampleFunc: func(sink *app.Sink) gst.FlowReturn {
+			sample := sink.PullSample()
+			if sample == nil {
+				return gst.FlowOK
+			}
+			// defer sample.Unref()
 
-	go func() {
-		<-ctx.Done()
-		pipeline.BlockSetState(gst.StateNull)
-		mainLoop.Quit()
-	}()
+			// Retrieve the buffer from the sample.
+			buffer := sample.GetBuffer()
+
+			_, err := io.Copy(output, buffer.Reader())
+
+			if err != nil {
+				panic(err)
+			}
+
+			return gst.FlowOK
+		},
+		EOSFunc: func(sink *app.Sink) {
+			cancel()
+		},
+	})
 
 	// Start the pipeline
 	pipeline.SetState(gst.StatePlaying)
 
-	g, _ := errgroup.WithContext(ctx)
-
-	g.Go(func() error {
-		_, err := io.Copy(iw, f)
-		iw.Close()
-		pipeline.BlockSetState(gst.StateNull)
+	go func() {
+		<-ctx.Done()
 		mainLoop.Quit()
-		return err
-	})
+	}()
 
-	g.Go(func() error {
-		mainLoop.Run()
-		ow.Close()
-		return nil
-	})
+	mainLoop.Run()
 
-	var output bytes.Buffer
-	g.Go(func() error {
-		_, err := io.Copy(&output, or)
-		return err
-	})
-
-	err = g.Wait()
 	if err != nil {
 		return err
 	}

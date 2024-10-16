@@ -198,7 +198,7 @@ windows-amd64:
 # unbuffer here is a workaround for wine trying to pop up a terminal window and failing
 .PHONY: windows-amd64-startup-test
 windows-amd64-startup-test:
-	bash -c 'set -euo pipefail && unbuffer wine64 ./build-windows-amd64/aquareum.exe --version | cat'
+	bash -c 'set -euo pipefail && unbuffer wine64 ./build-windows-amd64/aquareum.exe self-test | cat'
 
 .PHONY: node-all-platforms-macos
 node-all-platforms-macos: app
