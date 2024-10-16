@@ -167,7 +167,7 @@ func SelfTest(ctx context.Context) error {
 			buffer := gst.NewBufferWithSize(int64(len(bs)))
 			buffer.Map(gst.MapWrite).WriteData(bs)
 			self.PushBuffer(buffer)
-			pipeline.SendEvent(gst.NewEOSEvent())
+			self.EndStream()
 		},
 	})
 
