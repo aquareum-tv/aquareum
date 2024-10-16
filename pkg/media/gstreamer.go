@@ -289,7 +289,7 @@ func (mm *MediaManager) TestSource(ctx context.Context) error {
 	mainLoop := glib.NewMainLoop(glib.MainContextDefault(), false)
 
 	pipelineSlice := []string{
-		"h264parse name=mux ! splitmuxsink name=splitter async-finalize=true sink-factory=fdsink muxer-factory=matroskamux max-size-bytes=1",
+		"h264parse name=mux ! splitmuxsink name=splitter async-finalize=true sink-factory=appsink muxer-factory=matroskamux max-size-bytes=1",
 		"compositor name=comp ! videoconvert ! x264enc speed-preset=ultrafast key-int-max=30 ! mux.",
 		fmt.Sprintf(`videotestsrc is-live=true ! video/x-raw,format=AYUV,framerate=30/1,width=%d,height=%d ! comp.`, TESTSRC_WIDTH, TESTSRC_HEIGHT),
 		fmt.Sprintf("videobox border-alpha=0 top=-%d left=-%d name=box ! comp.", (TESTSRC_HEIGHT/2)-(QR_SIZE/2), (TESTSRC_WIDTH/2)-(QR_SIZE/2)),
@@ -309,34 +309,35 @@ func (mm *MediaManager) TestSource(ctx context.Context) error {
 		return fmt.Errorf("splitter not found")
 	}
 
-	var r *os.File
-	var w *os.File
-	var done func()
-	cleanup := func() {
-		if r != nil {
-			r.Close()
+	ele.Connect("sink-added", func(split, sinkEle *gst.Element) {
+		buf := &bytes.Buffer{}
+		appsink := app.SinkFromElement(sinkEle)
+		if appsink == nil {
+			panic("appsink should not be nil")
 		}
-		if done != nil {
-			done()
-		}
-		r = nil
-		w = nil
-		done = nil
-	}
-	defer cleanup()
-	ele.Connect("sink-added", func(split, sink *gst.Element) {
-		cleanup()
-		var err error
-		r, w, done, err = SafePipe()
-		if err != nil {
-			panic("SafePipe error that should not happen")
-		}
-		sink.SetProperty("fd", int(w.Fd()))
-		go func() {
-			buf := &bytes.Buffer{}
-			io.Copy(buf, r)
-			mm.SignSegment(ctx, buf, time.Now().UnixMilli())
-		}()
+		appsink.SetCallbacks(&app.SinkCallbacks{
+			NewSampleFunc: func(sink *app.Sink) gst.FlowReturn {
+				sample := sink.PullSample()
+				if sample == nil {
+					return gst.FlowOK
+				}
+				// defer sample.Unref()
+
+				// Retrieve the buffer from the sample.
+				buffer := sample.GetBuffer()
+
+				_, err := io.Copy(buf, buffer.Reader())
+
+				if err != nil {
+					panic(err)
+				}
+
+				return gst.FlowOK
+			},
+			EOSFunc: func(sink *app.Sink) {
+				mm.SignSegment(ctx, buf, time.Now().UnixMilli())
+			},
+		})
 	})
 
 	pngele, err := pipeline.GetElementByName("pngsrc")
