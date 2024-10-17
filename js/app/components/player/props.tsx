@@ -3,13 +3,29 @@ export type PlayerProps = {
   name: string;
   src: string;
   muted: boolean;
-  setMuted: (boolean) => void;
-  setFullscreen: (boolean) => void;
   fullscreen: boolean;
   protocol: string;
-  setProtocol: (string) => void;
   showControls: boolean;
+  telemetry: boolean;
+  setMuted: (boolean) => void;
+  setFullscreen: (boolean) => void;
+  setProtocol: (string) => void;
   userInteraction: () => void;
+  playerEvent: (
+    e: Event,
+    time: string,
+    eventType: string,
+    meta: { [key: string]: any },
+  ) => void;
+  playerId: string;
+};
+
+export type PlayerEvent = {
+  id?: string;
+  time: string;
+  playerId: string;
+  eventType: string;
+  meta: { [key: string]: any };
 };
 
 export const PROTOCOL_HLS = "hls";

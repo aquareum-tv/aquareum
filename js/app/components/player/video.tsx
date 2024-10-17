@@ -25,7 +25,6 @@ type VideoProps = PlayerProps & { url: string };
 
 export default function WebVideo(props: PlayerProps) {
   const { url, protocol } = srcToUrl(props);
-  console.log("got", url, protocol);
   if (protocol === PROTOCOL_PROGRESSIVE_MP4) {
     return <ProgressiveMP4Player url={url} {...props} />;
   } else if (protocol === PROTOCOL_PROGRESSIVE_WEBM) {
@@ -39,6 +38,9 @@ export default function WebVideo(props: PlayerProps) {
 
 const VideoElement = forwardRef(
   (props: VideoProps, ref: ForwardedRef<HTMLVideoElement>) => {
+    const event = (evType) => (e) => {
+      props.playerEvent(e, new Date().toISOString(), evType, {});
+    };
     return (
       <View
         backgroundColor="#111"
@@ -56,6 +58,29 @@ const VideoElement = forwardRef(
           crossOrigin="anonymous"
           onMouseMove={props.userInteraction}
           onClick={props.userInteraction}
+          onAbort={event("abort")}
+          onCanPlay={event("canplay")}
+          onCanPlayThrough={event("canplaythrough")}
+          onDurationChange={event("durationchange")}
+          onEmptied={event("emptied")}
+          onEncrypted={event("encrypted")}
+          onEnded={event("ended")}
+          onError={event("error")}
+          onLoadedData={event("loadeddata")}
+          onLoadedMetadata={event("loadedmetadata")}
+          onLoadStart={event("loadstart")}
+          onPause={event("pause")}
+          onPlay={event("play")}
+          onPlaying={event("playing")}
+          onProgress={event("progress")}
+          onRateChange={event("ratechange")}
+          onSeeked={event("seeked")}
+          onSeeking={event("seeking")}
+          onStalled={event("stalled")}
+          onSuspend={event("suspend")}
+          onTimeUpdate={event("timeupdate")}
+          onVolumeChange={event("volumechange")}
+          onWaiting={event("waiting")}
           style={{
             objectFit: "contain",
             backgroundColor: "transparent",

@@ -60,6 +60,7 @@
     "react-native-webview": "13.10.5",
     "tamagui": "^1.102.3",
     "ua-parser-js": "^1.0.39",
+    "uuid": "^10.0.0",
     "viem": "2.x",
     "wagmi": "2"
   },
@@ -71,6 +72,7 @@
     "@tamagui/metro-plugin": "^1.102.3",
     "@types/react": "~18.3.3",
     "@types/react-native": "^0.73.0",
+    "@types/uuid": "^10.0.0",
     "typescript": "~5.5.3"
   },
   "private": true

@@ -9298,6 +9298,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/uuid@npm:^10.0.0":
+  version: 10.0.0
+  resolution: "@types/uuid@npm:10.0.0"
+  checksum: 10/e3958f8b0fe551c86c14431f5940c3470127293280830684154b91dc7eb3514aeb79fe3216968833cf79d4d1c67f580f054b5be2cd562bebf4f728913e73e944
+  languageName: node
+  linkType: hard
+
 "@types/ws@npm:^8.5.5":
   version: 8.5.12
   resolution: "@types/ws@npm:8.5.12"
@@ -10571,6 +10578,7 @@ __metadata:
     "@tanstack/react-query": "npm:^5.51.16"
     "@types/react": "npm:~18.3.3"
     "@types/react-native": "npm:^0.73.0"
+    "@types/uuid": "npm:^10.0.0"
     babel-preset-expo: "npm:^11.0.12"
     burnt: "npm:^0.12.2"
     chrono-node: "npm:^2.7.6"
@@ -10600,6 +10608,7 @@ __metadata:
     tamagui: "npm:^1.102.3"
     typescript: "npm:~5.5.3"
     ua-parser-js: "npm:^1.0.39"
+    uuid: "npm:^10.0.0"
     viem: "npm:2.x"
     wagmi: "npm:2"
   languageName: unknown
