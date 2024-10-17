@@ -2,6 +2,7 @@ package api
 
 import (
 	"bufio"
+	"bytes"
 	"context"
 	"encoding/base64"
 	"fmt"
@@ -15,7 +16,6 @@ import (
 
 	"aquareum.tv/aquareum/pkg/errors"
 	"aquareum.tv/aquareum/pkg/log"
-	"aquareum.tv/aquareum/pkg/media"
 	"aquareum.tv/aquareum/pkg/mist/mistconfig"
 	"aquareum.tv/aquareum/pkg/mist/misttriggers"
 	v0 "aquareum.tv/aquareum/pkg/schema/v0"
@@ -188,7 +188,9 @@ func (a *AquareumAPI) InternalHandler(ctx context.Context) (http.Handler, error)
 			return
 		}
 		ctx := log.WithLogValues(ctx, "user", user, "file", p.ByName("file"), "time", fmt.Sprintf("%d", ms))
-		err := a.MediaManager.SignSegment(ctx, r.Body, ms)
+		buf := &bytes.Buffer{}
+		io.Copy(buf, r.Body)
+		err := a.MediaManager.SignSegment(ctx, bytes.NewReader(buf.Bytes()), ms)
 		if err != nil {
 			log.Log(ctx, "segment error", "error", err)
 			errors.WriteHTTPInternalServerError(w, "segment error", err)
@@ -198,13 +200,7 @@ func (a *AquareumAPI) InternalHandler(ctx context.Context) (http.Handler, error)
 
 	handleIncomingStream := func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		log.Log(ctx, "stream start")
-		user, err := a.keyToUser(ctx, p.ByName("key"))
-		if err != nil {
-			errors.WriteHTTPForbidden(w, "unable to authenticate stream key", err)
-			return
-		}
-		prefix := fmt.Sprintf("%s/segment/%s", a.CLI.OwnInternalURL(), user)
-		err = media.SegmentToHTTP(ctx, r.Body, prefix)
+		err := a.MediaManager.IngestStream(ctx, r.Body)
 
 		if err != nil {
 			log.Log(ctx, "stream error", "error", err)
