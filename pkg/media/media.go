@@ -53,8 +53,17 @@ type HLSStream struct {
 	Wait func() string
 }
 
+func RunSelfTest(ctx context.Context) error {
+	gst.Init(nil)
+	return SelfTest(ctx)
+}
+
 func MakeMediaManager(ctx context.Context, cli *config.CLI, signer crypto.Signer, rep replication.Replicator) (*MediaManager, error) {
 	gst.Init(nil)
+	err := SelfTest(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("error in gstreamer self-test: %w", err)
+	}
 	hex := signers.HexAddr(signer.Public().(*ecdsa.PublicKey))
 	exists, err := cli.DataFileExists([]string{hex, CERT_FILE})
 	if err != nil {
@@ -86,16 +95,10 @@ func MakeMediaManager(ctx context.Context, cli *config.CLI, signer crypto.Signer
 	}, nil
 }
 
-// accept an incoming mkv segment, mux to mp4, and sign it
-func (mm *MediaManager) SignSegment(ctx context.Context, input io.Reader, ms int64) error {
-	buf := bytes.Buffer{}
-	err := MuxToMP4(ctx, input, &buf)
-	if err != nil {
-		return fmt.Errorf("error muxing to mp4: %w", err)
-	}
-	reader := bytes.NewReader(buf.Bytes())
+// accept an incoming mkv, and sign it
+func (mm *MediaManager) SignSegment(ctx context.Context, input io.ReadSeeker, ms int64) error {
 	rws := &aqio.ReadWriteSeeker{}
-	err = mm.SignMP4(ctx, reader, rws, ms)
+	err := mm.SignMP4(ctx, input, rws, ms)
 	if err != nil {
 		return fmt.Errorf("error signing mp4: %w", err)
 	}
@@ -191,58 +194,8 @@ func MuxToMP4(ctx context.Context, input io.Reader, output io.Writer) error {
 		return err
 	}
 	of.Close()
-	status, info, err := ffmpeg.GetCodecInfo(oname)
-	if err != nil {
-		return fmt.Errorf("error in GetCodecInfo: %w", err)
-	}
-	fmt.Printf("%v %v\n", status, info.DurSecs)
 	// log.Log(ctx, "transmuxing complete", "out-file", oname, "wrote", written)
 	return nil
-}
-
-func SegmentToHTTP(ctx context.Context, input io.Reader, prefix string) error {
-	tc := ffmpeg.NewTranscoder()
-	defer tc.StopTranscoder()
-	ir, iw, idone, err := SafePipe()
-	if err != nil {
-		return fmt.Errorf("error opening pipe: %w", err)
-	}
-	defer idone()
-	out := []ffmpeg.TranscodeOptions{
-		{
-			Oname: fmt.Sprintf("%s/%%d.mkv", prefix),
-			VideoEncoder: ffmpeg.ComponentOptions{
-				Name: "copy",
-			},
-			AudioEncoder: ffmpeg.ComponentOptions{
-				Name: "copy",
-			},
-			Profile: ffmpeg.VideoProfile{Format: ffmpeg.FormatNone},
-			Muxer: ffmpeg.ComponentOptions{
-				Name: "stream_segment",
-				Opts: map[string]string{
-					"segment_time": "0.1",
-				},
-			},
-		},
-	}
-	iname := fmt.Sprintf("pipe:%d", ir.Fd())
-	in := &ffmpeg.TranscodeOptionsIn{Fname: iname, Transmuxing: true}
-	g, _ := errgroup.WithContext(ctx)
-	g.Go(func() error {
-		_, err := io.Copy(iw, input)
-		// log.Log(ctx, "input copy done", "error", err)
-		iw.Close()
-		return err
-	})
-	g.Go(func() error {
-		_, err = tc.Transcode(in, out)
-		// log.Log(ctx, "transcode done", "error", err)
-		tc.StopTranscoder()
-		ir.Close()
-		return err
-	})
-	return g.Wait()
 }
 
 func (mm *MediaManager) SegmentToMKVPlusOpus(ctx context.Context, user string, w io.Writer) error {
@@ -566,5 +519,6 @@ func (mm *MediaManager) ValidateMP4(ctx context.Context, input io.Reader) error 
 	io.Copy(fd, r)
 	base := filepath.Base(fd.Name())
 	go mm.PublishSegment(ctx, mm.user, base)
+	log.Log(ctx, "successfully ingested segment", "user", pub.String(), "timestamp", meta.StartTime)
 	return nil
 }

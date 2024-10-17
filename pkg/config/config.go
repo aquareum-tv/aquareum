@@ -72,6 +72,7 @@ type CLI struct {
 	StreamerName           string
 	AllowedStreams         []aqpub.Pub
 	Peers                  []string
+	TestStream             bool
 
 	dataDirFlags []*string
 }

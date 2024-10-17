@@ -45,6 +45,16 @@ func start(build *config.BuildFlags, platformJobs []jobFunc) error {
 		return Stream(os.Args[2])
 	}
 
+	if len(os.Args) > 1 && os.Args[1] == "self-test" {
+		err := media.RunSelfTest(context.Background())
+		if err != nil {
+			fmt.Println(err.Error())
+			os.Exit(1)
+		}
+		fmt.Println("self-test successful!")
+		os.Exit(0)
+	}
+
 	fs := flag.NewFlagSet("aquareum", flag.ExitOnError)
 	cli := config.CLI{Build: build}
 	fs.StringVar(&cli.DataDir, "data-dir", config.DefaultDataDir(), "directory for keeping all aquareum data")
@@ -73,13 +83,14 @@ func start(build *config.BuildFlags, platformJobs []jobFunc) error {
 	fs.StringVar(&cli.StreamerName, "streamer-name", "", "name of the person streaming from this aquareum node")
 	cli.AddressSliceFlag(fs, &cli.AllowedStreams, "allowed-streams", "", "comma-separated list of addresses that this node will replicate")
 	cli.StringSliceFlag(fs, &cli.Peers, "peers", "", "other aquareum nodes to replicate to")
+	fs.BoolVar(&cli.TestStream, "test-stream", false, "run a built-in test stream on boot")
 
 	fs.Bool("insecure", false, "DEPRECATED, does nothing.")
 
 	version := fs.Bool("version", false, "print version and exit")
 
 	if runtime.GOOS == "linux" {
-		fs.BoolVar(&cli.NoMist, "no-mist", false, "Disable MistServer")
+		fs.BoolVar(&cli.NoMist, "no-mist", true, "Disable MistServer")
 		fs.IntVar(&cli.MistAdminPort, "mist-admin-port", 14242, "MistServer admin port (internal use only)")
 		fs.IntVar(&cli.MistRTMPPort, "mist-rtmp-port", 11935, "MistServer RTMP port (internal use only)")
 		fs.IntVar(&cli.MistHTTPPort, "mist-http-port", 18080, "MistServer HTTP port (internal use only)")
@@ -239,6 +250,12 @@ func start(build *config.BuildFlags, platformJobs []jobFunc) error {
 	group.Go(func() error {
 		return a.ServeInternalHTTP(ctx)
 	})
+
+	if cli.TestStream {
+		group.Go(func() error {
+			return mm.TestSource(ctx)
+		})
+	}
 
 	for _, job := range platformJobs {
 		group.Go(func() error {

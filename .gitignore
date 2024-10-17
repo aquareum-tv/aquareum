@@ -14,3 +14,4 @@ description.md
 lerna-debug.log
 build-*
 .ci/build.env
+*.log

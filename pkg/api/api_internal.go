@@ -2,24 +2,25 @@ package api
 
 import (
 	"bufio"
+	"bytes"
 	"context"
 	"encoding/base64"
 	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
+	"os"
 	"regexp"
+	"runtime/pprof"
 	"strconv"
 	"strings"
 	"time"
 
 	"aquareum.tv/aquareum/pkg/errors"
 	"aquareum.tv/aquareum/pkg/log"
-	"aquareum.tv/aquareum/pkg/media"
 	"aquareum.tv/aquareum/pkg/mist/mistconfig"
 	"aquareum.tv/aquareum/pkg/mist/misttriggers"
 	v0 "aquareum.tv/aquareum/pkg/schema/v0"
-	"github.com/google/uuid"
 	"github.com/julienschmidt/httprouter"
 	sloghttp "github.com/samber/slog-http"
 	"golang.org/x/sync/errgroup"
@@ -38,18 +39,10 @@ func (a *AquareumAPI) ServeInternalHTTP(ctx context.Context) error {
 }
 
 // lightweight way to authenticate push requests to ourself
-var secretUUID string
 var mkvRE *regexp.Regexp
 
 func init() {
-	uu, err := uuid.NewV7()
-	if err != nil {
-		panic(err)
-	}
-	secretUUID = uu.String()
-
 	mkvRE = regexp.MustCompile(`^\d+\.mkv$`)
-
 }
 
 func (a *AquareumAPI) InternalHandler(ctx context.Context) (http.Handler, error) {
@@ -181,14 +174,16 @@ func (a *AquareumAPI) InternalHandler(ctx context.Context) (http.Handler, error)
 		w.WriteHeader(200)
 	})
 
+	// self-destruct code, useful for dumping goroutines on windows
+	router.POST("/abort", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		pprof.Lookup("goroutine").WriteTo(os.Stderr, 2)
+		log.Log(ctx, "got POST /abort, self-destructing")
+		os.Exit(1)
+	})
+
 	// internal route called for each pushed segment from ffmpeg
-	router.POST("/segment/:uuid/:user/:file", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	router.POST("/segment/:user/:file", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		ms := time.Now().UnixMilli()
-		uu := p.ByName("uuid")
-		if uu != secretUUID {
-			errors.WriteHTTPForbidden(w, "unable to authenticate internal url", nil)
-			return
-		}
 		user := p.ByName("user")
 		if user == "" {
 			log.Log(ctx, "invalid code path: got empty user?")
@@ -202,7 +197,9 @@ func (a *AquareumAPI) InternalHandler(ctx context.Context) (http.Handler, error)
 			return
 		}
 		ctx := log.WithLogValues(ctx, "user", user, "file", p.ByName("file"), "time", fmt.Sprintf("%d", ms))
-		err := a.MediaManager.SignSegment(ctx, r.Body, ms)
+		buf := &bytes.Buffer{}
+		io.Copy(buf, r.Body)
+		err := a.MediaManager.SignSegment(ctx, bytes.NewReader(buf.Bytes()), ms)
 		if err != nil {
 			log.Log(ctx, "segment error", "error", err)
 			errors.WriteHTTPInternalServerError(w, "segment error", err)
@@ -210,16 +207,9 @@ func (a *AquareumAPI) InternalHandler(ctx context.Context) (http.Handler, error)
 		}
 	})
 
-	// route to accept an incoming mkv stream from OBS, segment it, and push the segments back to this HTTP handler
-	router.POST("/stream/:key", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	handleIncomingStream := func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		log.Log(ctx, "stream start")
-		user, err := a.keyToUser(ctx, p.ByName("key"))
-		if err != nil {
-			errors.WriteHTTPForbidden(w, "unable to authenticate stream key", err)
-			return
-		}
-		prefix := fmt.Sprintf("%s/segment/%s/%s", a.CLI.OwnInternalURL(), secretUUID, user)
-		err = media.SegmentToHTTP(ctx, r.Body, prefix)
+		err := a.MediaManager.IngestStream(ctx, r.Body)
 
 		if err != nil {
 			log.Log(ctx, "stream error", "error", err)
@@ -227,7 +217,11 @@ func (a *AquareumAPI) InternalHandler(ctx context.Context) (http.Handler, error)
 			return
 		}
 		log.Log(ctx, "stream success", "url", r.URL.String())
-	})
+	}
+
+	// route to accept an incoming mkv stream from OBS, segment it, and push the segments back to this HTTP handler
+	router.POST("/stream/:key", handleIncomingStream)
+	router.PUT("/stream/:key", handleIncomingStream)
 	handler := sloghttp.Recovery(router)
 	handler = sloghttp.New(slog.Default())(handler)
 	return handler, nil

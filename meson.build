@@ -6,7 +6,7 @@ project(
     'cpp_std': 'c++11',
     'default_library': 'static',
     'auto_features': 'disabled',
-    'force_fallback_for': 'glib-2.0,gobject-2.0,gio-2.0,gio-unix-2.0,fdk-aac,zlib,libffi,pcre2,intl',
+    'force_fallback_for': 'glib-2.0,gobject-2.0,gio-2.0,gio-unix-2.0,fdk-aac,zlib,libffi,pcre2,intl,x264',
     'buildtype': 'debug',
   },
 )
@@ -194,6 +194,7 @@ aquareum_deps += [
   gst_full_dep,
   dependency('gio-2.0'),
   dependency('gstreamer-controller-1.0'),
+  dependency('gstreamer-app-1.0'),
   dependency('gstreamer-pbutils-1.0'),
   dependency('gstplayback'),
 ]
