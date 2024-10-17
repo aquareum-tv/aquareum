@@ -367,8 +367,8 @@ func (mm *MediaManager) IngestStream(ctx context.Context, input io.Reader) error
 				log.Log(ctx, "gstreamer debug", "message", debug)
 			}
 			mainLoop.Quit()
-		default:
-			log.Log(ctx, msg.String())
+			// default:
+			// log.Log(ctx, msg.String())
 		}
 		return true
 	})
@@ -530,9 +530,10 @@ func (mm *MediaManager) SegmentAndSignElem(ctx context.Context) (*gst.Element, e
 				return gst.FlowOK
 			},
 			EOSFunc: func(sink *app.Sink) {
-				go mm.SignSegment(ctx, bytes.NewReader(buf.Bytes()), time.Now().UnixMilli())
-				runtime.GC()
-				sink.SetState(gst.StateNull)
+				err := mm.SignSegment(ctx, bytes.NewReader(buf.Bytes()), time.Now().UnixMilli())
+				if err != nil {
+					log.Log(ctx, "error signing segment", "error", err)
+				}
 			},
 		})
 	})

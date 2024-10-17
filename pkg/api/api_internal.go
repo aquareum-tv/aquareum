@@ -9,7 +9,9 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
+	"os"
 	"regexp"
+	"runtime/pprof"
 	"strconv"
 	"strings"
 	"time"
@@ -170,6 +172,13 @@ func (a *AquareumAPI) InternalHandler(ctx context.Context) (http.Handler, error)
 		w.Header().Set("Content-Type", "video/x-matroska")
 		w.Header().Set("Transfer-Encoding", "chunked")
 		w.WriteHeader(200)
+	})
+
+	// self-destruct code, useful for dumping goroutines on windows
+	router.POST("/abort", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		pprof.Lookup("goroutine").WriteTo(os.Stderr, 2)
+		log.Log(ctx, "got POST /abort, self-destructing")
+		os.Exit(1)
 	})
 
 	// internal route called for each pushed segment from ffmpeg
