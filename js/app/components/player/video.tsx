@@ -3,6 +3,7 @@ import React, {
   forwardRef,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
   useTransition,
@@ -36,11 +37,57 @@ export default function WebVideo(props: PlayerProps) {
   }
 }
 
+const POLL_INTERVAL = 5000;
+const updateEvents = {
+  playing: true,
+  waiting: true,
+  stalled: true,
+};
+
 const VideoElement = forwardRef(
   (props: VideoProps, ref: ForwardedRef<HTMLVideoElement>) => {
-    const event = (evType) => (e) => {
-      props.playerEvent(e, new Date().toISOString(), evType, {});
+    const [whatDoing, setWhatDoing] = useState("start");
+    const [whatDid, setWhatDid] = useState<{ [key: string]: number }>({});
+    const [doingSince, setDoingSince] = useState(Date.now());
+    const [lastUpdated, setLastUpdated] = useState(0);
+    const updateWhatDid = (now: Date): { [key: string]: number } => {
+      const prev = whatDid[whatDoing] ?? 0;
+      const duration = now.getTime() - doingSince;
+      const ret = {
+        ...whatDid,
+        [whatDoing]: prev + duration,
+      };
+      return ret;
     };
+    const event = (evType) => (e) => {
+      const now = new Date();
+      if (updateEvents[evType] && evType !== whatDoing) {
+        setWhatDid(updateWhatDid(now));
+        setWhatDoing(evType);
+        setDoingSince(now.getTime());
+      }
+      props.playerEvent(now.toISOString(), evType, {});
+    };
+
+    useEffect(() => {
+      if (lastUpdated === 0) {
+        return;
+      }
+      const now = new Date();
+      const fullWhatDid = updateWhatDid(now);
+      setWhatDid({});
+      setDoingSince(now.getTime());
+      props.playerEvent(now.toISOString(), "aq-played", {
+        whatHappened: fullWhatDid,
+      });
+    }, [lastUpdated]);
+
+    useEffect(() => {
+      const interval = setInterval((_) => {
+        setLastUpdated(Date.now());
+      }, POLL_INTERVAL);
+      return () => clearInterval(interval);
+    }, []);
     return (
       <View
         backgroundColor="#111"
@@ -72,13 +119,13 @@ const VideoElement = forwardRef(
           onPause={event("pause")}
           onPlay={event("play")}
           onPlaying={event("playing")}
-          onProgress={event("progress")}
+          // onProgress={event("progress")}
+          // onTimeUpdate={event("timeupdate")}
           onRateChange={event("ratechange")}
           onSeeked={event("seeked")}
           onSeeking={event("seeking")}
           onStalled={event("stalled")}
           onSuspend={event("suspend")}
-          onTimeUpdate={event("timeupdate")}
           onVolumeChange={event("volumechange")}
           onWaiting={event("waiting")}
           style={{

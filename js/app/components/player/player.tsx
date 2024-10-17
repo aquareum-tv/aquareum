@@ -52,7 +52,6 @@ export function Player(props: Partial<PlayerProps>) {
   const { url } = useAquareumNode();
   const info = usePlatform();
   const playerEvent = async (
-    e: Event,
     time: string,
     eventType: string,
     meta: { [key: string]: any },

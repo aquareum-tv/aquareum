@@ -12,7 +12,6 @@ export type PlayerProps = {
   setProtocol: (string) => void;
   userInteraction: () => void;
   playerEvent: (
-    e: Event,
     time: string,
     eventType: string,
     meta: { [key: string]: any },
