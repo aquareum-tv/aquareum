@@ -1,17 +1,10 @@
 include: ".ci/dockerfile-hash.yaml"
 
 windows-selftest:
+  stage: build
   tags:
     - windows
   timeout: 2 hours
-  script:
-    - echo "Hello World"
-    - curl icanhazip.com | grep '4'
-
-msys2-mingw32:
-  stage: build
-  tags:
-    - win32
   variables:
     MSYSTEM: "MINGW32"
     CHERE_INVOKING: "yes"
