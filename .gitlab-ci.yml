@@ -5,8 +5,11 @@ windows-selftest:
   tags:
     - windows
   timeout: 2 hours
+  variables:
+    MSYSTEM: "MINGW32"
+    CHERE_INVOKING: "yes"
   script:
-    - echo hooray | grep ray
+    - C:\msys64\usr\bin\bash -lc "bash -x ./util/windows-selftest.sh"
 # builder:
 #   stage: build
 #   interruptible: true
