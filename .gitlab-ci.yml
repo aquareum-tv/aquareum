@@ -7,6 +7,16 @@ windows-selftest:
   script:
     - echo "Hello World"
     - curl icanhazip.com | grep '4'
+
+msys2-mingw32:
+  stage: build
+  tags:
+    - win32
+  variables:
+    MSYSTEM: "MINGW32"
+    CHERE_INVOKING: "yes"
+  script:
+    - C:\msys64\usr\bin\bash -lc "bash -x ./util/windows-selftest.sh"
 # builder:
 #   stage: build
 #   interruptible: true
