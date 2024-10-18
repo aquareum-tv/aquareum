@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log/slog"
@@ -195,6 +196,35 @@ func (a *AquareumAPI) InternalHandler(ctx context.Context) (http.Handler, error)
 	// route to accept an incoming mkv stream from OBS, segment it, and push the segments back to this HTTP handler
 	router.POST("/stream/:key", handleIncomingStream)
 	router.PUT("/stream/:key", handleIncomingStream)
+
+	router.GET("/player-report/:id", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		id := p.ByName("id")
+		if id == "" {
+			errors.WriteHTTPBadRequest(w, "id required", nil)
+			return
+		}
+		events, err := a.Model.PlayerReport(id)
+		if err != nil {
+			errors.WriteHTTPBadRequest(w, err.Error(), err)
+			return
+		}
+		bs, err := json.Marshal(events)
+		if err != nil {
+			errors.WriteHTTPInternalServerError(w, "unable to marhsal json", err)
+			return
+		}
+		w.Write(bs)
+	})
+
+	router.DELETE("/player-events", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		err := a.Model.ClearPlayerEvents()
+		if err != nil {
+			errors.WriteHTTPInternalServerError(w, "unable to delete player events", err)
+			return
+		}
+		w.WriteHeader(204)
+	})
+
 	handler := sloghttp.Recovery(router)
 	handler = sloghttp.New(slog.Default())(handler)
 	return handler, nil

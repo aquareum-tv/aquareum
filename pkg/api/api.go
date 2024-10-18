@@ -40,6 +40,8 @@ type AquareumAPI struct {
 	FirebaseNotifier notifications.FirebaseNotifier
 	MediaManager     *media.MediaManager
 	MediaSigner      *media.MediaSigner
+	// not thread-safe yet
+	Aliases map[string]string
 }
 
 func MakeAquareumAPI(cli *config.CLI, mod model.Model, signer *eip712.EIP712Signer, noter notifications.FirebaseNotifier, mm *media.MediaManager, ms *media.MediaSigner) (*AquareumAPI, error) {
@@ -47,7 +49,15 @@ func MakeAquareumAPI(cli *config.CLI, mod model.Model, signer *eip712.EIP712Sign
 	if err != nil {
 		return nil, err
 	}
-	a := &AquareumAPI{CLI: cli, Model: mod, Updater: updater, Signer: signer, FirebaseNotifier: noter, MediaManager: mm, MediaSigner: ms}
+	a := &AquareumAPI{CLI: cli,
+		Model:            mod,
+		Updater:          updater,
+		Signer:           signer,
+		FirebaseNotifier: noter,
+		MediaManager:     mm,
+		MediaSigner:      ms,
+		Aliases:          map[string]string{},
+	}
 	a.Mimes, err = updater.GetMimes()
 	if err != nil {
 		return nil, err

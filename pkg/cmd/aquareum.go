@@ -267,6 +267,8 @@ func start(build *config.BuildFlags, platformJobs []jobFunc) error {
 		if err != nil {
 			return err
 		}
+		cli.AllowedStreams = append(cli.AllowedStreams, testMediaSigner.Pub)
+		a.Aliases["self-test"] = testMediaSigner.Pub.String()
 		group.Go(func() error {
 			return mm.TestSource(ctx, testMediaSigner)
 		})

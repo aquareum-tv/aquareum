@@ -16,8 +16,9 @@ import (
 )
 
 func (a *AquareumAPI) NormalizeUser(user string) string {
-	if user == "self-test" {
-		user = a.Signer.Hex()
+	alias, ok := a.Aliases[user]
+	if ok {
+		user = alias
 	}
 	user = strings.ToLower(user)
 	return user

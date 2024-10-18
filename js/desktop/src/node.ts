@@ -54,6 +54,7 @@ export default async function makeNode(opts: { env: { [k: string]: string } }) {
   return {
     proc,
     addr: `http://${addr}`,
+    internalAddr: `http://${internalAddr}`,
   };
 }
 
