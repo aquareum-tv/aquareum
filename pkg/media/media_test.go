@@ -27,7 +27,7 @@ func getFixture(name string) string {
 	return filepath.Join(dir, "..", "..", "test", "fixtures", name)
 }
 
-func getStaticTestMediaManager(t *testing.T) *MediaManager {
+func getStaticTestMediaManager(t *testing.T) (*MediaManager, *MediaSigner) {
 	signer, err := c2pa.MakeStaticSigner(eip712test.KeyBytes)
 	require.NoError(t, err)
 	pub, err := aqpub.FromHexString("0x6fbe6863cf1efc713899455e526a13239d371175")
@@ -40,7 +40,8 @@ func getStaticTestMediaManager(t *testing.T) *MediaManager {
 	})
 	mm, err := MakeMediaManager(context.Background(), cli, signer, &boring.BoringReplicator{})
 	require.NoError(t, err)
-	return mm
+	ms, err := MakeMediaSigner(context.Background(), cli, "test-person", signer)
+	return mm, ms
 }
 
 func mp4(t *testing.T) []byte {
@@ -62,13 +63,11 @@ func TestMuxToMP4(t *testing.T) {
 func TestSignMP4(t *testing.T) {
 	mp4bs := mp4(t)
 	r := bytes.NewReader(mp4bs)
-	f, err := os.CreateTemp("", "*.mp4")
+	_, ms := getStaticTestMediaManager(t)
+	millis := time.Now().UnixMilli()
+	bs, err := ms.SignMP4(context.Background(), r, millis)
 	require.NoError(t, err)
-	mm := getStaticTestMediaManager(t)
-	require.NoError(t, err)
-	ms := time.Now().UnixMilli()
-	err = mm.SignMP4(context.Background(), r, f, ms)
-	require.NoError(t, err)
+	require.Greater(t, len(bs), 0)
 }
 
 func TestSignMP4WithWallet(t *testing.T) {
@@ -77,15 +76,14 @@ func TestSignMP4WithWallet(t *testing.T) {
 			TAURL:          "http://timestamp.digicert.com",
 			AllowedStreams: []aqpub.Pub{},
 		})
-		mm, err := MakeMediaManager(context.Background(), cli, signer, &boring.BoringReplicator{})
+		ms, err := MakeMediaSigner(context.Background(), cli, "test person", signer)
 		require.NoError(t, err)
 		mp4bs := mp4(t)
 		r := bytes.NewReader(mp4bs)
-		f, err := os.CreateTemp("", "*.mp4")
+		millis := time.Now().UnixMilli()
+		bs, err := ms.SignMP4(context.Background(), r, millis)
 		require.NoError(t, err)
-		ms := time.Now().UnixMilli()
-		err = mm.SignMP4(context.Background(), r, f, ms)
-		require.NoError(t, err)
+		require.Greater(t, len(bs), 0)
 	})
 }
 
@@ -124,7 +122,7 @@ func TestSignMP4WithWallet(t *testing.T) {
 func TestVerifyMP4(t *testing.T) {
 	f, err := os.Open(getFixture("sample-segment.mp4"))
 	require.NoError(t, err)
-	mm := getStaticTestMediaManager(t)
+	mm, _ := getStaticTestMediaManager(t)
 	err = mm.ValidateMP4(context.Background(), f)
 	require.NoError(t, err)
 }

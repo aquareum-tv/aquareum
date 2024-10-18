@@ -1,7 +1,6 @@
 package aqio
 
 import (
-	"bytes"
 	"errors"
 	"io"
 
@@ -66,5 +65,17 @@ func (rws *ReadWriteSeeker) Read(b []byte) (n int, err error) {
 // Returns a ReadSeeker based on the current value of the buffer.
 // Don't write to it afterwards!
 func (rws *ReadWriteSeeker) ReadSeeker() io.ReadSeeker {
-	return bytes.NewReader(rws.buf)
+	rws.Seek(0, io.SeekStart)
+	return rws
+}
+
+// Returns the current value of the buffer.
+// Don't write to it afterwards!
+func (rws *ReadWriteSeeker) Bytes() ([]byte, error) {
+	rws.Seek(0, io.SeekStart)
+	bs, err := io.ReadAll(rws)
+	if err != nil {
+		return nil, err
+	}
+	return bs, nil
 }

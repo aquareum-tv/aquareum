@@ -2,7 +2,6 @@ package api
 
 import (
 	"bufio"
-	"bytes"
 	"context"
 	"encoding/base64"
 	"fmt"
@@ -69,7 +68,7 @@ func (a *AquareumAPI) InternalHandler(ctx context.Context) (http.Handler, error)
 			errors.WriteHTTPBadRequest(w, "user required", nil)
 			return
 		}
-		user = strings.ToLower(user)
+		user = a.NormalizeUser(user)
 		w.Header().Set("content-type", "text/plain")
 		fmt.Fprintf(w, "ffconcat version 1.0\n")
 		// intermittent reports that you need two here to make things work properly? shouldn't matter.
@@ -84,7 +83,7 @@ func (a *AquareumAPI) InternalHandler(ctx context.Context) (http.Handler, error)
 			errors.WriteHTTPBadRequest(w, "user required", nil)
 			return
 		}
-		user = strings.ToLower(user)
+		user = a.NormalizeUser(user)
 		log.Log(ctx, "got latest.mp4 request", "user", user)
 		file := <-a.MediaManager.SubscribeSegment(ctx, user)
 		w.Header().Set("Location", fmt.Sprintf("%s/playback/%s/segment/%s\n", a.CLI.OwnInternalURL(), user, file))
@@ -97,7 +96,7 @@ func (a *AquareumAPI) InternalHandler(ctx context.Context) (http.Handler, error)
 			errors.WriteHTTPBadRequest(w, "user required", nil)
 			return
 		}
-		user = strings.ToLower(user)
+		user = a.NormalizeUser(user)
 		file := p.ByName("file")
 		if file == "" {
 			errors.WriteHTTPBadRequest(w, "file required", nil)
@@ -117,7 +116,7 @@ func (a *AquareumAPI) InternalHandler(ctx context.Context) (http.Handler, error)
 			errors.WriteHTTPBadRequest(w, "user required", nil)
 			return
 		}
-		user = strings.ToLower(user)
+		user = a.NormalizeUser(user)
 		w.Header().Set("Content-Type", "video/x-matroska")
 		w.WriteHeader(200)
 		err := a.MediaManager.SegmentToMKVPlusOpus(ctx, user, w)
@@ -132,7 +131,7 @@ func (a *AquareumAPI) InternalHandler(ctx context.Context) (http.Handler, error)
 			errors.WriteHTTPBadRequest(w, "user required", nil)
 			return
 		}
-		user = strings.ToLower(user)
+		user = a.NormalizeUser(user)
 		var delayMS int64 = 1000
 		userDelay := r.URL.Query().Get("delayms")
 		if userDelay != "" {
@@ -181,35 +180,9 @@ func (a *AquareumAPI) InternalHandler(ctx context.Context) (http.Handler, error)
 		os.Exit(1)
 	})
 
-	// internal route called for each pushed segment from ffmpeg
-	router.POST("/segment/:user/:file", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-		ms := time.Now().UnixMilli()
-		user := p.ByName("user")
-		if user == "" {
-			log.Log(ctx, "invalid code path: got empty user?")
-			errors.WriteHTTPInternalServerError(w, "invalid code path: got empty user?", nil)
-			return
-		}
-		user = strings.ToLower(user)
-		f := p.ByName("file")
-		if !mkvRE.MatchString(f) {
-			errors.WriteHTTPBadRequest(w, "file was not in number.mp4 format", nil)
-			return
-		}
-		ctx := log.WithLogValues(ctx, "user", user, "file", p.ByName("file"), "time", fmt.Sprintf("%d", ms))
-		buf := &bytes.Buffer{}
-		io.Copy(buf, r.Body)
-		err := a.MediaManager.SignSegment(ctx, bytes.NewReader(buf.Bytes()), ms)
-		if err != nil {
-			log.Log(ctx, "segment error", "error", err)
-			errors.WriteHTTPInternalServerError(w, "segment error", err)
-			return
-		}
-	})
-
 	handleIncomingStream := func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		log.Log(ctx, "stream start")
-		err := a.MediaManager.IngestStream(ctx, r.Body)
+		err := a.MediaManager.IngestStream(ctx, r.Body, a.MediaSigner)
 
 		if err != nil {
 			log.Log(ctx, "stream error", "error", err)

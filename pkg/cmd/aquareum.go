@@ -222,7 +222,11 @@ func start(build *config.BuildFlags, platformJobs []jobFunc) error {
 			return err
 		}
 	}
-	a, err := api.MakeAquareumAPI(&cli, mod, eip712signer, noter, mm)
+	ms, err := media.MakeMediaSigner(ctx, &cli, cli.StreamerName, signer)
+	if err != nil {
+		return err
+	}
+	a, err := api.MakeAquareumAPI(&cli, mod, eip712signer, noter, mm, ms)
 	if err != nil {
 		return err
 	}
@@ -252,8 +256,19 @@ func start(build *config.BuildFlags, platformJobs []jobFunc) error {
 	})
 
 	if cli.TestStream {
+		testSigner, err := eip712.MakeEIP712Signer(ctx, &eip712.EIP712SignerOptions{
+			Schema:          schema,
+			EthKeystorePath: filepath.Join(cli.DataDir, "test-signer"),
+		})
+		if err != nil {
+			return err
+		}
+		testMediaSigner, err := media.MakeMediaSigner(ctx, &cli, "self-test-signer", testSigner)
+		if err != nil {
+			return err
+		}
 		group.Go(func() error {
-			return mm.TestSource(ctx)
+			return mm.TestSource(ctx, testMediaSigner)
 		})
 	}
 

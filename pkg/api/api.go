@@ -39,14 +39,15 @@ type AquareumAPI struct {
 	Mimes            map[string]string
 	FirebaseNotifier notifications.FirebaseNotifier
 	MediaManager     *media.MediaManager
+	MediaSigner      *media.MediaSigner
 }
 
-func MakeAquareumAPI(cli *config.CLI, mod model.Model, signer *eip712.EIP712Signer, noter notifications.FirebaseNotifier, mm *media.MediaManager) (*AquareumAPI, error) {
+func MakeAquareumAPI(cli *config.CLI, mod model.Model, signer *eip712.EIP712Signer, noter notifications.FirebaseNotifier, mm *media.MediaManager, ms *media.MediaSigner) (*AquareumAPI, error) {
 	updater, err := PrepareUpdater(cli)
 	if err != nil {
 		return nil, err
 	}
-	a := &AquareumAPI{CLI: cli, Model: mod, Updater: updater, Signer: signer, FirebaseNotifier: noter, MediaManager: mm}
+	a := &AquareumAPI{CLI: cli, Model: mod, Updater: updater, Signer: signer, FirebaseNotifier: noter, MediaManager: mm, MediaSigner: ms}
 	a.Mimes, err = updater.GetMimes()
 	if err != nil {
 		return nil, err

@@ -297,7 +297,7 @@ func ToHLS(ctx context.Context, input io.Reader, dir string) error {
 	return g.Wait()
 }
 
-func (mm *MediaManager) IngestStream(ctx context.Context, input io.Reader) error {
+func (mm *MediaManager) IngestStream(ctx context.Context, input io.Reader, ms *MediaSigner) error {
 	pipelineSlice := []string{
 		"appsrc name=streamsrc ! matroskademux name=demux ! h264parse name=parse",
 	}
@@ -342,7 +342,7 @@ func (mm *MediaManager) IngestStream(ctx context.Context, input io.Reader) error
 		return err
 	}
 	// defer runtime.KeepAlive(parseEle)
-	signer, err := mm.SegmentAndSignElem(ctx)
+	signer, err := mm.SegmentAndSignElem(ctx, ms)
 	if err != nil {
 		return err
 	}
@@ -388,7 +388,7 @@ type QRData struct {
 	Now int64 `json:"now"`
 }
 
-func (mm *MediaManager) TestSource(ctx context.Context) error {
+func (mm *MediaManager) TestSource(ctx context.Context, ms *MediaSigner) error {
 	mainLoop := glib.NewMainLoop(glib.MainContextDefault(), false)
 
 	pipelineSlice := []string{
@@ -420,7 +420,7 @@ func (mm *MediaManager) TestSource(ctx context.Context) error {
 		return fmt.Errorf("parseele not found")
 	}
 
-	signer, err := mm.SegmentAndSignElem(ctx)
+	signer, err := mm.SegmentAndSignElem(ctx, ms)
 	if err != nil {
 		return err
 	}
@@ -490,7 +490,7 @@ func (mm *MediaManager) TestSource(ctx context.Context) error {
 }
 
 // element that takes the input stream, muxes to mp4, and signs the result
-func (mm *MediaManager) SegmentAndSignElem(ctx context.Context) (*gst.Element, error) {
+func (mm *MediaManager) SegmentAndSignElem(ctx context.Context, ms *MediaSigner) (*gst.Element, error) {
 	// elem, err := gst.NewElement("splitmuxsink name=splitter async-finalize=true sink-factory=appsink muxer-factory=matroskamux max-size-bytes=1")
 	elem, err := gst.NewElementWithProperties("splitmuxsink", map[string]any{
 		"name":           "signer",
@@ -530,9 +530,15 @@ func (mm *MediaManager) SegmentAndSignElem(ctx context.Context) (*gst.Element, e
 				return gst.FlowOK
 			},
 			EOSFunc: func(sink *app.Sink) {
-				err := mm.SignSegment(ctx, bytes.NewReader(buf.Bytes()), time.Now().UnixMilli())
+				bs, err := ms.SignMP4(ctx, bytes.NewReader(buf.Bytes()), time.Now().UnixMilli())
 				if err != nil {
 					log.Log(ctx, "error signing segment", "error", err)
+					return
+				}
+				err = mm.ValidateMP4(ctx, bytes.NewReader(bs))
+				if err != nil {
+					log.Log(ctx, "error validating segment", "error", err)
+					return
 				}
 			},
 		})

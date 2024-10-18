@@ -8,7 +8,6 @@ declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
 import makeNode from "./node";
 import getEnv from "./env";
 import initUpdater from "./updater";
-import { UpdateSourceType } from "update-electron-app";
 import { resolve } from "path";
 import { parseArgs } from "node:util";
 
@@ -18,57 +17,80 @@ if (require("electron-squirrel-startup")) {
 }
 
 const {
-  values: { path },
+  values: { path, "self-test": selfTest },
 } = parseArgs({
   options: {
     path: {
       type: "string",
     },
+    "self-test": {
+      type: "boolean",
+    },
   },
 });
 
-const createWindow = async (): Promise<void> => {
+const makeWindow = async (): Promise<BrowserWindow> => {
+  const { isDev } = getEnv();
+  let logoFile: string;
+  if (isDev) {
+    // theoretically cwd is aquareum/js/desktop:
+    logoFile = resolve(process.cwd(), "assets", "aquareum-logo.png");
+  } else {
+    logoFile = resolve(process.resourcesPath, "aquareum-logo.png");
+  }
+  const window = new BrowserWindow({
+    height: 600,
+    width: 800,
+    icon: logoFile,
+    webPreferences: {
+      preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
+    },
+    // titleBarStyle: "hidden",
+    // titleBarOverlay: true,
+  });
+
+  window.removeMenu();
+
+  return window;
+};
+
+const start = async (): Promise<void> => {
+  initUpdater();
+  const { skipNode, nodeFrontend } = getEnv();
+  let loadAddr;
+  if (!skipNode) {
+    const { addr } = await makeNode({ env: {} });
+    loadAddr = addr;
+  }
+  const mainWindow = await makeWindow();
+
+  if (nodeFrontend) {
+    mainWindow.loadURL(`${loadAddr}${path}`);
+  } else {
+    mainWindow.loadURL(`http://localhost:38081${path}`);
+  }
+};
+
+const runSelfTest = async (): Promise<void> => {
+  const { addr } = await makeNode({
+    env: {
+      AQ_TEST_STREAM: "true",
+    },
+  });
+  const mainWindow = await makeWindow();
+
+  mainWindow.loadURL(`${addr}/self-test`);
+};
+
+// This method will be called when Electron has finished
+// initialization and is ready to create browser windows.
+// Some APIs can only be used after this event occurs.
+app.on("ready", async () => {
   try {
-    initUpdater();
-    const { skipNode, nodeFrontend, isDev } = getEnv();
-    let loadAddr;
-    if (!skipNode) {
-      const { proc, addr } = await makeNode();
-      loadAddr = addr;
-      let running = true;
-      app.on("before-quit", () => {
-        proc.kill("SIGTERM");
-      });
-      proc.on("exit", () => {
-        running = false;
-        app.quit();
-      });
-    }
-    let logoFile: string;
-    if (isDev) {
-      // theoretically cwd is aquareum/js/desktop:
-      logoFile = resolve(process.cwd(), "assets", "aquareum-logo.png");
+    if (!selfTest) {
+      await start();
     } else {
-      logoFile = resolve(process.resourcesPath, "aquareum-logo.png");
-    }
-    // Create the browser window.
-    const mainWindow = new BrowserWindow({
-      height: 600,
-      width: 800,
-      icon: logoFile,
-      webPreferences: {
-        preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
-      },
-      // titleBarStyle: "hidden",
-      // titleBarOverlay: true,
-    });
-
-    mainWindow.removeMenu();
-
-    if (nodeFrontend) {
-      mainWindow.loadURL(`${loadAddr}${path}`);
-    } else {
-      mainWindow.loadURL(`http://localhost:38081${path}`);
+      await runSelfTest();
     }
   } catch (e) {
     console.error(e);
@@ -83,21 +105,16 @@ const createWindow = async (): Promise<void> => {
     await dialog.showMessageBox(dialogOpts);
     app.quit();
   }
-};
-
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
-app.on("ready", createWindow);
+});
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
-app.on("window-all-closed", () => {
-  if (process.platform !== "darwin") {
-    app.quit();
-  }
-});
+// app.on("window-all-closed", () => {
+//   if (process.platform !== "darwin") {
+//     app.quit();
+//   }
+// });
 
 app.on("activate", () => {
   // On OS X it's common to re-create a window in the app when the
