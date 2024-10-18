@@ -28,7 +28,10 @@ const findExe = async (): Promise<string> => {
   return exe;
 };
 
-export default async function makeNode(opts: { env: { [k: string]: string } }) {
+export default async function makeNode(opts: {
+  env: { [k: string]: string };
+  autoQuit: boolean;
+}) {
   const exe = await findExe();
   const addr = "127.0.0.1:38082";
   const internalAddr = "127.0.0.1:39092";
@@ -44,12 +47,14 @@ export default async function makeNode(opts: { env: { [k: string]: string } }) {
   });
   await checkService(`http://${addr}/api/healthz`);
 
-  app.on("before-quit", () => {
-    proc.kill("SIGTERM");
-  });
-  proc.on("exit", () => {
-    app.quit();
-  });
+  if (opts.autoQuit) {
+    app.on("before-quit", () => {
+      proc.kill("SIGTERM");
+    });
+    proc.on("exit", () => {
+      app.quit();
+    });
+  }
 
   return {
     proc,

@@ -25,6 +25,10 @@ if (require("electron-squirrel-startup")) {
       "self-test": {
         type: "boolean",
       },
+      "self-test-duration": {
+        type: "string",
+        default: "60000",
+      },
     },
   });
   const env = getEnv();
@@ -85,7 +89,7 @@ if (require("electron-squirrel-startup")) {
     const { skipNode, nodeFrontend } = getEnv();
     let loadAddr;
     if (!skipNode) {
-      const { addr } = await makeNode({ env: {} });
+      const { addr } = await makeNode({ env: {}, autoQuit: true });
       loadAddr = addr;
     }
     const mainWindow = await makeWindow();
@@ -103,69 +107,78 @@ if (require("electron-squirrel-startup")) {
   const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
   // how much of our time is spent playing for a success?
   const PLAYING_SUCCESS = 0.9;
-  const TEST_DURATION = 60000;
 
   const runSelfTest = async (): Promise<void> => {
-    const { addr, internalAddr } = await makeNode({
+    let exitCode = 0;
+    const { addr, internalAddr, proc } = await makeNode({
       env: {
         AQ_TEST_STREAM: "true",
       },
+      autoQuit: false,
     });
-    const mainWindow = await makeWindow();
+    try {
+      const mainWindow = await makeWindow();
 
-    const testId = uuidv7();
-    const definitions = [
-      {
-        name: "hls",
-        src: "/hls/stream.m3u8",
-      },
-      {
-        name: "progressive-mp4",
-        src: "/stream.mp4",
-      },
-      {
-        name: "progressive-webm",
-        src: "/stream.webm",
-      },
-    ];
-    const tests = definitions.map((x) => ({
-      name: x.name,
-      playerId: `${testId}-${x.name}`,
-      src: `${addr}/api/playback/self-test${x.src}`,
-      showControls: true,
-    }));
-    const enc = encodeURIComponent(JSON.stringify(tests));
+      const testId = uuidv7();
+      const definitions = [
+        {
+          name: "hls",
+          src: "/hls/stream.m3u8",
+        },
+        {
+          name: "progressive-mp4",
+          src: "/stream.mp4",
+        },
+        {
+          name: "progressive-webm",
+          src: "/stream.webm",
+        },
+      ];
+      const tests = definitions.map((x) => ({
+        name: x.name,
+        playerId: `${testId}-${x.name}`,
+        src: `${addr}/api/playback/self-test${x.src}`,
+        showControls: true,
+      }));
+      const enc = encodeURIComponent(JSON.stringify(tests));
 
-    mainWindow.loadURL(`${addr}/multi/${enc}`);
+      mainWindow.loadURL(`${addr}/multi/${enc}`);
 
-    await delay(TEST_DURATION);
-    mainWindow.close();
-    const reports = await Promise.all(
-      tests.map(async (t) => {
-        const res = await fetch(`${internalAddr}/player-report/${t.playerId}`);
-        const data = (await res.json()) as { [k: string]: number };
-        return { ...t, data: data };
-      }),
-    );
-    let failed = false;
-    const percentages = reports.map((report) => {
-      let total = 0;
-      for (const [state, ms] of Object.entries(report.data)) {
-        total += ms;
+      await delay(parseInt(args["self-test-duration"]));
+      const reports = await Promise.all(
+        tests.map(async (t) => {
+          const res = await fetch(
+            `${internalAddr}/player-report/${t.playerId}`,
+          );
+          const data = (await res.json()) as { [k: string]: number };
+          return { ...t, data: data };
+        }),
+      );
+      let failed = false;
+      const percentages = reports.map((report) => {
+        let total = 0;
+        for (const [state, ms] of Object.entries(report.data)) {
+          total += ms;
+        }
+        const pcts: { [k: string]: number } = { playing: 0 };
+        for (const [state, ms] of Object.entries(report.data)) {
+          pcts[state] = ms / total;
+        }
+        if (pcts.playing < PLAYING_SUCCESS) {
+          failed = true;
+        }
+        return { ...report, pcts };
+      });
+      console.log(JSON.stringify(percentages, null, 2));
+      if (failed) {
+        console.log("test failed! exiting 1");
+        exitCode = 1;
       }
-      const pcts: { [k: string]: number } = { playing: 0 };
-      for (const [state, ms] of Object.entries(report.data)) {
-        pcts[state] = ms / total;
-      }
-      if (pcts.playing < PLAYING_SUCCESS) {
-        failed = true;
-      }
-      return { ...report, pcts };
-    });
-    console.log(JSON.stringify(percentages, null, 2));
-    if (failed) {
-      console.log("test failed! exiting 1");
-      app.exit(1);
+    } catch (e) {
+      console.error(`error in self-test: ${e}`);
+    } finally {
+      proc.kill("SIGTERM");
+      app.exit(exitCode);
     }
   };
 
