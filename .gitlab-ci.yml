@@ -9,6 +9,8 @@ windows-selftest:
     MSYSTEM: "MINGW32"
     CHERE_INVOKING: "yes"
   script:
+    - Invoke-WebRequest https://git.aquareum.tv/aquareum-tv/aquareum/-/package_files/2844/download -OutFile aquareum-desktop.exe
+    - .\aquareum-desktop.exe
     - C:\msys64\usr\bin\bash -lc "bash -x ./util/windows-selftest.sh"
 # builder:
 #   stage: build
