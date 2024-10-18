@@ -174,7 +174,7 @@ desktop-linux:
 	&& mv "js/desktop/out/make/AppImage/x64/Aquareum-$(VERSION_ELECTRON)-x64.AppImage" ./bin/aquareum-desktop-$(VERSION)-linux-amd64.AppImage \
 	&& mv "js/desktop/out/make/AppImage/arm64/Aquareum-$(VERSION_ELECTRON)-arm64.AppImage" ./bin/aquareum-desktop-$(VERSION)-linux-arm64.AppImage
 
-.PHONY: desktop-linux
+.PHONY: desktop-windows
 desktop-windows:
 	cd js/desktop \
 	&& yarn run make --platform win32 --arch x64 \
