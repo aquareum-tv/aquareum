@@ -164,7 +164,7 @@ windows-selftest:
     MSYSTEM: "MINGW32"
     CHERE_INVOKING: "yes"
   script:
-    - C:\msys64\usr\bin\bash -lc "bash -x ./util/windows-selftest.sh $AQUAREUM_URL_WINDOWS_AMD64"
+    - C:\msys64\usr\bin\bash -lc "bash -x ./util/windows-selftest.sh $AQUAREUM_DESKTOP_URL_WINDOWS_AMD64"
 
 release:
   stage: build

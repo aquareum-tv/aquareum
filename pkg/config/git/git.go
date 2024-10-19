@@ -125,7 +125,7 @@ func makeGit() error {
 			macV := fmt.Sprintf("%s/packages/generic/%s/%s/aquareum-%s-darwin-%s.zip", gitlabURL(), AQUAREUM_BRANCH, desc, desc, arch)
 			outMap[macK] = macV
 		}
-		outMap["AQUAREUM_URL_WINDOWS_AMD64"] = fmt.Sprintf("%s/packages/generic/%s/%s/aquareum-%s-windows-amd64.exe", gitlabURL(), AQUAREUM_BRANCH, desc, desc)
+		outMap["AQUAREUM_DESKTOP_URL_WINDOWS_AMD64"] = fmt.Sprintf("%s/packages/generic/%s/%s/aquareum-desktop-%s-windows-amd64.exe", gitlabURL(), AQUAREUM_BRANCH, desc, desc)
 		for k, v := range outMap {
 			out = out + fmt.Sprintf("%s=%s\n", k, v)
 		}
