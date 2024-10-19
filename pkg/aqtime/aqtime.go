@@ -8,7 +8,7 @@ import (
 )
 
 var RE *regexp.Regexp
-var Pattern string = `(\d\d\d\d)-(\d\d)-(\d\d)T(\d\d):(\d\d):(\d\d).(\d\d\d)Z`
+var Pattern string = `^(\d\d\d\d)-(\d\d)-(\d\d)T(\d\d)(?:[:-])(\d\d)(?:[:-])(\d\d)(?:[.-])(\d\d\d)Z$`
 
 type AQTime string
 
