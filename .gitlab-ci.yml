@@ -8,7 +8,6 @@ windows-selftest:
   variables:
     MSYSTEM: "MINGW32"
     CHERE_INVOKING: "yes"
-    GIT_STRATEGY: none
   script:
     - C:\msys64\usr\bin\bash -lc "bash -x ./util/windows-selftest.sh"
 # builder:
