@@ -19,6 +19,7 @@ import (
 	"aquareum.tv/aquareum/pkg/log"
 	"aquareum.tv/aquareum/pkg/replication"
 	"github.com/go-gst/go-gst/gst"
+	"github.com/google/uuid"
 	"github.com/livepeer/lpms/ffmpeg"
 	"golang.org/x/sync/errgroup"
 
@@ -35,12 +36,14 @@ const SCHEMA_ORG_START_TIME = "http://schema.org/startTime"
 const SCHEMA_ORG_END_TIME = "http://schema.org/endTime"
 
 type MediaManager struct {
-	cli           *config.CLI
-	mp4subs       map[string][]chan string
-	mp4subsmut    sync.Mutex
-	replicator    replication.Replicator
-	hlsRunning    map[string]HLSStream
-	hlsRunningMut sync.Mutex
+	cli            *config.CLI
+	mp4subs        map[string][]chan string
+	mp4subsmut     sync.Mutex
+	replicator     replication.Replicator
+	hlsRunning     map[string]HLSStream
+	hlsRunningMut  sync.Mutex
+	httpPipes      map[string]io.Writer
+	httpPipesMutex sync.Mutex
 }
 
 type HLSStream struct {
@@ -64,7 +67,33 @@ func MakeMediaManager(ctx context.Context, cli *config.CLI, signer crypto.Signer
 		mp4subs:    map[string][]chan string{},
 		replicator: rep,
 		hlsRunning: map[string]HLSStream{},
+		httpPipes:  map[string]io.Writer{},
 	}, nil
+}
+
+// replacement for os.Pipe that works on windows
+func (mm *MediaManager) HTTPPipe() (string, io.Reader, func(), error) {
+	uu, err := uuid.NewV7()
+	if err != nil {
+		return "", nil, nil, err
+	}
+	mm.httpPipesMutex.Lock()
+	defer mm.httpPipesMutex.Unlock()
+	u := fmt.Sprintf("%s/http-pipe/%s", mm.cli.OwnInternalURL(), uu.String())
+	done := func() {
+		mm.httpPipesMutex.Lock()
+		defer mm.httpPipesMutex.Unlock()
+		delete(mm.httpPipes, uu.String())
+	}
+	r, w := io.Pipe()
+	mm.httpPipes[uu.String()] = w
+	return u, r, done, nil
+}
+
+func (mm *MediaManager) GetHTTPPipeWriter(uu string) io.Writer {
+	mm.httpPipesMutex.Lock()
+	defer mm.httpPipesMutex.Unlock()
+	return mm.httpPipes[uu]
 }
 
 // subscribe to the latest segments from a given user for livestreaming purposes
@@ -241,7 +270,7 @@ func (mm *MediaManager) SegmentToMP4(ctx context.Context, user string, w io.Writ
 func (mm *MediaManager) SegmentToStream(ctx context.Context, user string, muxer ffmpeg.ComponentOptions, w io.Writer) error {
 	tc := ffmpeg.NewTranscoder()
 	defer tc.StopTranscoder()
-	or, ow, odone, err := SafePipe()
+	ourl, or, odone, err := mm.HTTPPipe()
 	if err != nil {
 		return err
 	}
@@ -260,10 +289,9 @@ func (mm *MediaManager) SegmentToStream(ctx context.Context, user string, muxer 
 			},
 		},
 	}
-	oname := fmt.Sprintf("pipe:%d", ow.Fd())
 	out := []ffmpeg.TranscodeOptions{
 		{
-			Oname: oname,
+			Oname: ourl,
 			VideoEncoder: ffmpeg.ComponentOptions{
 				Name: "copy",
 			},
@@ -271,22 +299,17 @@ func (mm *MediaManager) SegmentToStream(ctx context.Context, user string, muxer 
 				Name: "copy",
 			},
 			Profile: ffmpeg.VideoProfile{Format: ffmpeg.FormatNone},
-			Muxer: ffmpeg.ComponentOptions{
-				Name: "matroska",
-			},
+			Muxer:   muxer,
 		},
 	}
 	g, _ := errgroup.WithContext(ctx)
 	g.Go(func() error {
 		_, err := tc.Transcode(in, out)
-		// log.Log(ctx, "transcode done", "error", err)
 		tc.StopTranscoder()
 		return err
 	})
 	g.Go(func() error {
 		_, err := io.Copy(w, or)
-		// log.Log(ctx, "input copy done", "error", err)
-		or.Close()
 		return err
 	})
 	return g.Wait()

@@ -32,7 +32,7 @@ func (a *AquareumAPI) HandleMP4Playback(ctx context.Context) httprouter.Handle {
 			return
 		}
 		user = a.NormalizeUser(user)
-		var delayMS int64 = 1000
+		var delayMS int64 = 3000
 		userDelay := r.URL.Query().Get("delayms")
 		if userDelay != "" {
 			var err error

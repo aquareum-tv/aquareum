@@ -174,6 +174,20 @@ func (a *AquareumAPI) InternalHandler(ctx context.Context) (http.Handler, error)
 		w.WriteHeader(200)
 	})
 
+	router.POST("/http-pipe/:uuid", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		uu := p.ByName("uuid")
+		if uu == "" {
+			errors.WriteHTTPBadRequest(w, "uuid required", nil)
+			return
+		}
+		pr := a.MediaManager.GetHTTPPipeWriter(uu)
+		if pr == nil {
+			errors.WriteHTTPNotFound(w, "http-pipe not found", nil)
+			return
+		}
+		io.Copy(pr, r.Body)
+	})
+
 	// self-destruct code, useful for dumping goroutines on windows
 	router.POST("/abort", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		pprof.Lookup("goroutine").WriteTo(os.Stderr, 2)
