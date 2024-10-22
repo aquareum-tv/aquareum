@@ -36,23 +36,60 @@ func SafePipe() (*os.File, *os.File, func(), error) {
 	}, nil
 }
 
+func readerNeedData(ctx context.Context, input io.Reader) func(self *app.Source, length uint) {
+	return func(self *app.Source, length uint) {
+		bs := make([]byte, length)
+		read, err := input.Read(bs)
+		if err != nil {
+			if errors.Is(err, io.EOF) {
+				if read > 0 {
+					panic("got data on eof???")
+				}
+				log.Log(ctx, "EOF, ending stream", "length", read)
+				self.EndStream()
+				return
+			} else {
+				panic(err)
+			}
+		}
+		toPush := bs
+		if uint(read) < length {
+			toPush = bs[:read]
+		}
+		buffer := gst.NewBufferWithSize(int64(len(toPush)))
+		buffer.Map(gst.MapWrite).WriteData(toPush)
+		self.PushBuffer(buffer)
+	}
+}
+
+func writerNewSample(ctx context.Context, output io.Writer) func(sink *app.Sink) gst.FlowReturn {
+	return func(sink *app.Sink) gst.FlowReturn {
+		sample := sink.PullSample()
+		if sample == nil {
+			return gst.FlowOK
+		}
+		// defer sample.Unref()
+
+		// Retrieve the buffer from the sample.
+		buffer := sample.GetBuffer()
+
+		_, err := io.Copy(output, buffer.Reader())
+
+		if err != nil {
+			panic(err)
+		}
+
+		return gst.FlowOK
+	}
+}
+
 func AddOpusToMKV(ctx context.Context, input io.Reader, output io.Writer) error {
-	ir, iw, idone, err := SafePipe()
-	if err != nil {
-		return err
-	}
-	defer idone()
-	or, ow, odone, err := SafePipe()
-	if err != nil {
-		return err
-	}
-	defer odone()
 
 	mainLoop := glib.NewMainLoop(glib.MainContextDefault(), false)
 
 	pipelineSlice := []string{
-		fmt.Sprintf("fdsrc name=livestream fd=%d ! matroskademux name=demux", ir.Fd()),
-		fmt.Sprintf("matroskamux name=mux ! fdsink fd=%d", ow.Fd()),
+		"appsrc name=appsrc ! matroskademux name=demux",
+		"matroskamux name=mux ! appsink name=appsink",
 		"demux.audio_0 ! queue ! tee name=asplit",
 		"demux.video_0 ! queue ! mux.video_0",
 		"asplit. ! queue ! fdkaacdec ! audioresample ! opusenc inband-fec=true perfect-timestamp=true bitrate=128000 ! mux.audio_1",
@@ -64,8 +101,32 @@ func AddOpusToMKV(ctx context.Context, input io.Reader, output io.Writer) error 
 		return err
 	}
 
+	appsrc, err := pipeline.GetElementByName("appsrc")
+	if err != nil {
+		return err
+	}
+
+	src := app.SrcFromElement(appsrc)
+	src.SetCallbacks(&app.SourceCallbacks{
+		NeedDataFunc: readerNeedData(ctx, input),
+	})
+
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
+
+	appsink, err := pipeline.GetElementByName("appsink")
+	if err != nil {
+		return err
+	}
+
+	sink := app.SinkFromElement(appsink)
+	sink.SetCallbacks(&app.SinkCallbacks{
+		NewSampleFunc: writerNewSample(ctx, output),
+		EOSFunc: func(sink *app.Sink) {
+			cancel()
+		},
+	})
+
 	go func() {
 		<-ctx.Done()
 		pipeline.BlockSetState(gst.StateNull)
@@ -95,30 +156,9 @@ func AddOpusToMKV(ctx context.Context, input io.Reader, output io.Writer) error 
 	// Start the pipeline
 	pipeline.SetState(gst.StatePlaying)
 
-	g, _ := errgroup.WithContext(ctx)
-
-	g.Go(func() error {
-		_, err := io.Copy(iw, input)
-		log.Log(ctx, "input copy complete", "error", err)
-		iw.Close()
-		return err
-	})
-
-	g.Go(func() error {
-		mainLoop.Run()
-		log.Log(ctx, "main loop complete")
-		ow.Close()
-		return nil
-	})
-
-	g.Go(func() error {
-		runtime.GC()
-		_, err := io.Copy(output, or)
-		log.Log(ctx, "output copy complete", "error", err)
-		return err
-	})
-
-	return g.Wait()
+	mainLoop.Run()
+	log.Log(ctx, "main loop complete")
+	return nil
 }
 
 // basic test to make sure gstreamer functionality is working
@@ -212,19 +252,13 @@ func SelfTest(ctx context.Context) error {
 }
 
 func ToHLS(ctx context.Context, input io.Reader, dir string) error {
-	ir, iw, idone, err := SafePipe()
-	if err != nil {
-		return err
-	}
-	defer idone()
-
 	mainLoop := glib.NewMainLoop(glib.MainContextDefault(), false)
 
 	seg := filepath.Join(dir, "segment%05d.ts")
 	playlist := filepath.Join(dir, HLS_PLAYLIST)
 	pipelineSlice := []string{
-		fmt.Sprintf("fdsrc name=livestream fd=%d ! matroskademux name=demux", ir.Fd()),
-		fmt.Sprintf("hlssink2 name=mux location=%s target-duration=1 playlist-location=%s", seg, playlist),
+		"appsrc name=appsrc ! matroskademux name=demux",
+		"hlssink2 name=mux target-duration=1",
 		"demux.video_0 ! queue ! h264parse ! mux.video",
 		"demux.audio_0 ! queue ! aacparse ! mux.audio",
 	}
@@ -233,6 +267,30 @@ func ToHLS(ctx context.Context, input io.Reader, dir string) error {
 	if err != nil {
 		return err
 	}
+
+	mux, err := pipeline.GetElementByName("mux")
+	if err != nil {
+		return err
+	}
+	// these two can't be set on a string or backslashes break things on windows
+	err = mux.SetProperty("location", seg)
+	if err != nil {
+		return err
+	}
+	err = mux.SetProperty("playlist-location", playlist)
+	if err != nil {
+		return err
+	}
+
+	appsrc, err := pipeline.GetElementByName("appsrc")
+	if err != nil {
+		return err
+	}
+
+	src := app.SrcFromElement(appsrc)
+	src.SetCallbacks(&app.SourceCallbacks{
+		NeedDataFunc: readerNeedData(ctx, input),
+	})
 
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
@@ -264,22 +322,10 @@ func ToHLS(ctx context.Context, input io.Reader, dir string) error {
 	// Start the pipeline
 	pipeline.SetState(gst.StatePlaying)
 
-	g, _ := errgroup.WithContext(ctx)
+	mainLoop.Run()
+	log.Log(ctx, "main loop complete")
 
-	g.Go(func() error {
-		_, err := io.Copy(iw, input)
-		log.Log(ctx, "input copy complete", "error", err)
-		iw.Close()
-		return err
-	})
-
-	g.Go(func() error {
-		mainLoop.Run()
-		log.Log(ctx, "main loop complete")
-		return nil
-	})
-
-	return g.Wait()
+	return nil
 }
 
 func (mm *MediaManager) IngestStream(ctx context.Context, input io.Reader, ms *MediaSigner) error {
@@ -300,29 +346,7 @@ func (mm *MediaManager) IngestStream(ctx context.Context, input io.Reader, ms *M
 	// defer runtime.KeepAlive(srcele)
 	src := app.SrcFromElement(srcele)
 	src.SetCallbacks(&app.SourceCallbacks{
-		NeedDataFunc: func(self *app.Source, length uint) {
-			bs := make([]byte, length)
-			read, err := input.Read(bs)
-			if err != nil {
-				if errors.Is(err, io.EOF) {
-					if read > 0 {
-						panic("got data on eof???")
-					}
-					log.Log(ctx, "EOF, ending stream", "length", read)
-					self.EndStream()
-					return
-				} else {
-					panic(err)
-				}
-			}
-			toPush := bs
-			if uint(read) < length {
-				toPush = bs[:read]
-			}
-			buffer := gst.NewBufferWithSize(int64(len(toPush)))
-			buffer.Map(gst.MapWrite).WriteData(toPush)
-			self.PushBuffer(buffer)
-		},
+		NeedDataFunc: readerNeedData(ctx, input),
 	})
 	parseEle, err := pipeline.GetElementByName("parse")
 	if err != nil {
@@ -394,7 +418,7 @@ func (mm *MediaManager) TestSource(ctx context.Context, ms *MediaSigner) error {
 
 	pipelineSlice := []string{
 		"h264parse name=videoparse",
-		"compositor name=comp ! videoconvert ! x264enc speed-preset=ultrafast key-int-max=30 ! queue ! videoparse.",
+		"compositor name=comp ! videoconvert ! video/x-raw,format=I420 ! x264enc speed-preset=ultrafast key-int-max=30 ! queue ! videoparse.",
 		fmt.Sprintf(`videotestsrc is-live=true ! video/x-raw,format=AYUV,framerate=30/1,width=%d,height=%d ! comp.`, TESTSRC_WIDTH, TESTSRC_HEIGHT),
 		fmt.Sprintf("videobox border-alpha=0 top=-%d left=-%d name=box ! comp.", (TESTSRC_HEIGHT/2)-(QR_SIZE/2), (TESTSRC_WIDTH/2)-(QR_SIZE/2)),
 		"appsrc name=pngsrc ! pngdec ! videoconvert ! videorate ! video/x-raw,format=AYUV,framerate=1/1 ! box.",
@@ -519,34 +543,14 @@ func (mm *MediaManager) SegmentAndSignElem(ctx context.Context, ms *MediaSigner)
 	}
 
 	elem.Connect("sink-added", func(split, sinkEle *gst.Element) {
-		log.Log(ctx, "sink-added")
 		buf := &bytes.Buffer{}
 		appsink := app.SinkFromElement(sinkEle)
 		if appsink == nil {
 			panic("appsink should not be nil")
 		}
 		appsink.SetCallbacks(&app.SinkCallbacks{
-			NewSampleFunc: func(sink *app.Sink) gst.FlowReturn {
-				sample := sink.PullSample()
-				if sample == nil {
-					return gst.FlowOK
-				}
-				sample.Ref()
-				defer sample.Unref()
-
-				// Retrieve the buffer from the sample.
-				buffer := sample.GetBuffer()
-
-				_, err := io.Copy(buf, buffer.Reader())
-
-				if err != nil {
-					panic(err)
-				}
-
-				return gst.FlowOK
-			},
+			NewSampleFunc: writerNewSample(ctx, buf),
 			EOSFunc: func(sink *app.Sink) {
-				log.Log(ctx, "eos")
 				bs, err := ms.SignMP4(ctx, bytes.NewReader(buf.Bytes()), time.Now().UnixMilli())
 				if err != nil {
 					log.Log(ctx, "error signing segment", "error", err)

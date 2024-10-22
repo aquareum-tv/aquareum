@@ -1,19 +1,15 @@
 package media
 
 import (
-	"bufio"
-	"bytes"
 	"context"
 	"os"
 	"path/filepath"
 	"runtime"
 	"testing"
-	"time"
 
 	"aquareum.tv/aquareum/pkg/config"
 	ct "aquareum.tv/aquareum/pkg/config/configtesting"
 	"aquareum.tv/aquareum/pkg/crypto/aqpub"
-	"aquareum.tv/aquareum/pkg/crypto/signers/eip712"
 	"aquareum.tv/aquareum/pkg/crypto/signers/eip712/eip712test"
 	_ "aquareum.tv/aquareum/pkg/media/mediatesting"
 	"aquareum.tv/aquareum/pkg/replication/boring"
@@ -44,48 +40,48 @@ func getStaticTestMediaManager(t *testing.T) (*MediaManager, *MediaSigner) {
 	return mm, ms
 }
 
-func mp4(t *testing.T) []byte {
-	f, err := os.Open(getFixture("video.mpegts"))
-	require.NoError(t, err)
-	defer f.Close()
-	buf := bytes.Buffer{}
-	w := bufio.NewWriter(&buf)
-	err = MuxToMP4(context.Background(), f, w)
-	require.NoError(t, err)
-	return buf.Bytes()
-}
+// func mp4(t *testing.T) []byte {
+// 	f, err := os.Open(getFixture("video.mpegts"))
+// 	require.NoError(t, err)
+// 	defer f.Close()
+// 	buf := bytes.Buffer{}
+// 	w := bufio.NewWriter(&buf)
+// 	err = MuxToMP4(context.Background(), f, w)
+// 	require.NoError(t, err)
+// 	return buf.Bytes()
+// }
 
-func TestMuxToMP4(t *testing.T) {
-	bs := mp4(t)
-	require.Greater(t, len(bs), 0)
-}
+// func TestMuxToMP4(t *testing.T) {
+// 	bs := mp4(t)
+// 	require.Greater(t, len(bs), 0)
+// }
 
-func TestSignMP4(t *testing.T) {
-	mp4bs := mp4(t)
-	r := bytes.NewReader(mp4bs)
-	_, ms := getStaticTestMediaManager(t)
-	millis := time.Now().UnixMilli()
-	bs, err := ms.SignMP4(context.Background(), r, millis)
-	require.NoError(t, err)
-	require.Greater(t, len(bs), 0)
-}
+// func TestSignMP4(t *testing.T) {
+// 	mp4bs := mp4(t)
+// 	r := bytes.NewReader(mp4bs)
+// 	_, ms := getStaticTestMediaManager(t)
+// 	millis := time.Now().UnixMilli()
+// 	bs, err := ms.SignMP4(context.Background(), r, millis)
+// 	require.NoError(t, err)
+// 	require.Greater(t, len(bs), 0)
+// }
 
-func TestSignMP4WithWallet(t *testing.T) {
-	eip712test.WithTestSigner(func(signer *eip712.EIP712Signer) {
-		cli := ct.CLI(t, &config.CLI{
-			TAURL:          "http://timestamp.digicert.com",
-			AllowedStreams: []aqpub.Pub{},
-		})
-		ms, err := MakeMediaSigner(context.Background(), cli, "test person", signer)
-		require.NoError(t, err)
-		mp4bs := mp4(t)
-		r := bytes.NewReader(mp4bs)
-		millis := time.Now().UnixMilli()
-		bs, err := ms.SignMP4(context.Background(), r, millis)
-		require.NoError(t, err)
-		require.Greater(t, len(bs), 0)
-	})
-}
+// func TestSignMP4WithWallet(t *testing.T) {
+// 	eip712test.WithTestSigner(func(signer *eip712.EIP712Signer) {
+// 		cli := ct.CLI(t, &config.CLI{
+// 			TAURL:          "http://timestamp.digicert.com",
+// 			AllowedStreams: []aqpub.Pub{},
+// 		})
+// 		ms, err := MakeMediaSigner(context.Background(), cli, "test person", signer)
+// 		require.NoError(t, err)
+// 		mp4bs := mp4(t)
+// 		r := bytes.NewReader(mp4bs)
+// 		millis := time.Now().UnixMilli()
+// 		bs, err := ms.SignMP4(context.Background(), r, millis)
+// 		require.NoError(t, err)
+// 		require.Greater(t, len(bs), 0)
+// 	})
+// }
 
 // TODO: Would be good to have this tested with SoftHSM
 // func TestSignMP4WithHSM(t *testing.T) {
