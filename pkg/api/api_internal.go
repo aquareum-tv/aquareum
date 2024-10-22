@@ -85,7 +85,6 @@ func (a *AquareumAPI) InternalHandler(ctx context.Context) (http.Handler, error)
 			return
 		}
 		user = a.NormalizeUser(user)
-		log.Log(ctx, "got latest.mp4 request", "user", user)
 		file := <-a.MediaManager.SubscribeSegment(ctx, user)
 		w.Header().Set("Location", fmt.Sprintf("%s/playback/%s/segment/%s\n", a.CLI.OwnInternalURL(), user, file))
 		w.WriteHeader(301)

@@ -38,7 +38,11 @@ type clogContextKeyType struct{}
 // singleton value to identify our logging metadata in context
 var clogContextKey = clogContextKeyType{}
 
+var errorLogLevel glog.Level = 1
+var warnLogLevel glog.Level = 2
 var defaultLogLevel glog.Level = 3
+var debugLogLevel glog.Level = 4
+var traceLogLevel glog.Level = 9
 
 // basic type to represent logging container. logging context is immutable after
 // creation, so we don't have to worry about locking.
@@ -90,7 +94,7 @@ func WithLogValues(ctx context.Context, args ...string) context.Context {
 }
 
 // Actual log handler; the others have wrappers to properly handle stack depth
-func (v *VerboseLogger) log(ctx context.Context, message string, args ...any) {
+func (v *VerboseLogger) log(ctx context.Context, message string, fn func(string, ...any), args ...any) {
 	if !glog.V(v.level) {
 		return
 	}
@@ -117,15 +121,35 @@ func (v *VerboseLogger) log(ctx context.Context, message string, args ...any) {
 	if !hasCaller {
 		allArgs = append(allArgs, "caller", caller(3))
 	}
-	slog.Info(message, allArgs...)
+	fn(message, allArgs...)
 }
 
 func (v *VerboseLogger) Log(ctx context.Context, message string, args ...any) {
-	v.log(ctx, message, args...)
+	if v.level >= 4 {
+		v.log(ctx, message, slog.Debug, args...)
+	} else {
+		v.log(ctx, message, slog.Info, args...)
+	}
+}
+
+func Error(ctx context.Context, message string, args ...any) {
+	V(errorLogLevel).log(ctx, message, slog.Error, args...)
+}
+
+func Warn(ctx context.Context, message string, args ...any) {
+	V(warnLogLevel).log(ctx, message, slog.Warn, args...)
 }
 
 func Log(ctx context.Context, message string, args ...any) {
-	V(defaultLogLevel).log(ctx, message, args...)
+	V(defaultLogLevel).log(ctx, message, slog.Info, args...)
+}
+
+func Debug(ctx context.Context, message string, args ...any) {
+	V(debugLogLevel).log(ctx, message, slog.Debug, args...)
+}
+
+func Trace(ctx context.Context, message string, args ...any) {
+	V(traceLogLevel).log(ctx, message, slog.Debug, args...)
 }
 
 // returns filenames relative to aquareum root

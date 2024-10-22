@@ -45,7 +45,7 @@ func readerNeedData(ctx context.Context, input io.Reader) func(self *app.Source,
 				if read > 0 {
 					panic("got data on eof???")
 				}
-				log.Log(ctx, "EOF, ending stream", "length", read)
+				log.Debug(ctx, "EOF, ending stream", "length", read)
 				self.EndStream()
 				return
 			} else {
@@ -138,17 +138,17 @@ func AddOpusToMKV(ctx context.Context, input io.Reader, output io.Writer) error 
 		switch msg.Type() {
 
 		case gst.MessageEOS: // When end-of-stream is received flush the pipeling and stop the main loop
-			log.Log(ctx, "got EOS")
+			log.Debug(ctx, "got EOS")
 			cancel()
 		case gst.MessageError: // Error messages are always fatal
 			err := msg.ParseError()
-			log.Log(ctx, "gstreamer error", "error", err.Error())
+			log.Error(ctx, "gstreamer error", "error", err.Error())
 			if debug := err.DebugString(); debug != "" {
 				log.Log(ctx, "gstreamer debug", "message", debug)
 			}
 			cancel()
 		default:
-			log.Log(ctx, msg.String())
+			log.Debug(ctx, msg.String())
 		}
 		return true
 	})
@@ -308,13 +308,13 @@ func ToHLS(ctx context.Context, input io.Reader, dir string) error {
 			cancel()
 		case gst.MessageError: // Error messages are always fatal
 			err := msg.ParseError()
-			log.Log(ctx, "gstreamer error", "error", err.Error())
+			log.Error(ctx, "gstreamer error", "error", err.Error())
 			if debug := err.DebugString(); debug != "" {
-				log.Log(ctx, "gstreamer debug", "message", debug)
+				log.Debug(ctx, "gstreamer debug", "message", debug)
 			}
 			cancel()
 		default:
-			log.Log(ctx, msg.String())
+			log.Debug(ctx, msg.String())
 		}
 		return true
 	})
@@ -384,13 +384,13 @@ func (mm *MediaManager) IngestStream(ctx context.Context, input io.Reader, ms *M
 			mainLoop.Quit()
 		case gst.MessageError: // Error messages are always fatal
 			err := msg.ParseError()
-			log.Log(ctx, "gstreamer error", "error", err.Error())
+			log.Error(ctx, "gstreamer error", "error", err.Error())
 			if debug := err.DebugString(); debug != "" {
 				log.Log(ctx, "gstreamer debug", "message", debug)
 			}
 			mainLoop.Quit()
 		default:
-			log.Log(ctx, msg.String())
+			log.Debug(ctx, msg.String())
 		}
 		return true
 	})
@@ -553,12 +553,12 @@ func (mm *MediaManager) SegmentAndSignElem(ctx context.Context, ms *MediaSigner)
 			EOSFunc: func(sink *app.Sink) {
 				bs, err := ms.SignMP4(ctx, bytes.NewReader(buf.Bytes()), time.Now().UnixMilli())
 				if err != nil {
-					log.Log(ctx, "error signing segment", "error", err)
+					log.Error(ctx, "error signing segment", "error", err)
 					return
 				}
 				err = mm.ValidateMP4(ctx, bytes.NewReader(bs))
 				if err != nil {
-					log.Log(ctx, "error validating segment", "error", err)
+					log.Error(ctx, "error validating segment", "error", err)
 					return
 				}
 			},

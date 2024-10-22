@@ -54,7 +54,8 @@ func start(build *config.BuildFlags, platformJobs []jobFunc) error {
 		fmt.Println("self-test successful!")
 		os.Exit(0)
 	}
-
+	flag.Set("logtostderr", "true")
+	vFlag := flag.Lookup("v")
 	fs := flag.NewFlagSet("aquareum", flag.ExitOnError)
 	cli := config.CLI{Build: build}
 	fs.StringVar(&cli.DataDir, "data-dir", config.DefaultDataDir(), "directory for keeping all aquareum data")
@@ -84,6 +85,7 @@ func start(build *config.BuildFlags, platformJobs []jobFunc) error {
 	cli.AddressSliceFlag(fs, &cli.AllowedStreams, "allowed-streams", "", "comma-separated list of addresses that this node will replicate")
 	cli.StringSliceFlag(fs, &cli.Peers, "peers", "", "other aquareum nodes to replicate to")
 	fs.BoolVar(&cli.TestStream, "test-stream", false, "run a built-in test stream on boot")
+	verbosity := fs.String("v", "3", "log verbosity level")
 
 	fs.Bool("insecure", false, "DEPRECATED, does nothing.")
 
@@ -102,6 +104,8 @@ func start(build *config.BuildFlags, platformJobs []jobFunc) error {
 	if err != nil {
 		return err
 	}
+	flag.CommandLine.Parse(nil)
+	vFlag.Value.Set(*verbosity)
 
 	ctx := context.Background()
 
