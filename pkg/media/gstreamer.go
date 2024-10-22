@@ -63,22 +63,6 @@ func AddOpusToMKV(ctx context.Context, input io.Reader, output io.Writer) error 
 	if err != nil {
 		return err
 	}
-	// demux, err := pipeline.GetElementByName("demux")
-	// if err != nil {
-	// 	return err
-	// }
-	// // Get the audiotestsrc's src-pad.
-	// demuxPad := demux.GetStaticPad("sink")
-	// if demuxPad == nil {
-	// 	return fmt.Errorf("src pad on src element was nil")
-	// }
-
-	// // Add a probe handler on the audiotestsrc's src-pad.
-	// // This handler gets called for every buffer that passes the pad we probe.
-	// demuxPad.AddProbe(gst.PadProbeTypeAllBoth, func(self *gst.Pad, info *gst.PadProbeInfo) gst.PadProbeReturn {
-	// 	// fmt.Printf("%v\n", info)
-	// 	return gst.PadProbeOK
-	// })
 
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
@@ -93,6 +77,7 @@ func AddOpusToMKV(ctx context.Context, input io.Reader, output io.Writer) error 
 		switch msg.Type() {
 
 		case gst.MessageEOS: // When end-of-stream is received flush the pipeling and stop the main loop
+			log.Log(ctx, "got EOS")
 			cancel()
 		case gst.MessageError: // Error messages are always fatal
 			err := msg.ParseError()
@@ -299,7 +284,9 @@ func ToHLS(ctx context.Context, input io.Reader, dir string) error {
 
 func (mm *MediaManager) IngestStream(ctx context.Context, input io.Reader, ms *MediaSigner) error {
 	pipelineSlice := []string{
-		"appsrc name=streamsrc ! matroskademux name=demux ! h264parse name=parse",
+		"appsrc name=streamsrc ! matroskademux name=demux",
+		"demux. ! queue ! h264parse name=parse",
+		"demux. ! queue ! aacparse name=audioparse",
 	}
 	pipeline, err := gst.NewPipelineFromString(strings.Join(pipelineSlice, "\n"))
 	if err != nil {
@@ -341,14 +328,25 @@ func (mm *MediaManager) IngestStream(ctx context.Context, input io.Reader, ms *M
 	if err != nil {
 		return err
 	}
-	// defer runtime.KeepAlive(parseEle)
+
 	signer, err := mm.SegmentAndSignElem(ctx, ms)
 	if err != nil {
 		return err
 	}
-	// defer runtime.KeepAlive(signer)
-	pipeline.Add(signer)
+
+	err = pipeline.Add(signer)
+	if err != nil {
+		return err
+	}
 	err = parseEle.Link(signer)
+	if err != nil {
+		return err
+	}
+	audioparse, err := pipeline.GetElementByName("audioparse")
+	if err != nil {
+		return err
+	}
+	err = audioparse.Link(signer)
 	if err != nil {
 		return err
 	}
@@ -367,13 +365,16 @@ func (mm *MediaManager) IngestStream(ctx context.Context, input io.Reader, ms *M
 				log.Log(ctx, "gstreamer debug", "message", debug)
 			}
 			mainLoop.Quit()
-			// default:
-			// log.Log(ctx, msg.String())
+		default:
+			log.Log(ctx, msg.String())
 		}
 		return true
 	})
 
-	pipeline.SetState(gst.StatePlaying)
+	err = pipeline.SetState(gst.StatePlaying)
+	if err != nil {
+		return err
+	}
 
 	mainLoop.Run()
 
@@ -392,11 +393,12 @@ func (mm *MediaManager) TestSource(ctx context.Context, ms *MediaSigner) error {
 	mainLoop := glib.NewMainLoop(glib.MainContextDefault(), false)
 
 	pipelineSlice := []string{
-		"h264parse name=parser",
-		"compositor name=comp ! videoconvert ! x264enc speed-preset=ultrafast key-int-max=30 ! parser.",
+		"h264parse name=videoparse",
+		"compositor name=comp ! videoconvert ! x264enc speed-preset=ultrafast key-int-max=30 ! queue ! videoparse.",
 		fmt.Sprintf(`videotestsrc is-live=true ! video/x-raw,format=AYUV,framerate=30/1,width=%d,height=%d ! comp.`, TESTSRC_WIDTH, TESTSRC_HEIGHT),
 		fmt.Sprintf("videobox border-alpha=0 top=-%d left=-%d name=box ! comp.", (TESTSRC_HEIGHT/2)-(QR_SIZE/2), (TESTSRC_WIDTH/2)-(QR_SIZE/2)),
 		"appsrc name=pngsrc ! pngdec ! videoconvert ! videorate ! video/x-raw,format=AYUV,framerate=1/1 ! box.",
+		"audiotestsrc ! audioconvert ! fdkaacenc ! queue ! aacparse name=audioparse",
 	}
 
 	pipeline, err := gst.NewPipelineFromString(strings.Join(pipelineSlice, "\n"))
@@ -408,16 +410,15 @@ func (mm *MediaManager) TestSource(ctx context.Context, ms *MediaSigner) error {
 	if err != nil {
 		return err
 	}
-	if pngele == nil {
-		return fmt.Errorf("pngsrc not found")
-	}
 
-	parseele, err := pipeline.GetElementByName("parser")
+	videoparse, err := pipeline.GetElementByName("videoparse")
 	if err != nil {
 		return err
 	}
-	if parseele == nil {
-		return fmt.Errorf("parseele not found")
+
+	audioparse, err := pipeline.GetElementByName("audioparse")
+	if err != nil {
+		return err
 	}
 
 	signer, err := mm.SegmentAndSignElem(ctx, ms)
@@ -425,7 +426,12 @@ func (mm *MediaManager) TestSource(ctx context.Context, ms *MediaSigner) error {
 		return err
 	}
 	pipeline.Add(signer)
-	err = parseele.Link(signer)
+
+	err = videoparse.Link(signer)
+	if err != nil {
+		return fmt.Errorf("link to signer failed: %w", err)
+	}
+	err = audioparse.Link(signer)
 	if err != nil {
 		return fmt.Errorf("link to signer failed: %w", err)
 	}
@@ -503,7 +509,17 @@ func (mm *MediaManager) SegmentAndSignElem(ctx context.Context, ms *MediaSigner)
 		return nil, err
 	}
 
+	p := elem.GetRequestPad("video")
+	if p == nil {
+		return nil, fmt.Errorf("failed to get video pad")
+	}
+	p = elem.GetRequestPad("audio_%u")
+	if p == nil {
+		return nil, fmt.Errorf("failed to get audio pad")
+	}
+
 	elem.Connect("sink-added", func(split, sinkEle *gst.Element) {
+		log.Log(ctx, "sink-added")
 		buf := &bytes.Buffer{}
 		appsink := app.SinkFromElement(sinkEle)
 		if appsink == nil {
@@ -530,6 +546,7 @@ func (mm *MediaManager) SegmentAndSignElem(ctx context.Context, ms *MediaSigner)
 				return gst.FlowOK
 			},
 			EOSFunc: func(sink *app.Sink) {
+				log.Log(ctx, "eos")
 				bs, err := ms.SignMP4(ctx, bytes.NewReader(buf.Bytes()), time.Now().UnixMilli())
 				if err != nil {
 					log.Log(ctx, "error signing segment", "error", err)

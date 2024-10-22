@@ -135,6 +135,12 @@ export default function Controls(props: PlayerProps) {
 }
 
 export function PopoverMenu(props: PlayerProps) {
+  const [open, setOpen] = useState(false);
+  useEffect(() => {
+    if (props.showControls === false) {
+      setOpen(false);
+    }
+  }, [props.showControls]);
   return (
     <Popover
       size="$5"
@@ -142,11 +148,19 @@ export function PopoverMenu(props: PlayerProps) {
       placement="top"
       keepChildrenMounted
       stayInFrame
+      open={open}
     >
       <Popover.Trigger asChild cursor="pointer">
-        <View paddingLeft="$3" paddingRight="$5" justifyContent="center">
-          <Settings />
-        </View>
+        <Pressable
+          style={{
+            justifyContent: "center",
+          }}
+          onPress={() => setOpen(!open)}
+        >
+          <View paddingLeft="$3" paddingRight="$5" justifyContent="center">
+            <Settings />
+          </View>
+        </Pressable>
       </Popover.Trigger>
 
       <Adapt when="sm" platform="touch">
