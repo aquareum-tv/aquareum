@@ -54,7 +54,8 @@ func start(build *config.BuildFlags, platformJobs []jobFunc) error {
 		fmt.Println("self-test successful!")
 		os.Exit(0)
 	}
-
+	flag.Set("logtostderr", "true")
+	vFlag := flag.Lookup("v")
 	fs := flag.NewFlagSet("aquareum", flag.ExitOnError)
 	cli := config.CLI{Build: build}
 	fs.StringVar(&cli.DataDir, "data-dir", config.DefaultDataDir(), "directory for keeping all aquareum data")
@@ -84,6 +85,7 @@ func start(build *config.BuildFlags, platformJobs []jobFunc) error {
 	cli.AddressSliceFlag(fs, &cli.AllowedStreams, "allowed-streams", "", "comma-separated list of addresses that this node will replicate")
 	cli.StringSliceFlag(fs, &cli.Peers, "peers", "", "other aquareum nodes to replicate to")
 	fs.BoolVar(&cli.TestStream, "test-stream", false, "run a built-in test stream on boot")
+	verbosity := fs.String("v", "3", "log verbosity level")
 
 	fs.Bool("insecure", false, "DEPRECATED, does nothing.")
 
@@ -102,6 +104,8 @@ func start(build *config.BuildFlags, platformJobs []jobFunc) error {
 	if err != nil {
 		return err
 	}
+	flag.CommandLine.Parse(nil)
+	vFlag.Value.Set(*verbosity)
 
 	ctx := context.Background()
 
@@ -222,7 +226,11 @@ func start(build *config.BuildFlags, platformJobs []jobFunc) error {
 			return err
 		}
 	}
-	a, err := api.MakeAquareumAPI(&cli, mod, eip712signer, noter, mm)
+	ms, err := media.MakeMediaSigner(ctx, &cli, cli.StreamerName, signer)
+	if err != nil {
+		return err
+	}
+	a, err := api.MakeAquareumAPI(&cli, mod, eip712signer, noter, mm, ms)
 	if err != nil {
 		return err
 	}
@@ -252,8 +260,21 @@ func start(build *config.BuildFlags, platformJobs []jobFunc) error {
 	})
 
 	if cli.TestStream {
+		testSigner, err := eip712.MakeEIP712Signer(ctx, &eip712.EIP712SignerOptions{
+			Schema:          schema,
+			EthKeystorePath: filepath.Join(cli.DataDir, "test-signer"),
+		})
+		if err != nil {
+			return err
+		}
+		testMediaSigner, err := media.MakeMediaSigner(ctx, &cli, "self-test-signer", testSigner)
+		if err != nil {
+			return err
+		}
+		cli.AllowedStreams = append(cli.AllowedStreams, testMediaSigner.Pub)
+		a.Aliases["self-test"] = testMediaSigner.Pub.String()
 		group.Go(func() error {
-			return mm.TestSource(ctx)
+			return mm.TestSource(ctx, testMediaSigner)
 		})
 	}
 

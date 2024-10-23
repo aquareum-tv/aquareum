@@ -3,6 +3,7 @@ import { resolve } from "path";
 import { access, constants } from "fs/promises";
 import { spawn } from "child_process";
 import getEnv from "./env";
+import { app } from "electron";
 
 const findExe = async (): Promise<string> => {
   const { isDev } = getEnv();
@@ -27,25 +28,38 @@ const findExe = async (): Promise<string> => {
   return exe;
 };
 
-export default async function makeNode() {
+export default async function makeNode(opts: {
+  env: { [k: string]: string };
+  autoQuit: boolean;
+}) {
   const exe = await findExe();
   const addr = "127.0.0.1:38082";
   const internalAddr = "127.0.0.1:39092";
-  const proc = spawn(exe, ["--insecure"], {
+  const proc = spawn(exe, [], {
     stdio: "inherit",
     env: {
       ...process.env,
-      AQ_NO_MIST: "true",
       AQ_HTTP_ADDR: addr,
       AQ_HTTP_INTERNAL_ADDR: internalAddr,
+      ...opts.env,
     },
     windowsHide: true,
   });
   await checkService(`http://${addr}/api/healthz`);
 
+  if (opts.autoQuit) {
+    app.on("before-quit", () => {
+      proc.kill("SIGTERM");
+    });
+    proc.on("exit", () => {
+      app.quit();
+    });
+  }
+
   return {
     proc,
     addr: `http://${addr}`,
+    internalAddr: `http://${internalAddr}`,
   };
 }
 

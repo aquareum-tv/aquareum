@@ -54,6 +54,11 @@ RUN mkdir -p ${ANDROID_HOME}/cmdline-tools && \
 
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > rustup.sh \
   && bash rustup.sh -y \
+  && rustup target add aarch64-unknown-linux-gnu \
+  && rustup target add x86_64-unknown-linux-gnu \
+  && rustup target add x86_64-pc-windows-gnu \
+  && rustup target add x86_64-apple-darwin \
+  && rustup target add aarch64-apple-darwin \
   && rm rustup.sh
 
 FROM builder AS cached-builder

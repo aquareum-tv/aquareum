@@ -1,10 +1,17 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Button, Text, View, XStack } from "tamagui";
 import Controls from "./controls";
 import Video from "./video";
 import Fullscreen from "./fullscreen";
-import { PlayerProps, PROTOCOL_HLS, PROTOCOL_PROGRESSIVE_MP4 } from "./props";
+import {
+  PlayerEvent,
+  PlayerProps,
+  PROTOCOL_HLS,
+  PROTOCOL_PROGRESSIVE_MP4,
+} from "./props";
 import usePlatform from "hooks/usePlatform";
+import { v7 as uuidv7 } from "uuid";
+import useAquareumNode from "hooks/useAquareumNode";
 
 const HIDE_CONTROLS_AFTER = 2000;
 
@@ -16,6 +23,7 @@ export function Player(props: Partial<PlayerProps>) {
       </View>
     );
   }
+  const playerId = useMemo(() => props.playerId ?? uuidv7(), [props.playerId]);
   const [muted, setMuted] = useState(true);
   const [showControls, setShowControls] = useState(true);
   const [touchTime, setTouchTime] = useState(0);
@@ -29,7 +37,6 @@ export function Player(props: Partial<PlayerProps>) {
     return () => clearTimeout(timeoutId);
   }, [touchTime]);
   const userInteraction = () => {
-    console.log("interact");
     setTouchTime(Date.now());
     setShowControls(true);
   };
@@ -42,10 +49,37 @@ export function Player(props: Partial<PlayerProps>) {
   } else if (plat.isFirefox) {
     defProto = PROTOCOL_HLS;
   }
+  const { url } = useAquareumNode();
+  const info = usePlatform();
+  const playerEvent = async (
+    time: string,
+    eventType: string,
+    meta: { [key: string]: any },
+  ) => {
+    const data: PlayerEvent = {
+      time: time,
+      playerId: playerId,
+      eventType: eventType,
+      meta: {
+        ...meta,
+        ...info,
+      },
+    };
+    try {
+      await fetch(`${url}/api/player-event`, {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+    } catch (e) {
+      console.error("error sending player telemetry", e);
+    }
+  };
   const [protocol, setProtocol] = useState(defProto);
   const [fullscreen, setFullscreen] = useState(false);
   const childProps: PlayerProps = {
+    playerId: playerId,
     name: props.name || props.src,
+    telemetry: props.telemetry ?? false,
     src: props.src,
     muted: muted,
     setMuted: setMuted,
@@ -55,6 +89,7 @@ export function Player(props: Partial<PlayerProps>) {
     setProtocol: setProtocol,
     showControls: props.showControls ?? showControls,
     userInteraction: userInteraction,
+    playerEvent: playerEvent,
   };
   return (
     <View f={1} justifyContent="center" position="relative">

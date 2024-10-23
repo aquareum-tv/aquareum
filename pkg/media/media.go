@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"crypto"
-	"crypto/ecdsa"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -14,13 +13,13 @@ import (
 	"sync"
 	"time"
 
-	"aquareum.tv/aquareum/pkg/aqio"
 	"aquareum.tv/aquareum/pkg/aqtime"
 	"aquareum.tv/aquareum/pkg/config"
 	"aquareum.tv/aquareum/pkg/crypto/signers"
 	"aquareum.tv/aquareum/pkg/log"
 	"aquareum.tv/aquareum/pkg/replication"
 	"github.com/go-gst/go-gst/gst"
+	"github.com/google/uuid"
 	"github.com/livepeer/lpms/ffmpeg"
 	"golang.org/x/sync/errgroup"
 
@@ -37,15 +36,14 @@ const SCHEMA_ORG_START_TIME = "http://schema.org/startTime"
 const SCHEMA_ORG_END_TIME = "http://schema.org/endTime"
 
 type MediaManager struct {
-	cli           *config.CLI
-	signer        crypto.Signer
-	cert          []byte
-	user          string
-	mp4subs       map[string][]chan string
-	mp4subsmut    sync.Mutex
-	replicator    replication.Replicator
-	hlsRunning    map[string]HLSStream
-	hlsRunningMut sync.Mutex
+	cli            *config.CLI
+	mp4subs        map[string][]chan string
+	mp4subsmut     sync.Mutex
+	replicator     replication.Replicator
+	hlsRunning     map[string]HLSStream
+	hlsRunningMut  sync.Mutex
+	httpPipes      map[string]io.Writer
+	httpPipesMutex sync.Mutex
 }
 
 type HLSStream struct {
@@ -64,49 +62,38 @@ func MakeMediaManager(ctx context.Context, cli *config.CLI, signer crypto.Signer
 	if err != nil {
 		return nil, fmt.Errorf("error in gstreamer self-test: %w", err)
 	}
-	hex := signers.HexAddr(signer.Public().(*ecdsa.PublicKey))
-	exists, err := cli.DataFileExists([]string{hex, CERT_FILE})
-	if err != nil {
-		return nil, err
-	}
-	if !exists {
-		cert, err := signers.GenerateES256KCert(signer)
-		if err != nil {
-			return nil, err
-		}
-		r := bytes.NewReader(cert)
-		err = cli.DataFileWrite([]string{hex, CERT_FILE}, r, false)
-		if err != nil {
-			return nil, err
-		}
-		log.Log(ctx, "wrote new media signing certificate", "file", filepath.Join(hex, CERT_FILE))
-	}
-	buf := bytes.Buffer{}
-	cli.DataFileRead([]string{hex, CERT_FILE}, &buf)
-	cert := buf.Bytes()
 	return &MediaManager{
 		cli:        cli,
-		signer:     signer,
-		cert:       cert,
-		user:       hex,
 		mp4subs:    map[string][]chan string{},
 		replicator: rep,
 		hlsRunning: map[string]HLSStream{},
+		httpPipes:  map[string]io.Writer{},
 	}, nil
 }
 
-// accept an incoming mkv, and sign it
-func (mm *MediaManager) SignSegment(ctx context.Context, input io.ReadSeeker, ms int64) error {
-	rws := &aqio.ReadWriteSeeker{}
-	err := mm.SignMP4(ctx, input, rws, ms)
+// replacement for os.Pipe that works on windows
+func (mm *MediaManager) HTTPPipe() (string, io.Reader, func(), error) {
+	uu, err := uuid.NewV7()
 	if err != nil {
-		return fmt.Errorf("error signing mp4: %w", err)
+		return "", nil, nil, err
 	}
-	err = mm.ValidateMP4(ctx, rws.ReadSeeker())
-	if err != nil {
-		return fmt.Errorf("error validating mp4: %w", err)
+	mm.httpPipesMutex.Lock()
+	defer mm.httpPipesMutex.Unlock()
+	u := fmt.Sprintf("%s/http-pipe/%s", mm.cli.OwnInternalURL(), uu.String())
+	done := func() {
+		mm.httpPipesMutex.Lock()
+		defer mm.httpPipesMutex.Unlock()
+		delete(mm.httpPipes, uu.String())
 	}
-	return nil
+	r, w := io.Pipe()
+	mm.httpPipes[uu.String()] = w
+	return u, r, done, nil
+}
+
+func (mm *MediaManager) GetHTTPPipeWriter(uu string) io.Writer {
+	mm.httpPipesMutex.Lock()
+	defer mm.httpPipesMutex.Unlock()
+	return mm.httpPipes[uu]
 }
 
 // subscribe to the latest segments from a given user for livestreaming purposes
@@ -130,72 +117,6 @@ func (mm *MediaManager) PublishSegment(ctx context.Context, user, file string) {
 		sub <- file
 	}
 	mm.mp4subs[user] = []chan string{}
-}
-
-func MuxToMP4(ctx context.Context, input io.Reader, output io.Writer) error {
-	tc := ffmpeg.NewTranscoder()
-	ir, iw, idone, err := SafePipe()
-	if err != nil {
-		return fmt.Errorf("error opening pipe: %w", err)
-	}
-	defer idone()
-	dname, err := os.MkdirTemp("", "aquareum-muxing")
-	if err != nil {
-		return fmt.Errorf("error making temp directory: %w", err)
-	}
-	defer func() {
-		// log.Log(ctx, "cleaning up")
-		tc.StopTranscoder()
-	}()
-	oname := filepath.Join(dname, "output.mp4")
-	out := []ffmpeg.TranscodeOptions{
-		{
-			Oname: oname,
-			VideoEncoder: ffmpeg.ComponentOptions{
-				Name: "copy",
-			},
-			AudioEncoder: ffmpeg.ComponentOptions{
-				Name: "copy",
-			},
-			Profile: ffmpeg.VideoProfile{Format: ffmpeg.FormatNone},
-			Muxer: ffmpeg.ComponentOptions{
-				Name: "mp4",
-				Opts: map[string]string{"movflags": "+faststart"},
-			},
-		},
-	}
-	iname := fmt.Sprintf("pipe:%d", ir.Fd())
-	in := &ffmpeg.TranscodeOptionsIn{Fname: iname, Transmuxing: true}
-	g, _ := errgroup.WithContext(ctx)
-	g.Go(func() error {
-		_, err := io.Copy(iw, input)
-		// log.Log(ctx, "input copy done", "error", err)
-		iw.Close()
-		return err
-	})
-	g.Go(func() error {
-		_, err = tc.Transcode(in, out)
-		// log.Log(ctx, "transcode done", "error", err)
-		tc.StopTranscoder()
-		ir.Close()
-		return err
-	})
-	err = g.Wait()
-	if err != nil {
-		return err
-	}
-	of, err := os.Open(oname)
-	if err != nil {
-		return err
-	}
-	defer of.Close()
-	_, err = io.Copy(output, of)
-	if err != nil {
-		return err
-	}
-	of.Close()
-	// log.Log(ctx, "transmuxing complete", "out-file", oname, "wrote", written)
-	return nil
 }
 
 func (mm *MediaManager) SegmentToMKVPlusOpus(ctx context.Context, user string, w io.Writer) error {
@@ -283,7 +204,7 @@ func (mm *MediaManager) SegmentToMP4(ctx context.Context, user string, w io.Writ
 func (mm *MediaManager) SegmentToStream(ctx context.Context, user string, muxer ffmpeg.ComponentOptions, w io.Writer) error {
 	tc := ffmpeg.NewTranscoder()
 	defer tc.StopTranscoder()
-	or, ow, odone, err := SafePipe()
+	ourl, or, odone, err := mm.HTTPPipe()
 	if err != nil {
 		return err
 	}
@@ -302,10 +223,9 @@ func (mm *MediaManager) SegmentToStream(ctx context.Context, user string, muxer 
 			},
 		},
 	}
-	oname := fmt.Sprintf("pipe:%d", ow.Fd())
 	out := []ffmpeg.TranscodeOptions{
 		{
-			Oname: oname,
+			Oname: ourl,
 			VideoEncoder: ffmpeg.ComponentOptions{
 				Name: "copy",
 			},
@@ -313,92 +233,23 @@ func (mm *MediaManager) SegmentToStream(ctx context.Context, user string, muxer 
 				Name: "copy",
 			},
 			Profile: ffmpeg.VideoProfile{Format: ffmpeg.FormatNone},
-			Muxer: ffmpeg.ComponentOptions{
-				Name: "matroska",
-			},
+			Muxer:   muxer,
 		},
 	}
 	g, _ := errgroup.WithContext(ctx)
 	g.Go(func() error {
 		_, err := tc.Transcode(in, out)
-		// log.Log(ctx, "transcode done", "error", err)
 		tc.StopTranscoder()
 		return err
 	})
 	g.Go(func() error {
 		_, err := io.Copy(w, or)
-		// log.Log(ctx, "input copy done", "error", err)
-		or.Close()
 		return err
 	})
 	return g.Wait()
 }
 
 type obj map[string]any
-
-func (mm *MediaManager) SignMP4(ctx context.Context, input io.ReadSeeker, output io.ReadWriteSeeker, start int64) error {
-	end := time.Now().UnixMilli()
-	mani := obj{
-		"title": fmt.Sprintf("Livestream Segment at %s", aqtime.FromMillis(start)),
-		"assertions": []obj{
-			{
-				"label": "c2pa.actions",
-				"data": obj{
-					"actions": []obj{
-						{"action": "c2pa.created"},
-						{"action": "c2pa.published"},
-					},
-				},
-			},
-			{
-				"label": "stds.metadata",
-				"data": obj{
-					"@context": obj{
-						"s": "http://schema.org/",
-					},
-					"@type": "s:VideoObject",
-					"s:creator": []obj{
-						{
-							"@type":     "s:Person",
-							"s:name":    mm.cli.StreamerName,
-							"s:address": mm.user,
-						},
-					},
-					"s:startTime": aqtime.FromMillis(start).String(),
-					"s:endTime":   aqtime.FromMillis(end).String(),
-				},
-			},
-		},
-	}
-	manifestBs, err := json.Marshal(mani)
-	if err != nil {
-		return err
-	}
-	var manifest c2pa.ManifestDefinition
-	err = json.Unmarshal(manifestBs, &manifest)
-	if err != nil {
-		return err
-	}
-	alg, err := c2pa.GetSigningAlgorithm(string(c2pa.ES256K))
-	if err != nil {
-		return err
-	}
-	b, err := c2pa.NewBuilder(&manifest, &c2pa.BuilderParams{
-		Cert:      mm.cert,
-		Signer:    mm.signer,
-		Algorithm: alg,
-		TAURL:     mm.cli.TAURL,
-	})
-	if err != nil {
-		return err
-	}
-
-	err = b.Sign(input, output, "video/mp4")
-	if err != nil {
-		return err
-	}
-	return nil
-}
 
 type StringVal struct {
 	Value string `json:"@value"`
@@ -518,7 +369,7 @@ func (mm *MediaManager) ValidateMP4(ctx context.Context, input io.Reader) error 
 	r = bytes.NewReader(buf)
 	io.Copy(fd, r)
 	base := filepath.Base(fd.Name())
-	go mm.PublishSegment(ctx, mm.user, base)
+	go mm.PublishSegment(ctx, pub.String(), base)
 	log.Log(ctx, "successfully ingested segment", "user", pub.String(), "timestamp", meta.StartTime)
 	return nil
 }

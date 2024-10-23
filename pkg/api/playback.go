@@ -15,6 +15,15 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
+func (a *AquareumAPI) NormalizeUser(user string) string {
+	alias, ok := a.Aliases[user]
+	if ok {
+		user = alias
+	}
+	user = strings.ToLower(user)
+	return user
+}
+
 func (a *AquareumAPI) HandleMP4Playback(ctx context.Context) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		user := p.ByName("user")
@@ -22,8 +31,8 @@ func (a *AquareumAPI) HandleMP4Playback(ctx context.Context) httprouter.Handle {
 			errors.WriteHTTPBadRequest(w, "user required", nil)
 			return
 		}
-		user = strings.ToLower(user)
-		var delayMS int64 = 1000
+		user = a.NormalizeUser(user)
+		var delayMS int64 = 3000
 		userDelay := r.URL.Query().Get("delayms")
 		if userDelay != "" {
 			var err error
@@ -61,7 +70,7 @@ func (a *AquareumAPI) HandleMKVPlayback(ctx context.Context) httprouter.Handle {
 			errors.WriteHTTPBadRequest(w, "user required", nil)
 			return
 		}
-		user = strings.ToLower(user)
+		user = a.NormalizeUser(user)
 		var delayMS int64 = 1000
 		userDelay := r.URL.Query().Get("delayms")
 		if userDelay != "" {
@@ -100,7 +109,7 @@ func (a *AquareumAPI) HandleHLSPlayback(ctx context.Context) httprouter.Handle {
 			errors.WriteHTTPBadRequest(w, "user required", nil)
 			return
 		}
-		user = strings.ToLower(user)
+		user = a.NormalizeUser(user)
 		file := p.ByName("file")
 		if file == "" {
 			errors.WriteHTTPBadRequest(w, "file required", nil)

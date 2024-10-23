@@ -3,11 +3,12 @@ package aqtime
 import (
 	"fmt"
 	"regexp"
+	"strings"
 	"time"
 )
 
 var RE *regexp.Regexp
-var Pattern string = `(\d\d\d\d)-(\d\d)-(\d\d)T(\d\d):(\d\d):(\d\d).(\d\d\d)Z`
+var Pattern string = `^(\d\d\d\d)-(\d\d)-(\d\d)T(\d\d)(?:[:-])(\d\d)(?:[:-])(\d\d)(?:[.-])(\d\d\d)Z$`
 
 type AQTime string
 
@@ -43,6 +44,14 @@ func (aqt AQTime) Parts() (string, string, string, string, string, string, strin
 
 func (aqt AQTime) String() string {
 	return string(aqt)
+}
+
+// version of AQTime suitable for saving as a file (esp on windows)
+func (aqt AQTime) FileSafeString() string {
+	str := string(aqt)
+	str = strings.ReplaceAll(str, ":", "-")
+	str = strings.ReplaceAll(str, ".", "-")
+	return str
 }
 
 func (aqt AQTime) Time() time.Time {

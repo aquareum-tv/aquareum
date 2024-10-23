@@ -212,7 +212,7 @@ func (cli *CLI) SegmentFilePath(user string, file string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	fname := fmt.Sprintf("%s%s", aqt.String(), ext)
+	fname := fmt.Sprintf("%s%s", aqt.FileSafeString(), ext)
 	yr, mon, day, hr, min, _, _ := aqt.Parts()
 	return cli.dataFilePath([]string{SEGMENTS_DIR, user, yr, mon, day, hr, min, fname}), nil
 }
@@ -227,7 +227,7 @@ func (cli *CLI) SegmentFileCreate(user string, aqt aqtime.AQTime, ext string) (*
 	if ext != "mp4" {
 		return nil, fmt.Errorf("expected mp4 ext, got %s", ext)
 	}
-	fname := fmt.Sprintf("%s.%s", aqt.String(), ext)
+	fname := fmt.Sprintf("%s.%s", aqt.FileSafeString(), ext)
 	yr, mon, day, hr, min, _, _ := aqt.Parts()
 	return cli.DataFileCreate([]string{SEGMENTS_DIR, user, yr, mon, day, hr, min, fname}, false)
 }

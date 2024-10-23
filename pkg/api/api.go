@@ -39,14 +39,25 @@ type AquareumAPI struct {
 	Mimes            map[string]string
 	FirebaseNotifier notifications.FirebaseNotifier
 	MediaManager     *media.MediaManager
+	MediaSigner      *media.MediaSigner
+	// not thread-safe yet
+	Aliases map[string]string
 }
 
-func MakeAquareumAPI(cli *config.CLI, mod model.Model, signer *eip712.EIP712Signer, noter notifications.FirebaseNotifier, mm *media.MediaManager) (*AquareumAPI, error) {
+func MakeAquareumAPI(cli *config.CLI, mod model.Model, signer *eip712.EIP712Signer, noter notifications.FirebaseNotifier, mm *media.MediaManager, ms *media.MediaSigner) (*AquareumAPI, error) {
 	updater, err := PrepareUpdater(cli)
 	if err != nil {
 		return nil, err
 	}
-	a := &AquareumAPI{CLI: cli, Model: mod, Updater: updater, Signer: signer, FirebaseNotifier: noter, MediaManager: mm}
+	a := &AquareumAPI{CLI: cli,
+		Model:            mod,
+		Updater:          updater,
+		Signer:           signer,
+		FirebaseNotifier: noter,
+		MediaManager:     mm,
+		MediaSigner:      ms,
+		Aliases:          map[string]string{},
+	}
 	a.Mimes, err = updater.GetMimes()
 	if err != nil {
 		return nil, err
@@ -100,6 +111,7 @@ func (a *AquareumAPI) Handler(ctx context.Context) (http.Handler, error) {
 	apiRouter.GET("/api/playback/:user/stream.mp4", a.HandleMP4Playback(ctx))
 	apiRouter.GET("/api/playback/:user/stream.webm", a.HandleMKVPlayback(ctx))
 	apiRouter.GET("/api/playback/:user/hls/:file", a.HandleHLSPlayback(ctx))
+	apiRouter.POST("/api/player-event", a.HandlePlayerEvent(ctx))
 	apiRouter.NotFound = a.HandleAPI404(ctx)
 	router.Handler("GET", "/api/*resource", apiRouter)
 	router.Handler("POST", "/api/*resource", apiRouter)
@@ -291,6 +303,22 @@ func (a *AquareumAPI) HandleSegment(ctx context.Context) http.HandlerFunc {
 			return
 		}
 		w.WriteHeader(200)
+	}
+}
+
+func (a *AquareumAPI) HandlePlayerEvent(ctx context.Context) httprouter.Handle {
+	return func(w http.ResponseWriter, req *http.Request, p httprouter.Params) {
+		var event model.PlayerEventAPI
+		if err := json.NewDecoder(req.Body).Decode(&event); err != nil {
+			apierrors.WriteHTTPBadRequest(w, "could not decode JSON body", err)
+			return
+		}
+		err := a.Model.CreatePlayerEvent(event)
+		if err != nil {
+			apierrors.WriteHTTPBadRequest(w, "could not create player event", err)
+			return
+		}
+		w.WriteHeader(201)
 	}
 }
 

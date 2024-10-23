@@ -73,7 +73,7 @@ build-docker-amd64:
   script:
     - /kaniko/executor
       --build-arg TARGETARCH=amd64
-      --build-arg AQUAREUM_URL=$AQUAREUM_URL_AMD64
+      --build-arg AQUAREUM_URL=$AQUAREUM_URL_LINUX_AMD64
       --context "${CI_PROJECT_DIR}"
       --dockerfile "${CI_PROJECT_DIR}/docker/release.Dockerfile"
       --destination "$CI_REGISTRY_IMAGE:$AQUAREUM_BRANCH-amd64"
@@ -92,7 +92,7 @@ build-docker-arm64:
   script:
     - /kaniko/executor
       --build-arg TARGETARCH=arm64
-      --build-arg AQUAREUM_URL=$AQUAREUM_URL_ARM64
+      --build-arg AQUAREUM_URL=$AQUAREUM_URL_LINUX_ARM64
       --context "${CI_PROJECT_DIR}"
       --dockerfile "${CI_PROJECT_DIR}/docker/release.Dockerfile"
       --destination "$CI_REGISTRY_IMAGE:$AQUAREUM_BRANCH-arm64"
@@ -152,6 +152,22 @@ build-mac:
       && pip3 install meson
       && make ci-macos -j16
 
+windows-selftest:
+  stage: build
+  # for the moment...
+  allow_failure: true
+  tags:
+    - windows
+  timeout: 2 hours
+  needs:
+    - job: build
+      artifacts: true
+  variables:
+    MSYSTEM: "MINGW32"
+    CHERE_INVOKING: "yes"
+  script:
+    - C:\msys64\usr\bin\bash -lc "bash -x ./util/windows-selftest.sh $AQUAREUM_DESKTOP_URL_WINDOWS_AMD64"
+
 release:
   stage: build
   interruptible: true
@@ -163,6 +179,7 @@ release:
     - build-docker-arm64
     - build-docker-manifest
     - build
+    - windows-selftest
     - test
   rules:
     - if: '$CI_COMMIT_TAG =~ /^v?\d+\.\d+\.\d+$/'

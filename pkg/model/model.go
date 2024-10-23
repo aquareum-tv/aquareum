@@ -22,13 +22,11 @@ type DBModel struct {
 type Model interface {
 	CreateNotification(token string) error
 	ListNotifications() ([]Notification, error)
-}
 
-type Notification struct {
-	Token     string `gorm:"primarykey"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt `gorm:"index"`
+	CreatePlayerEvent(event PlayerEventAPI) error
+	ListPlayerEvents(playerId string) ([]PlayerEvent, error)
+	PlayerReport(playerId string) (map[string]float64, error)
+	ClearPlayerEvents() error
 }
 
 func MakeDB(dbURL string) (Model, error) {
@@ -56,28 +54,11 @@ func MakeDB(dbURL string) (Model, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error starting database: %w", err)
 	}
-	err = db.AutoMigrate(Notification{})
-	if err != nil {
-		return nil, err
+	for _, model := range []any{Notification{}, PlayerEvent{}} {
+		err = db.AutoMigrate(model)
+		if err != nil {
+			return nil, err
+		}
 	}
 	return &DBModel{DB: db}, nil
-}
-
-func (m *DBModel) CreateNotification(token string) error {
-	err := m.DB.Model(Notification{}).Create(&Notification{
-		Token: token,
-	}).Error
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *DBModel) ListNotifications() ([]Notification, error) {
-	nots := []Notification{}
-	err := m.DB.Find(&nots).Error
-	if err != nil {
-		return nil, fmt.Errorf("error retrieving notifications: %w", err)
-	}
-	return nots, nil
 }
